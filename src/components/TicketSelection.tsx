@@ -62,14 +62,14 @@ const TicketSelection = ({ selections, onChange, onBuyTicket }: TicketSelectionP
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.1 + index * 0.12 }}
-              className={`relative rounded-xl border overflow-hidden transition-all ${
+              className={`relative rounded-xl border overflow-hidden transition-all duration-200 ${
                 isSoldOut
                   ? 'border-border bg-background opacity-70'
                   : isActive
-                  ? 'border-cta/40 bg-background shadow-lg ring-2 ring-cta/30'
+                  ? 'border-cta/40 bg-background shadow-lg ring-2 ring-cta/30 scale-[1.02]'
                   : isHoveredFromMap
-                  ? 'border-cta/30 bg-cta/5 shadow-md ring-1 ring-cta/20'
-                  : 'border-border bg-background hover:border-foreground/10 hover:shadow-sm cursor-pointer'
+                  ? 'border-cta/30 bg-background shadow-md ring-1 ring-cta/20 scale-[1.01]'
+                  : 'border-border bg-background hover:scale-[1.02] hover:shadow-md cursor-pointer'
               }`}
               onClick={() => !isSoldOut && !isActive && setTicketType(ticket.type)}
               onMouseEnter={() => setHoveredTicket(ticket.type)}
@@ -86,9 +86,11 @@ const TicketSelection = ({ selections, onChange, onBuyTicket }: TicketSelectionP
                     ₪{ticket.price.toLocaleString()}
                   </span>
                   {isSoldOut && (
-                    <Badge variant="destructive" className="text-[11px] px-2 py-0.5 font-bold">
-                      אזל המלאי
-                    </Badge>
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                      <div className="bg-destructive text-white text-[14px] font-bold px-6 py-1.5 rounded -rotate-12 shadow-lg">
+                        אזלו הכרטיסים
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>
