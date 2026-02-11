@@ -50,8 +50,8 @@ export const TICKETS: TicketInfo[] = [
     fomoText: '85% כרטיסים נרכשו',
     fomoPercent: 85,
     soldOut: false,
-    color: '#2D6A4F',
-    colorClass: 'bg-emerald-300',
+    color: '#C0C0C0',
+    colorClass: 'bg-gray-400',
     mapLabel: 'אזור כללי',
   },
   {
@@ -62,8 +62,8 @@ export const TICKETS: TicketInfo[] = [
     fomoText: '72% כרטיסים נרכשו',
     fomoPercent: 72,
     soldOut: false,
-    color: '#B8860B',
-    colorClass: 'bg-orange-300',
+    color: '#D4A373',
+    colorClass: 'bg-amber-400',
     mapLabel: 'אזור פרמייר',
   },
   {
@@ -74,8 +74,8 @@ export const TICKETS: TicketInfo[] = [
     fomoText: '100% כרטיסים נרכשו',
     fomoPercent: 100,
     soldOut: true,
-    color: '#5B2C6F',
-    colorClass: 'bg-violet-300',
+    color: '#C5A355',
+    colorClass: 'bg-yellow-600',
     mapLabel: 'VIP',
   },
 ];

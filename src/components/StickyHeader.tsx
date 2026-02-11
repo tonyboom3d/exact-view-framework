@@ -43,11 +43,11 @@ const StickyHeader = () => {
           <div className="flex flex-col items-end gap-1">
             <div className="flex items-center gap-1 text-[14px] text-muted-foreground">
               <Calendar className="w-4 h-4" />
-              <span>15-18 מרץ 2025</span>
+              <span>12 במרץ 2026, 16:00 – 15 במרץ 2026, 23:50</span>
             </div>
             <div className="flex items-center gap-1 text-[14px] text-muted-foreground">
               <MapPin className="w-4 h-4" />
-              <span>פלורידה, ארה"ב</span>
+              <span>מלון פרימה מילניום, התדהר 2, רעננה, ישראל</span>
             </div>
           </div>
         </div>
@@ -99,7 +99,7 @@ const FlipDigit = ({ value }: { value: string }) => {
           animate={{ rotateX: 0, opacity: 1 }}
           exit={{ rotateX: 90, opacity: 0 }}
           transition={{ duration: 0.3, ease: 'easeOut' }}
-          className="bg-foreground/90 text-background font-mono text-[20px] font-extrabold rounded-md w-[28px] h-[36px] flex items-center justify-center shadow-md"
+          className="bg-[#1B3A5C] text-white font-mono text-[20px] font-extrabold rounded-md w-[28px] h-[36px] flex items-center justify-center shadow-md"
           style={{ perspective: '200px', backfaceVisibility: 'hidden' }}
         >
           {value}
