@@ -326,18 +326,20 @@ const BuyerDetails = ({
                       </div>
                       {/* Next ticket button */}
                       {ticket.index < flatTickets.length - 1 && (
-                        <button
-                          type="button"
-                          disabled={!isTicketComplete(ticket.index)}
-                          onClick={() => goToNextTicket(ticket.index)}
-                          className={`w-full mt-2 h-12 rounded-xl text-base font-bold transition-all shadow-lg ${
-                            isTicketComplete(ticket.index)
-                              ? 'bg-primary text-primary-foreground hover:opacity-90'
-                              : 'bg-muted text-muted-foreground cursor-not-allowed'
-                          }`}
-                        >
-                          → מילוי הכרטיס הבא
-                        </button>
+                        <div className="flex justify-start mt-2">
+                          <button
+                            type="button"
+                            disabled={!isTicketComplete(ticket.index)}
+                            onClick={() => goToNextTicket(ticket.index)}
+                            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                              isTicketComplete(ticket.index)
+                                ? 'bg-blue-500 text-white hover:bg-blue-600'
+                                : 'bg-muted text-muted-foreground cursor-not-allowed'
+                            }`}
+                          >
+                            מילוי הכרטיס הבא →
+                          </button>
+                        </div>
                       )}
                     </div>
                   </motion.div>
