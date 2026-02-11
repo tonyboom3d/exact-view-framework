@@ -307,13 +307,13 @@ const BuyerDetails = ({
                           type="button"
                           disabled={!isTicketComplete(ticket.index)}
                           onClick={() => goToNextTicket(ticket.index)}
-                          className={`w-full mt-2 py-2.5 rounded-lg text-sm font-bold transition-all ${
+                          className={`w-full mt-2 h-12 rounded-xl text-base font-bold transition-all shadow-lg ${
                             isTicketComplete(ticket.index)
                               ? 'bg-primary text-primary-foreground hover:opacity-90'
                               : 'bg-muted text-muted-foreground cursor-not-allowed'
                           }`}
                         >
-                          מילוי הכרטיס הבא ←
+                          → מילוי הכרטיס הבא
                         </button>
                       )}
                     </div>
