@@ -62,7 +62,7 @@ const StickyHeader = () => {
           <img
             src={tonyImg}
             alt="Tony Robbins"
-            className="absolute right-2 -top-10 h-[80px] w-auto object-contain pointer-events-none"
+            className="absolute right-2 bottom-0 h-[100px] w-auto object-contain pointer-events-none"
             style={{ transform: 'scaleX(-1)' }}
           />
           <Clock className="w-5 h-5 text-destructive" />
