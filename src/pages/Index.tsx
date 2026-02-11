@@ -53,9 +53,9 @@ const Index = () => {
   };
 
   const handleBuyTicket = (type: TicketType) => {
-    if (totalTickets === 0) {
-      toast({ title: 'יש לבחור לפחות כרטיס אחד', variant: 'destructive' });
-      return;
+    // If no ticket selected yet, default to 1 of this type
+    if (selections.length === 0 || selections[0].type !== type) {
+      handleSelectionsChange([{ type, quantity: 1 }]);
     }
     setStep(2);
     window.scrollTo({ top: 0, behavior: 'smooth' });
