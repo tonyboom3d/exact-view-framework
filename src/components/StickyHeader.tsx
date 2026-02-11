@@ -54,7 +54,7 @@ const StickyHeader = () => {
           </div>
         </div>
         <motion.div
-          className="relative mt-3 flex items-center justify-center gap-3 bg-cta/5 rounded-xl px-4 py-3 overflow-visible"
+          className="relative mt-3 flex flex-col items-center justify-center gap-1 bg-cta/5 rounded-xl px-4 py-3 overflow-visible"
           initial={{ opacity: 0, scaleY: 0 }}
           animate={{ opacity: 1, scaleY: 1 }}
           transition={{ duration: 0.4, delay: 0.3 }}
@@ -65,9 +65,8 @@ const StickyHeader = () => {
             className="absolute right-2 bottom-0 h-[120px] w-auto object-contain pointer-events-none"
             style={{ transform: 'scaleX(-1)' }}
           />
-          <Clock className="w-5 h-5 text-destructive" />
-          <span className="text-[15px] font-semibold text-foreground">
-            המחיר עולה בעוד
+          <span className="text-[15px] font-semibold text-foreground mb-1">
+            מתחילים בעוד
           </span>
           <div className="flex items-center gap-1.5" dir="ltr">
             <FlipUnit value={pad(timeLeft.days)} label="ימים" />
