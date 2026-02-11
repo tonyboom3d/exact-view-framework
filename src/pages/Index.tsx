@@ -95,8 +95,10 @@ const Index = () => {
   const steps = [1, 2, 3, 4];
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="h-screen bg-background flex flex-col overflow-hidden">
       <StickyHeader />
+
+      <div className="flex-1 overflow-y-auto flex flex-col">
 
       {/* Step Indicator */}
       <motion.div
@@ -168,6 +170,7 @@ const Index = () => {
         onBack={handleBack}
         disabled={false}
       />
+      </div>
     </div>
   );
 };
