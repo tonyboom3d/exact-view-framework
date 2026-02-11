@@ -18,6 +18,7 @@ export interface GuestInfo {
   firstName: string;
   lastName: string;
   phone: string;
+  email?: string;
 }
 
 export interface BuyerInfo {
