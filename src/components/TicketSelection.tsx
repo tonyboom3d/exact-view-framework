@@ -75,15 +75,15 @@ const TicketSelection = ({ selections, onChange, onBuyTicket }: TicketSelectionP
               onMouseEnter={() => setHoveredTicket(ticket.type)}
               onMouseLeave={() => setHoveredTicket(null)}
             >
-              {/* Color band with ticket name + sold-out badge for VIP */}
+              {/* Color band with ticket name + price + sold-out badge */}
               <div
                 className="px-5 py-3 flex items-center justify-between"
                 style={{ backgroundColor: ticket.color }}
               >
                 <h3 className="font-bold text-[17px] text-white">{ticket.name}</h3>
                 <div className="flex items-center gap-2">
-                  <span className="text-[13px] font-bold text-white/90">
-                    {ticket.fomoPercent}% נמכרו
+                  <span className="text-[14px] font-bold text-white/90">
+                    ₪{ticket.price.toLocaleString()}
                   </span>
                   {isSoldOut && (
                     <Badge variant="destructive" className="text-[11px] px-2 py-0.5 font-bold">
@@ -97,12 +97,7 @@ const TicketSelection = ({ selections, onChange, onBuyTicket }: TicketSelectionP
                 {/* Description */}
                 <p className="text-[15px] text-muted-foreground mb-4">{ticket.description}</p>
 
-                {/* Fomo text above progress bar */}
-                <p className="text-[13px] text-muted-foreground mb-1.5 text-right font-medium">
-                  {ticket.fomoPercent}% כרטיסים נרכשו
-                </p>
-
-                {/* Bottom row: buy button (left) + progress bar (right) */}
+                {/* Bottom row: buy button (left) + progress bar with label (right) */}
                 <div className="flex items-center gap-3">
                   {/* Buy button - compact, left side */}
                   <Button
@@ -149,7 +144,7 @@ const TicketSelection = ({ selections, onChange, onBuyTicket }: TicketSelectionP
                     </Button>
                   </div>
 
-                  {/* Progress bar - right side (flex-1) */}
+                  {/* Progress bar with label - right side (flex-1) */}
                   <motion.div
                     className="flex-1"
                     initial={{ scaleX: 0 }}
@@ -157,6 +152,9 @@ const TicketSelection = ({ selections, onChange, onBuyTicket }: TicketSelectionP
                     transition={{ duration: 0.6, delay: 0.3 + index * 0.12 }}
                     style={{ transformOrigin: 'right' }}
                   >
+                    <p className="text-[12px] text-muted-foreground mb-1 text-right font-medium">
+                      {ticket.fomoPercent}% כרטיסים נרכשו
+                    </p>
                     <div className="bg-muted rounded-full h-3">
                       <div
                         className="h-3 rounded-full transition-all"
