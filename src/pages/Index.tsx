@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import PaymentDialog from '@/components/PaymentDialog';
 import StickyHeader from '@/components/StickyHeader';
 import StickyBottomBar from '@/components/StickyBottomBar';
@@ -163,9 +163,9 @@ const Index = () => {
                 <Button
                   variant="outline"
                   onClick={handleBack}
-                  className="px-4"
+                  className="flex-1 h-12 text-base font-bold rounded-xl"
                 >
-                  <ArrowLeft className="w-4 h-4" />
+                  <ArrowRight className="w-4 h-4" />
                 </Button>
                 <Button
                   onClick={handleNext}
