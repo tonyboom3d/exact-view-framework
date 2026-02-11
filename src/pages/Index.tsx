@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
+import PaymentDialog from '@/components/PaymentDialog';
 import StickyHeader from '@/components/StickyHeader';
 import StickyBottomBar from '@/components/StickyBottomBar';
 import TicketSelection from '@/components/TicketSelection';
@@ -22,6 +23,7 @@ const Index = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [orderNumber] = useState(() => generateId());
   const [referralCode] = useState(() => generateId());
+  const [showPayment, setShowPayment] = useState(false);
 
   const totalTickets = useMemo(
     () => selections.reduce((sum, s) => sum + s.quantity, 0),
@@ -83,9 +85,16 @@ const Index = () => {
       if (!validateStep2()) return;
       setStep(3);
     } else if (step === 3) {
-      toast({ title: 'התשלום לא מחובר כרגע', description: 'זהו דמו בלבד — מעבר לדף תודה.' });
-      setStep(4);
+      setShowPayment(true);
+      return;
     }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handlePaymentConfirm = () => {
+    setShowPayment(false);
+    toast({ title: 'התשלום בוצע בהצלחה!', description: 'זהו דמו בלבד — מעבר לדף תודה.' });
+    setStep(4);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -162,7 +171,7 @@ const Index = () => {
                   onClick={handleNext}
                   className="flex-1 h-12 text-base font-bold bg-cta hover:bg-cta/90 text-cta-foreground rounded-xl shadow-lg"
                 >
-                  המשך לסיכום הזמנה
+                  מעבר לתשלום
                 </Button>
               </div>
             </motion.div>
@@ -187,6 +196,12 @@ const Index = () => {
         onNext={handleNext}
         onBack={handleBack}
         disabled={false}
+      />
+      <PaymentDialog
+        open={showPayment}
+        onOpenChange={setShowPayment}
+        onConfirm={handlePaymentConfirm}
+        totalPrice={totalPrice}
       />
       </div>
     </div>
