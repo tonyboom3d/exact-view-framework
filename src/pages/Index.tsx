@@ -163,7 +163,7 @@ const Index = () => {
                 <Button
                   variant="outline"
                   onClick={handleBack}
-                  className="flex-1 h-12 text-base font-bold rounded-xl"
+                  className="px-4 h-12"
                 >
                   <ArrowRight className="w-4 h-4" />
                 </Button>
