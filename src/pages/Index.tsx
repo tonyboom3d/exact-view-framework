@@ -109,7 +109,7 @@ const Index = () => {
           {steps.map((s, i) => (
             <div key={s} className="flex items-center flex-1">
               <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center text-base font-bold leading-none transition-all ${
+                className={`w-10 h-10 rounded-full inline-flex items-center justify-center text-base font-bold leading-[0] pt-[1px] transition-all ${
                   s <= step
                     ? 'bg-cta text-cta-foreground'
                     : 'bg-muted text-muted-foreground'
