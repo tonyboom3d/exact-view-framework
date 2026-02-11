@@ -125,10 +125,10 @@ const TicketSelection = ({ selections, onChange, onBuyTicket }: TicketSelectionP
                       variant="outline"
                       size="icon"
                       className="h-8 w-8 rounded-full"
-                      onClick={(e) => { e.stopPropagation(); if (!isSoldOut) { if (isActive) updateQuantity(ticket.type, -1); } }}
-                      disabled={isSoldOut || (isActive && qty <= 1) || !isActive}
+                      onClick={(e) => { e.stopPropagation(); if (!isSoldOut) { if (isActive) updateQuantity(ticket.type, 1); else onChange([{ type: ticket.type, quantity: 2 }]); } }}
+                      disabled={isSoldOut}
                     >
-                      <Minus className="w-3.5 h-3.5" />
+                      <Plus className="w-3.5 h-3.5" />
                     </Button>
                     <div className="flex items-center gap-1">
                       {(isActive ? qty : 1) > 1 ? (
@@ -142,10 +142,10 @@ const TicketSelection = ({ selections, onChange, onBuyTicket }: TicketSelectionP
                       variant="outline"
                       size="icon"
                       className="h-8 w-8 rounded-full"
-                      onClick={(e) => { e.stopPropagation(); if (!isSoldOut) { if (isActive) updateQuantity(ticket.type, 1); else onChange([{ type: ticket.type, quantity: 2 }]); } }}
-                      disabled={isSoldOut}
+                      onClick={(e) => { e.stopPropagation(); if (!isSoldOut) { if (isActive) updateQuantity(ticket.type, -1); } }}
+                      disabled={isSoldOut || (isActive && qty <= 1) || !isActive}
                     >
-                      <Plus className="w-3.5 h-3.5" />
+                      <Minus className="w-3.5 h-3.5" />
                     </Button>
                   </div>
 

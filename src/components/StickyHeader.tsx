@@ -33,15 +33,7 @@ const StickyHeader = () => {
     >
       <div className="max-w-5xl mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-[20px] font-bold text-foreground leading-tight">
-              Tony Robbins
-            </h1>
-            <p className="text-[15px] text-muted-foreground font-medium">
-              Unleash the Power Within
-            </p>
-          </div>
-          <div className="flex flex-col items-end gap-1">
+          <div className="flex flex-col items-start gap-1">
             <div className="flex items-center gap-1 text-[14px] text-muted-foreground">
               <Calendar className="w-4 h-4" />
               <span>12 במרץ 2026, 16:00 – 15 במרץ 2026, 23:50</span>
@@ -50,6 +42,14 @@ const StickyHeader = () => {
               <MapPin className="w-4 h-4" />
               <span>מלון פרימה מילניום, התדהר 2, רעננה, ישראל</span>
             </div>
+          </div>
+          <div className="text-left">
+            <h1 className="text-[20px] font-bold text-foreground leading-tight">
+              Tony Robbins
+            </h1>
+            <p className="text-[15px] text-muted-foreground font-medium">
+              Unleash the Power Within
+            </p>
           </div>
         </div>
         <motion.div
@@ -63,13 +63,13 @@ const StickyHeader = () => {
             המחיר עולה בעוד
           </span>
           <div className="flex items-center gap-1.5" dir="ltr">
-            <FlipUnit value={pad(timeLeft.seconds)} label="שניות" />
-            <span className="text-xl font-bold text-destructive animate-pulse">:</span>
-            <FlipUnit value={pad(timeLeft.minutes)} label="דקות" />
+            <FlipUnit value={pad(timeLeft.days)} label="ימים" />
             <span className="text-xl font-bold text-destructive animate-pulse">:</span>
             <FlipUnit value={pad(timeLeft.hours)} label="שעות" />
             <span className="text-xl font-bold text-destructive animate-pulse">:</span>
-            <FlipUnit value={pad(timeLeft.days)} label="ימים" />
+            <FlipUnit value={pad(timeLeft.minutes)} label="דקות" />
+            <span className="text-xl font-bold text-destructive animate-pulse">:</span>
+            <FlipUnit value={pad(timeLeft.seconds)} label="שניות" />
           </div>
         </motion.div>
       </div>
