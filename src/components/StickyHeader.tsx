@@ -62,13 +62,13 @@ const StickyHeader = () => {
             המחיר עולה בעוד
           </span>
           <div className="flex items-center gap-1.5" dir="ltr">
-            <FlipUnit value={pad(timeLeft.seconds)} label="שניות" />
-            <span className="text-xl font-bold text-cta animate-pulse">:</span>
-            <FlipUnit value={pad(timeLeft.minutes)} label="דקות" />
+            <FlipUnit value={pad(timeLeft.days)} label="ימים" />
             <span className="text-xl font-bold text-cta animate-pulse">:</span>
             <FlipUnit value={pad(timeLeft.hours)} label="שעות" />
             <span className="text-xl font-bold text-cta animate-pulse">:</span>
-            <FlipUnit value={pad(timeLeft.days)} label="ימים" />
+            <FlipUnit value={pad(timeLeft.minutes)} label="דקות" />
+            <span className="text-xl font-bold text-cta animate-pulse">:</span>
+            <FlipUnit value={pad(timeLeft.seconds)} label="שניות" />
           </div>
         </motion.div>
       </div>
