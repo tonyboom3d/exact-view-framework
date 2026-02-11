@@ -314,9 +314,12 @@ const BuyerDetails = ({
                           style={{ textAlign: 'right' }}
                           ref={(el) => { phoneRefs.current[ticket.index] = el; }}
                         />
-                        <p className="text-xs text-muted-foreground mt-1.5 flex items-center gap-1">
-                          📲 שילחו לוואטסאפ את הכרטיס
-                        </p>
+                        <div className="flex items-center gap-2 mt-1.5">
+                          <Checkbox id={`whatsapp-${ticket.index}`} defaultChecked />
+                          <Label htmlFor={`whatsapp-${ticket.index}`} className="text-xs text-muted-foreground cursor-pointer">
+                            שילחו לוואטסאפ את הכרטיס
+                          </Label>
+                        </div>
                       </div>
                       {/* Next ticket button */}
                       {ticket.index < flatTickets.length - 1 && (
