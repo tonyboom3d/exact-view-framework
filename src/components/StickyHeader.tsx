@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Clock, MapPin, Calendar } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const StickyHeader = () => {
   const [timeLeft, setTimeLeft] = useState({ hours: 2, minutes: 15, seconds: 0 });
@@ -22,8 +23,13 @@ const StickyHeader = () => {
   const pad = (n: number) => n.toString().padStart(2, '0');
 
   return (
-    <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
-      <div className="max-w-2xl mx-auto px-4 py-3">
+    <motion.header
+      className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border"
+      initial={{ y: -80, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.5, ease: 'easeOut' }}
+    >
+      <div className="max-w-4xl mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-base font-bold text-foreground leading-tight">
@@ -44,21 +50,26 @@ const StickyHeader = () => {
             </div>
           </div>
         </div>
-        <div className="mt-2 flex items-center justify-center gap-2 bg-foreground/5 rounded-lg px-3 py-1.5">
-          <Clock className="w-3.5 h-3.5 text-[hsl(var(--fomo))]" />
+        <motion.div
+          className="mt-2 flex items-center justify-center gap-2 bg-cta/5 rounded-lg px-3 py-1.5"
+          initial={{ opacity: 0, scaleY: 0 }}
+          animate={{ opacity: 1, scaleY: 1 }}
+          transition={{ duration: 0.4, delay: 0.3 }}
+        >
+          <Clock className="w-3.5 h-3.5 text-cta" />
           <span className="text-xs font-medium text-foreground">
             המחיר עולה בעוד
           </span>
-          <div className="flex items-center gap-1 font-mono text-sm font-bold text-[hsl(var(--fomo))]" dir="ltr">
+          <div className="flex items-center gap-1 font-mono text-sm font-bold text-cta" dir="ltr">
             <span>{pad(timeLeft.hours)}</span>
             <span className="animate-pulse">:</span>
             <span>{pad(timeLeft.minutes)}</span>
             <span className="animate-pulse">:</span>
             <span>{pad(timeLeft.seconds)}</span>
           </div>
-        </div>
+        </motion.div>
       </div>
-    </header>
+    </motion.header>
   );
 };
 
