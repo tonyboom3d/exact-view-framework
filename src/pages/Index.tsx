@@ -1,4 +1,6 @@
 import { useState, useMemo, useCallback } from 'react';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 import StickyHeader from '@/components/StickyHeader';
 import StickyBottomBar from '@/components/StickyBottomBar';
 import TicketSelection from '@/components/TicketSelection';
@@ -147,6 +149,21 @@ const Index = () => {
                 totalTickets={totalTickets}
                 errors={errors}
               />
+              <div className="flex gap-2 mt-6">
+                <Button
+                  variant="outline"
+                  onClick={handleBack}
+                  className="px-4"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                </Button>
+                <Button
+                  onClick={handleNext}
+                  className="flex-1 h-12 text-base font-bold bg-cta hover:bg-cta/90 text-cta-foreground rounded-xl shadow-lg"
+                >
+                  המשך לסיכום הזמנה
+                </Button>
+              </div>
             </motion.div>
           )}
           {step === 3 && (
