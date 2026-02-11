@@ -3,21 +3,22 @@ import { Clock, MapPin, Calendar } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const StickyHeader = () => {
-  const [timeLeft, setTimeLeft] = useState({ days: 3, hours: 2, minutes: 15, seconds: 0 });
+  const getTimeLeft = () => {
+    const target = new Date('2026-03-15T23:50:00+02:00').getTime();
+    const now = Date.now();
+    const diff = Math.max(0, Math.floor((target - now) / 1000));
+    return {
+      days: Math.floor(diff / 86400),
+      hours: Math.floor((diff % 86400) / 3600),
+      minutes: Math.floor((diff % 3600) / 60),
+      seconds: diff % 60,
+    };
+  };
+
+  const [timeLeft, setTimeLeft] = useState(getTimeLeft);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        const totalSeconds = prev.days * 86400 + prev.hours * 3600 + prev.minutes * 60 + prev.seconds - 1;
-        if (totalSeconds <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0 };
-        return {
-          days: Math.floor(totalSeconds / 86400),
-          hours: Math.floor((totalSeconds % 86400) / 3600),
-          minutes: Math.floor((totalSeconds % 3600) / 60),
-          seconds: totalSeconds % 60,
-        };
-      });
-    }, 1000);
+    const timer = setInterval(() => setTimeLeft(getTimeLeft()), 1000);
     return () => clearInterval(timer);
   }, []);
 
@@ -57,18 +58,18 @@ const StickyHeader = () => {
           animate={{ opacity: 1, scaleY: 1 }}
           transition={{ duration: 0.4, delay: 0.3 }}
         >
-          <Clock className="w-5 h-5 text-cta" />
+          <Clock className="w-5 h-5 text-destructive" />
           <span className="text-[15px] font-semibold text-foreground">
             המחיר עולה בעוד
           </span>
           <div className="flex items-center gap-1.5" dir="ltr">
-            <FlipUnit value={pad(timeLeft.days)} label="ימים" />
-            <span className="text-xl font-bold text-cta animate-pulse">:</span>
-            <FlipUnit value={pad(timeLeft.hours)} label="שעות" />
-            <span className="text-xl font-bold text-cta animate-pulse">:</span>
-            <FlipUnit value={pad(timeLeft.minutes)} label="דקות" />
-            <span className="text-xl font-bold text-cta animate-pulse">:</span>
             <FlipUnit value={pad(timeLeft.seconds)} label="שניות" />
+            <span className="text-xl font-bold text-destructive animate-pulse">:</span>
+            <FlipUnit value={pad(timeLeft.minutes)} label="דקות" />
+            <span className="text-xl font-bold text-destructive animate-pulse">:</span>
+            <FlipUnit value={pad(timeLeft.hours)} label="שעות" />
+            <span className="text-xl font-bold text-destructive animate-pulse">:</span>
+            <FlipUnit value={pad(timeLeft.days)} label="ימים" />
           </div>
         </motion.div>
       </div>
@@ -99,7 +100,7 @@ const FlipDigit = ({ value }: { value: string }) => {
           animate={{ rotateX: 0, opacity: 1 }}
           exit={{ rotateX: 90, opacity: 0 }}
           transition={{ duration: 0.3, ease: 'easeOut' }}
-          className="bg-[#1B3A5C] text-white font-mono text-[20px] font-extrabold rounded-md w-[28px] h-[36px] flex items-center justify-center shadow-md"
+          className="bg-destructive text-white font-mono text-[20px] font-extrabold rounded-md w-[28px] h-[36px] flex items-center justify-center shadow-md"
           style={{ perspective: '200px', backfaceVisibility: 'hidden' }}
         >
           {value}

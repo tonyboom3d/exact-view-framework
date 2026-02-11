@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Minus, Plus, User, Users, ShoppingCart } from 'lucide-react';
+import { Minus, Plus, User, Users, ShoppingCart, Ticket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { TICKETS, type TicketSelection as TicketSelectionType, type TicketType } from '@/types/order';
@@ -78,9 +78,12 @@ const TicketSelection = ({ selections, onChange, onBuyTicket }: TicketSelectionP
               {/* Color band with ticket name + price + sold-out badge */}
               <div
                 className="px-5 py-3 flex items-center justify-between"
-                style={{ backgroundColor: ticket.color }}
+                style={{ background: ticket.color }}
               >
-                <h3 className="font-bold text-[17px] text-white">{ticket.name}</h3>
+                <h3 className="font-bold text-[17px] text-white flex items-center gap-2">
+                  <Ticket className="w-5 h-5" />
+                  {ticket.name}
+                </h3>
                 <div className="flex items-center gap-2">
                   <span className="text-[14px] font-bold text-white/90">
                     ₪{ticket.price.toLocaleString()}
@@ -160,7 +163,7 @@ const TicketSelection = ({ selections, onChange, onBuyTicket }: TicketSelectionP
                     <div className="bg-muted rounded-full h-3">
                       <div
                         className="h-3 rounded-full transition-all"
-                        style={{ width: `${ticket.fomoPercent}%`, backgroundColor: ticket.color }}
+                        style={{ width: `${ticket.fomoPercent}%`, background: ticket.color }}
                       />
                     </div>
                   </motion.div>

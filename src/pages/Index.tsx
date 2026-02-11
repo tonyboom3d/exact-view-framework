@@ -105,11 +105,11 @@ const Index = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.2 }}
       >
-        <div className="flex items-center justify-center gap-2 max-w-5xl mx-auto">
+        <div className="flex items-center justify-between max-w-5xl mx-auto">
           {steps.map((s, i) => (
-            <div key={s} className="flex items-center gap-2">
+            <div key={s} className="flex items-center flex-1">
               <div
-                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                className={`w-10 h-10 rounded-full flex items-center justify-center text-base font-bold transition-all ${
                   s <= step
                     ? 'bg-cta text-cta-foreground'
                     : 'bg-muted text-muted-foreground'
@@ -118,7 +118,7 @@ const Index = () => {
                 {s}
               </div>
               {i < steps.length - 1 && (
-                <div className={`w-8 h-0.5 ${s < step ? 'bg-cta' : 'bg-muted'}`} />
+                <div className={`flex-1 h-0.5 mx-2 ${s < step ? 'bg-cta' : 'bg-muted'}`} />
               )}
             </div>
           ))}
