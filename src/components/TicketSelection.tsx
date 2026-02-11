@@ -100,7 +100,7 @@ const TicketSelection = ({ selections, onChange, onBuyTicket }: TicketSelectionP
 
               <div className="p-5">
                 {/* Description */}
-                <p className="text-[15px] text-muted-foreground mb-4 line-clamp-2">{ticket.description}</p>
+                <p className="text-[15px] text-muted-foreground mb-4 line-clamp-2 min-h-[3em]">{ticket.description}</p>
 
                 {/* Bottom row: buy button (left) + progress bar with label (right) */}
                 <div className="flex items-center gap-3">
