@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Check, Copy, Gift, Calendar, ChevronDown, Mail, Facebook, Twitter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TICKETS, type TicketSelection } from '@/types/order';
 import type { GuestInfo, BuyerInfo } from '@/types/order';
 import { toast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
+import confetti from 'canvas-confetti';
 
 interface ThankYouProps {
   orderNumber: string;
@@ -18,6 +19,17 @@ interface ThankYouProps {
 const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPayer }: ThankYouProps) => {
   const [copied, setCopied] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
+
+  useEffect(() => {
+    // Trigger confetti on mount
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: -0.1 },
+      gravity: 0.8,
+      ticks: 200,
+    });
+  }, []);
 
   const referralLink = `https://upw-tickets.com/ref/${referralCode}`;
   const shareText = `הי! רכשתי כרטיסים ל-Tony Robbins UPW 🔥\nקנה דרך הקישור שלי וקבל 200 ₪ הנחה:\n${referralLink}`;
