@@ -8,9 +8,9 @@ interface SeatingMapProps {
 }
 
 const ZONES: { type: TicketType; label: string; color: string; y: number; height: number; rx: number }[] = [
-  { type: 'vip', label: 'VIP', color: '#1D4ED8', y: 95, height: 40, rx: 6 },
-  { type: 'premier', label: 'Premier', color: '#2563EB', y: 145, height: 55, rx: 6 },
-  { type: 'general', label: 'General', color: '#3B82F6', y: 210, height: 70, rx: 6 },
+  { type: 'vip', label: 'VIP', color: '#8B5CF6', y: 95, height: 40, rx: 6 },
+  { type: 'premier', label: 'Premier', color: '#F59E0B', y: 145, height: 55, rx: 6 },
+  { type: 'general', label: 'General', color: '#10B981', y: 210, height: 70, rx: 6 },
 ];
 
 const SeatingMap = ({ hoveredTicket, activeTicket, onHoverZone }: SeatingMapProps) => {
