@@ -84,11 +84,9 @@ const BuyerDetails = ({
     return guest.firstName.trim() !== '' && guest.lastName.trim() !== '' && guest.phone.trim() !== '';
   };
 
-  const handleLastFieldClick = (ticketIdx: number) => {
-    if (ticketIdx < flatTickets.length - 1) {
-      setTimeout(() => {
-        setOpenTicketIndex(ticketIdx + 1);
-      }, 300);
+  const goToNextTicket = (currentIdx: number) => {
+    if (currentIdx < flatTickets.length - 1) {
+      setOpenTicketIndex(currentIdx + 1);
     }
   };
 
@@ -301,9 +299,23 @@ const BuyerDetails = ({
                           dir="ltr"
                           style={{ textAlign: 'right' }}
                           ref={(el) => { phoneRefs.current[ticket.index] = el; }}
-                          onFocus={() => handleLastFieldClick(ticket.index)}
                         />
                       </div>
+                      {/* Next ticket button */}
+                      {ticket.index < flatTickets.length - 1 && (
+                        <button
+                          type="button"
+                          disabled={!isTicketComplete(ticket.index)}
+                          onClick={() => goToNextTicket(ticket.index)}
+                          className={`w-full mt-2 py-2.5 rounded-lg text-sm font-bold transition-all ${
+                            isTicketComplete(ticket.index)
+                              ? 'bg-primary text-primary-foreground hover:opacity-90'
+                              : 'bg-muted text-muted-foreground cursor-not-allowed'
+                          }`}
+                        >
+                          מילוי הכרטיס הבא ←
+                        </button>
+                      )}
                     </div>
                   </motion.div>
                 )}
