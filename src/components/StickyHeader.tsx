@@ -65,16 +65,16 @@ const StickyHeader = () => {
             className="absolute right-1 sm:right-2 bottom-0 h-[120px] sm:h-[170px] w-auto object-contain pointer-events-none"
             style={{ transform: 'scaleX(-1)' }}
           />
-          <span className="text-[15px] font-semibold text-foreground mb-1">
+          <span className="text-[13px] sm:text-[15px] font-semibold text-foreground mb-1">
             מתחילים בעוד
           </span>
-          <div className="flex items-center gap-1.5" dir="ltr">
+          <div className="flex items-center gap-1 sm:gap-1.5" dir="ltr">
             <FlipUnit value={pad(timeLeft.days)} label="ימים" />
-            <span className="text-xl font-bold text-destructive animate-pulse">:</span>
+            <span className="text-base sm:text-xl font-bold text-destructive animate-pulse">:</span>
             <FlipUnit value={pad(timeLeft.hours)} label="שעות" />
-            <span className="text-xl font-bold text-destructive animate-pulse">:</span>
+            <span className="text-base sm:text-xl font-bold text-destructive animate-pulse">:</span>
             <FlipUnit value={pad(timeLeft.minutes)} label="דקות" />
-            <span className="text-xl font-bold text-destructive animate-pulse">:</span>
+            <span className="text-base sm:text-xl font-bold text-destructive animate-pulse">:</span>
             <FlipUnit value={pad(timeLeft.seconds)} label="שניות" />
           </div>
         </motion.div>
@@ -106,7 +106,7 @@ const FlipDigit = ({ value }: { value: string }) => {
           animate={{ rotateX: 0, opacity: 1 }}
           exit={{ rotateX: 90, opacity: 0 }}
           transition={{ duration: 0.3, ease: 'easeOut' }}
-          className="bg-destructive text-white font-mono text-[20px] font-extrabold rounded-md w-[28px] h-[36px] flex items-center justify-center shadow-md"
+          className="bg-destructive text-white font-mono text-[16px] sm:text-[20px] font-extrabold rounded-md w-[22px] sm:w-[28px] h-[30px] sm:h-[36px] flex items-center justify-center shadow-md"
           style={{ perspective: '200px', backfaceVisibility: 'hidden' }}
         >
           {value}
