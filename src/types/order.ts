@@ -9,6 +9,7 @@ export interface TicketInfo {
   fomoPercent: number;
   soldOut: boolean;
   color: string;
+  progressColor: string;
   colorClass: string;
   mapLabel: string;
 }
@@ -46,11 +47,12 @@ export const TICKETS: TicketInfo[] = [
     type: 'general',
     name: 'General Admission',
     price: 2900,
-    description: 'כניסה לאירוע, ישיבה באזור הכללי',
+    description: 'כל שאר המושבים באולם, מסומנים בצבע כחול. כולל את יתר השורות בגוש המרכזי והצדדי, ומציעים חוויית ישיבה נוחה עם שדה ראייה מצוין.',
     fomoText: '85% כרטיסים נרכשו',
     fomoPercent: 85,
     soldOut: false,
     color: 'linear-gradient(135deg, #1e3a5f, #2980b9)',
+    progressColor: '#2980b9',
     colorClass: 'bg-blue-600',
     mapLabel: 'אזור כללי',
   },
@@ -58,11 +60,12 @@ export const TICKETS: TicketInfo[] = [
     type: 'premier',
     name: 'Premier',
     price: 3450,
-    description: 'ישיבה באזור מועדף, קרוב לבמה',
-    fomoText: '72% כרטיסים נרכשו',
-    fomoPercent: 72,
-    soldOut: false,
+    description: 'המושבים הקרובים ביותר לבמה, בשתי השורות הראשונות של הגוש המרכזי. אזור זה מסומן בצבע זהב. הכרטיסים הללו הם Sold Out ואינם זמינים למכירה.',
+    fomoText: '100% כרטיסים נרכשו',
+    fomoPercent: 100,
+    soldOut: true,
     color: 'linear-gradient(135deg, #1a237e, #5c6bc0)',
+    progressColor: '#5c6bc0',
     colorClass: 'bg-indigo-600',
     mapLabel: 'אזור פרמייר',
   },
@@ -70,11 +73,12 @@ export const TICKETS: TicketInfo[] = [
     type: 'vip',
     name: 'VIP Experience',
     price: 4500,
-    description: 'חוויית VIP מלאה, שורות ראשונות, מפגש אישי',
-    fomoText: '100% כרטיסים נרכשו',
-    fomoPercent: 100,
-    soldOut: true,
+    description: 'מושבי פרימיום הממוקמים בגוש המרכזי בשורות 3 עד 6, וכן בשתי השורות הראשונות של הגושים הצדדיים. האזור מסומן בצבע סגול ומציע חוויית צפייה משודרגת.',
+    fomoText: '72% כרטיסים נרכשו',
+    fomoPercent: 72,
+    soldOut: false,
     color: 'linear-gradient(135deg, #0d1b2a, #1b4965)',
+    progressColor: '#1b4965',
     colorClass: 'bg-slate-800',
     mapLabel: 'VIP',
   },
