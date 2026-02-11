@@ -98,15 +98,63 @@ const TicketSelection = ({ selections, onChange, onBuyTicket }: TicketSelectionP
                 </div>
               </div>
 
-              <div className="p-5">
+              <div className="p-4 sm:p-5">
                 {/* Description */}
-                <p className="text-[15px] text-muted-foreground mb-4 line-clamp-2 min-h-[3em]">{ticket.description}</p>
+                <p className="text-[14px] sm:text-[15px] text-muted-foreground mb-3 sm:mb-4 line-clamp-2 min-h-[3em]">{ticket.description}</p>
 
-                {/* Bottom row: buy button (left) + progress bar with label (right) */}
-                <div className="flex items-center gap-3">
-                  {/* Progress bar with label - right side (flex-1) */}
+                {/* Mobile: stacked layout / Desktop: row layout */}
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-3">
+                  {/* Quantity selector + Buy button row */}
+                  <div className="flex items-center gap-2 justify-between sm:justify-end sm:order-2">
+                    {/* Quantity selector */}
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8 rounded-full"
+                        onClick={(e) => { e.stopPropagation(); if (!isSoldOut) { if (isActive) updateQuantity(ticket.type, 1); else onChange([{ type: ticket.type, quantity: 2 }]); } }}
+                        disabled={isSoldOut}
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                      </Button>
+                      <div className="flex items-center gap-1">
+                        {(isActive ? qty : 1) > 1 ? (
+                          <Users className="w-4 h-4 text-cta" />
+                        ) : (
+                          <User className="w-4 h-4 text-cta" />
+                        )}
+                        <span className="w-6 text-center font-bold text-foreground text-[15px]">{isActive ? qty : 1}</span>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8 rounded-full"
+                        onClick={(e) => { e.stopPropagation(); if (!isSoldOut) { if (isActive) updateQuantity(ticket.type, -1); } }}
+                        disabled={isSoldOut || (isActive && qty <= 1) || !isActive}
+                      >
+                        <Minus className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
+
+                    {/* Buy button */}
+                    <Button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (isSoldOut) return;
+                        if (!isActive) onChange([{ type: ticket.type, quantity: 1 }]);
+                        onBuyTicket(ticket.type);
+                      }}
+                      disabled={isSoldOut}
+                      className="h-10 px-3 sm:px-4 font-bold bg-cta hover:bg-cta/90 text-cta-foreground rounded-lg shadow text-[13px] sm:text-[14px] whitespace-nowrap"
+                    >
+                      <ShoppingCart className="w-4 h-4 ml-1.5" />
+                      {`לרכישה - ₪${(ticket.price * qty).toLocaleString()}`}
+                    </Button>
+                  </div>
+
+                  {/* Progress bar - full width on mobile, below the buttons */}
                   <motion.div
-                    className="flex-1"
+                    className="w-full sm:flex-1 sm:order-1"
                     initial={{ scaleX: 0 }}
                     animate={{ scaleX: 1 }}
                     transition={{ duration: 0.6, delay: 0.3 + index * 0.12 }}
@@ -116,57 +164,12 @@ const TicketSelection = ({ selections, onChange, onBuyTicket }: TicketSelectionP
                       {ticket.fomoPercent}% כרטיסים נרכשו
                     </p>
                     <div className="bg-muted/80 rounded-full h-3 border border-border/50">
-                    <div
+                      <div
                         className="h-3 rounded-full transition-all"
                         style={{ width: `${ticket.fomoPercent}%`, background: ticket.progressColor }}
                       />
                     </div>
                   </motion.div>
-
-                  {/* Quantity selector */}
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-8 w-8 rounded-full"
-                      onClick={(e) => { e.stopPropagation(); if (!isSoldOut) { if (isActive) updateQuantity(ticket.type, 1); else onChange([{ type: ticket.type, quantity: 2 }]); } }}
-                      disabled={isSoldOut}
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                    </Button>
-                    <div className="flex items-center gap-1">
-                      {(isActive ? qty : 1) > 1 ? (
-                        <Users className="w-4 h-4 text-cta" />
-                      ) : (
-                        <User className="w-4 h-4 text-cta" />
-                      )}
-                      <span className="w-6 text-center font-bold text-foreground text-[15px]">{isActive ? qty : 1}</span>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-8 w-8 rounded-full"
-                      onClick={(e) => { e.stopPropagation(); if (!isSoldOut) { if (isActive) updateQuantity(ticket.type, -1); } }}
-                      disabled={isSoldOut || (isActive && qty <= 1) || !isActive}
-                    >
-                      <Minus className="w-3.5 h-3.5" />
-                    </Button>
-                  </div>
-
-                  {/* Buy button - left side */}
-                  <Button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (isSoldOut) return;
-                      if (!isActive) onChange([{ type: ticket.type, quantity: 1 }]);
-                      onBuyTicket(ticket.type);
-                    }}
-                    disabled={isSoldOut}
-                    className="h-10 px-4 font-bold bg-cta hover:bg-cta/90 text-cta-foreground rounded-lg shadow text-[14px] whitespace-nowrap"
-                  >
-                    <ShoppingCart className="w-4 h-4 ml-1.5" />
-                    {`לרכישה - ₪${(ticket.price * qty).toLocaleString()}`}
-                  </Button>
                 </div>
               </div>
             </motion.div>
