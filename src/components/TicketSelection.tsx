@@ -115,7 +115,7 @@ const TicketSelection = ({ selections, onChange, onBuyTicket }: TicketSelectionP
                     <p className="text-[12px] text-muted-foreground mb-1 text-right font-medium">
                       {ticket.fomoPercent}% כרטיסים נרכשו
                     </p>
-                    <div className="bg-muted rounded-full h-3">
+                    <div className="bg-muted/80 rounded-full h-3 border border-border/50">
                     <div
                         className="h-3 rounded-full transition-all"
                         style={{ width: `${ticket.fomoPercent}%`, background: ticket.progressColor }}
