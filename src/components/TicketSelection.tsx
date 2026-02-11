@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Minus, Plus, User, Users, ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { TICKETS, type TicketSelection as TicketSelectionType, type TicketType } from '@/types/order';
 import { motion } from 'framer-motion';
 import SeatingMap from '@/components/SeatingMap';
@@ -44,11 +45,11 @@ const TicketSelection = ({ selections, onChange, onBuyTicket }: TicketSelectionP
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h2 className="text-2xl font-bold text-foreground">בחר את הכרטיסים שלך</h2>
-        <p className="text-base text-muted-foreground mt-1">בחר את סוג הכרטיס והכמות הרצויה</p>
+        <h2 className="text-[26px] font-bold text-foreground">בחר את הכרטיסים שלך</h2>
+        <p className="text-[17px] text-muted-foreground mt-1">בחר את סוג הכרטיס והכמות הרצויה</p>
       </motion.div>
 
-      <div className="space-y-4">
+      <div className="space-y-5">
         {TICKETS.map((ticket, index) => {
           const qty = activeType === ticket.type ? getQuantity(ticket.type) : 1;
           const isActive = activeType === ticket.type;
@@ -63,7 +64,7 @@ const TicketSelection = ({ selections, onChange, onBuyTicket }: TicketSelectionP
               transition={{ duration: 0.4, delay: 0.1 + index * 0.12 }}
               className={`relative rounded-xl border overflow-hidden transition-all ${
                 isSoldOut
-                  ? 'border-border bg-background opacity-60'
+                  ? 'border-border bg-background opacity-70'
                   : isActive
                   ? 'border-cta/40 bg-background shadow-lg ring-2 ring-cta/30'
                   : isHoveredFromMap
@@ -74,70 +75,36 @@ const TicketSelection = ({ selections, onChange, onBuyTicket }: TicketSelectionP
               onMouseEnter={() => setHoveredTicket(ticket.type)}
               onMouseLeave={() => setHoveredTicket(null)}
             >
-              {/* Color band with ticket name + FOMO percent */}
+              {/* Color band with ticket name + sold-out badge for VIP */}
               <div
-                className="px-4 py-2.5 flex items-center justify-between"
+                className="px-5 py-3 flex items-center justify-between"
                 style={{ backgroundColor: ticket.color }}
               >
-                <h3 className="font-bold text-base text-white">{ticket.name}</h3>
-                <span className="text-xs font-bold text-white/90">
-                  {ticket.fomoPercent}% נמכרו
-                </span>
+                <h3 className="font-bold text-[17px] text-white">{ticket.name}</h3>
+                <div className="flex items-center gap-2">
+                  <span className="text-[13px] font-bold text-white/90">
+                    {ticket.fomoPercent}% נמכרו
+                  </span>
+                  {isSoldOut && (
+                    <Badge variant="destructive" className="text-[11px] px-2 py-0.5 font-bold">
+                      אזל המלאי
+                    </Badge>
+                  )}
+                </div>
               </div>
 
-              <div className="p-4">
+              <div className="p-5">
                 {/* Description */}
-                <p className="text-sm text-muted-foreground mb-3">{ticket.description}</p>
+                <p className="text-[15px] text-muted-foreground mb-4">{ticket.description}</p>
 
-                {/* Bottom row: progress bar (right) + quantity + buy button (left) */}
+                {/* Fomo text above progress bar */}
+                <p className="text-[13px] text-muted-foreground mb-1.5 text-right font-medium">
+                  {ticket.fomoPercent}% כרטיסים נרכשו
+                </p>
+
+                {/* Bottom row: buy button (left) + progress bar (right) */}
                 <div className="flex items-center gap-3">
-                  {/* Progress bar - right side (flex-1) */}
-                  <motion.div
-                    className="flex-1"
-                    initial={{ scaleX: 0 }}
-                    animate={{ scaleX: 1 }}
-                    transition={{ duration: 0.6, delay: 0.3 + index * 0.12 }}
-                    style={{ transformOrigin: 'right' }}
-                  >
-                    <div className="bg-muted rounded-full h-2.5">
-                      <div
-                        className="h-2.5 rounded-full transition-all"
-                        style={{ width: `${ticket.fomoPercent}%`, backgroundColor: ticket.color }}
-                      />
-                    </div>
-                  </motion.div>
-
-                  {/* Quantity selector */}
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-7 w-7 rounded-full"
-                      onClick={(e) => { e.stopPropagation(); if (!isSoldOut) { if (isActive) updateQuantity(ticket.type, -1); } }}
-                      disabled={isSoldOut || (isActive && qty <= 1) || !isActive}
-                    >
-                      <Minus className="w-3 h-3" />
-                    </Button>
-                    <div className="flex items-center gap-1">
-                      {(isActive ? qty : 1) > 1 ? (
-                        <Users className="w-3.5 h-3.5 text-cta" />
-                      ) : (
-                        <User className="w-3.5 h-3.5 text-cta" />
-                      )}
-                      <span className="w-5 text-center font-bold text-foreground text-sm">{isActive ? qty : 1}</span>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-7 w-7 rounded-full"
-                      onClick={(e) => { e.stopPropagation(); if (!isSoldOut) { if (isActive) updateQuantity(ticket.type, 1); else onChange([{ type: ticket.type, quantity: 2 }]); } }}
-                      disabled={isSoldOut}
-                    >
-                      <Plus className="w-3 h-3" />
-                    </Button>
-                  </div>
-
-                  {/* Buy button - compact */}
+                  {/* Buy button - compact, left side */}
                   <Button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -146,11 +113,57 @@ const TicketSelection = ({ selections, onChange, onBuyTicket }: TicketSelectionP
                       onBuyTicket(ticket.type);
                     }}
                     disabled={isSoldOut}
-                    className="h-9 px-4 font-bold bg-cta hover:bg-cta/90 text-cta-foreground rounded-lg shadow text-sm whitespace-nowrap"
+                    className="h-10 px-4 font-bold bg-cta hover:bg-cta/90 text-cta-foreground rounded-lg shadow text-[14px] whitespace-nowrap"
                   >
-                    <ShoppingCart className="w-3.5 h-3.5 ml-1.5" />
-                    {isSoldOut ? 'אזל' : `₪${(ticket.price * qty).toLocaleString()}`}
+                    <ShoppingCart className="w-4 h-4 ml-1.5" />
+                    {`לרכישה - ₪${(ticket.price * qty).toLocaleString()}`}
                   </Button>
+
+                  {/* Quantity selector */}
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-8 w-8 rounded-full"
+                      onClick={(e) => { e.stopPropagation(); if (!isSoldOut) { if (isActive) updateQuantity(ticket.type, -1); } }}
+                      disabled={isSoldOut || (isActive && qty <= 1) || !isActive}
+                    >
+                      <Minus className="w-3.5 h-3.5" />
+                    </Button>
+                    <div className="flex items-center gap-1">
+                      {(isActive ? qty : 1) > 1 ? (
+                        <Users className="w-4 h-4 text-cta" />
+                      ) : (
+                        <User className="w-4 h-4 text-cta" />
+                      )}
+                      <span className="w-6 text-center font-bold text-foreground text-[15px]">{isActive ? qty : 1}</span>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-8 w-8 rounded-full"
+                      onClick={(e) => { e.stopPropagation(); if (!isSoldOut) { if (isActive) updateQuantity(ticket.type, 1); else onChange([{ type: ticket.type, quantity: 2 }]); } }}
+                      disabled={isSoldOut}
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+
+                  {/* Progress bar - right side (flex-1) */}
+                  <motion.div
+                    className="flex-1"
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: 1 }}
+                    transition={{ duration: 0.6, delay: 0.3 + index * 0.12 }}
+                    style={{ transformOrigin: 'right' }}
+                  >
+                    <div className="bg-muted rounded-full h-3">
+                      <div
+                        className="h-3 rounded-full transition-all"
+                        style={{ width: `${ticket.fomoPercent}%`, backgroundColor: ticket.color }}
+                      />
+                    </div>
+                  </motion.div>
                 </div>
               </div>
             </motion.div>
