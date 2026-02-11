@@ -163,11 +163,21 @@ const TicketSelection = ({ selections, onChange, onBuyTicket }: TicketSelectionP
                     <p className="text-[12px] text-muted-foreground mb-1 text-right font-medium">
                       {ticket.fomoPercent}% כרטיסים נרכשו
                     </p>
-                    <div className="bg-muted/80 rounded-full h-3 border border-border/50">
+                    <div className="bg-muted/80 rounded-full h-3 border border-border/50 overflow-hidden">
                       <div
-                        className="h-3 rounded-full transition-all"
+                        className="h-3 rounded-full relative overflow-hidden"
                         style={{ width: `${ticket.fomoPercent}%`, background: ticket.progressColor }}
-                      />
+                      >
+                        {!ticket.soldOut && (
+                          <div
+                            className="absolute inset-0 rounded-full"
+                            style={{
+                              background: `linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.35) 50%, transparent 100%)`,
+                              animation: 'progress-shimmer 3s ease-in-out infinite',
+                            }}
+                          />
+                        )}
+                      </div>
                     </div>
                   </motion.div>
                 </div>
