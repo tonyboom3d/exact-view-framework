@@ -17,6 +17,8 @@ interface BuyerDetailsProps {
   totalTickets: number;
   errors: Record<string, string>;
   selections: TicketSelection[];
+  showPayer: boolean;
+  onShowPayerChange: (v: boolean) => void;
 }
 
 interface FlatTicket {
@@ -35,6 +37,8 @@ const BuyerDetails = ({
   totalTickets,
   errors,
   selections,
+  showPayer,
+  onShowPayerChange,
 }: BuyerDetailsProps) => {
   // Flatten selections into individual tickets
   const flatTickets = useMemo<FlatTicket[]>(() => {
@@ -55,7 +59,6 @@ const BuyerDetails = ({
   }, [selections]);
 
   const [openTicketIndex, setOpenTicketIndex] = useState(0);
-  const [showPayer, setShowPayer] = useState(false);
   const [showCompany, setShowCompany] = useState(false);
   const [companyName, setCompanyName] = useState('');
   const phoneRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -112,7 +115,7 @@ const BuyerDetails = ({
         <Checkbox
           id="showPayer"
           checked={showPayer}
-          onCheckedChange={(v) => setShowPayer(v as boolean)}
+          onCheckedChange={(v) => onShowPayerChange(v as boolean)}
         />
         <Label htmlFor="showPayer" className="text-sm cursor-pointer font-medium">
           פרטי המשלם שונים מפרטי המשתתף
