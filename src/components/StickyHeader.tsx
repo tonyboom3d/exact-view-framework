@@ -10,9 +10,9 @@ const StickyHeader = () => {
     const diff = Math.max(0, Math.floor((target - now) / 1000));
     return {
       days: Math.floor(diff / 86400),
-      hours: Math.floor((diff % 86400) / 3600),
-      minutes: Math.floor((diff % 3600) / 60),
-      seconds: diff % 60,
+      hours: Math.floor(diff % 86400 / 3600),
+      minutes: Math.floor(diff % 3600 / 60),
+      seconds: diff % 60
     };
   };
 
@@ -30,8 +30,8 @@ const StickyHeader = () => {
       className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border"
       initial={{ y: -80, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5, ease: 'easeOut' }}
-    >
+      transition={{ duration: 0.5, ease: 'easeOut' }}>
+
       <div className="max-w-5xl mx-auto w-[95%] py-3">
         <div className="flex items-center justify-between gap-2">
           <div className="flex flex-col items-start gap-0.5 min-w-0">
@@ -54,21 +54,21 @@ const StickyHeader = () => {
           </div>
         </div>
         <motion.div
-          className="relative mt-4 sm:mt-6 flex flex-col items-start gap-1 bg-cta/5 rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 overflow-visible"
+          className="relative mt-4 sm:mt-6 flex-col gap-1 bg-cta/5 rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 overflow-visible flex items-end justify-center"
           initial={{ opacity: 0, scaleY: 0 }}
           animate={{ opacity: 1, scaleY: 1 }}
-          transition={{ duration: 0.4, delay: 0.3 }}
-        >
+          transition={{ duration: 0.4, delay: 0.3 }}>
+
           <img
             src={tonyImg}
             alt="Tony Robbins"
             className="absolute right-1 sm:right-2 bottom-0 h-[120px] sm:h-[170px] w-auto object-contain pointer-events-none"
-            style={{ transform: 'scaleX(-1)' }}
-          />
+            style={{ transform: 'scaleX(-1)' }} />
+
           <span className="text-[13px] sm:text-[15px] font-semibold text-foreground mb-1">
             מתחילים בעוד
           </span>
-          <div className="flex items-center gap-1 sm:gap-1.5" dir="ltr">
+          <div className="gap-1 sm:gap-1.5 flex items-center justify-start" dir="ltr">
             <FlipUnit value={pad(timeLeft.days)} label="ימים" />
             <span className="text-base sm:text-xl font-bold text-destructive animate-pulse">:</span>
             <FlipUnit value={pad(timeLeft.hours)} label="שעות" />
@@ -79,24 +79,24 @@ const StickyHeader = () => {
           </div>
         </motion.div>
       </div>
-    </motion.header>
-  );
+    </motion.header>);
+
 };
 
-const FlipUnit = ({ value, label }: { value: string; label: string }) => {
+const FlipUnit = ({ value, label }: {value: string;label: string;}) => {
   return (
     <div className="flex flex-col items-center gap-0.5">
       <div className="flex gap-[3px]">
-        {value.split('').map((digit, i) => (
-          <FlipDigit key={`${i}-${digit}`} value={digit} />
-        ))}
+        {value.split('').map((digit, i) =>
+        <FlipDigit key={`${i}-${digit}`} value={digit} />
+        )}
       </div>
       <span className="text-[10px] text-muted-foreground font-medium">{label}</span>
-    </div>
-  );
+    </div>);
+
 };
 
-const FlipDigit = ({ value }: { value: string }) => {
+const FlipDigit = ({ value }: {value: string;}) => {
   return (
     <div className="relative inline-flex">
       <AnimatePresence mode="popLayout">
@@ -107,13 +107,13 @@ const FlipDigit = ({ value }: { value: string }) => {
           exit={{ rotateX: 90, opacity: 0 }}
           transition={{ duration: 0.3, ease: 'easeOut' }}
           className="bg-destructive text-white font-mono text-[16px] sm:text-[20px] font-extrabold rounded-md w-[22px] sm:w-[28px] h-[30px] sm:h-[36px] flex items-center justify-center shadow-md"
-          style={{ perspective: '200px', backfaceVisibility: 'hidden' }}
-        >
+          style={{ perspective: '200px', backfaceVisibility: 'hidden' }}>
+
           {value}
         </motion.div>
       </AnimatePresence>
-    </div>
-  );
+    </div>);
+
 };
 
 export default StickyHeader;
