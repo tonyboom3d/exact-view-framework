@@ -105,7 +105,7 @@ const Index = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.2 }}
       >
-        <div className="flex items-center justify-center gap-2">
+        <div className="flex items-center justify-center gap-2 max-w-5xl mx-auto">
           {steps.map((s, i) => (
             <div key={s} className="flex items-center gap-2">
               <div
@@ -126,7 +126,7 @@ const Index = () => {
       </motion.div>
 
       {/* Content */}
-      <main className="flex-1 max-w-4xl mx-auto w-full px-4 pb-28">
+      <main className="flex-1 max-w-5xl mx-auto w-full px-4 pb-28">
         <AnimatePresence mode="wait">
           {step === 1 && (
             <motion.div key="step1" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
