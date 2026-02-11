@@ -288,6 +288,20 @@ const BuyerDetails = ({
                           />
                         </div>
                       </div>
+                      {ticket.index === 0 && (
+                        <div>
+                          <Label className="text-xs font-medium">אימייל *</Label>
+                          <Input
+                            type="email"
+                            placeholder="your@email.com"
+                            value={guest?.email || ''}
+                            onChange={(e) => updateGuest(ticket.index, 'email', e.target.value)}
+                            className="mt-1 text-right"
+                            dir="ltr"
+                            style={{ textAlign: 'right' }}
+                          />
+                        </div>
+                      )}
                       <div>
                         <Label className="text-xs font-medium">טלפון *</Label>
                         <Input
@@ -300,6 +314,9 @@ const BuyerDetails = ({
                           style={{ textAlign: 'right' }}
                           ref={(el) => { phoneRefs.current[ticket.index] = el; }}
                         />
+                        <p className="text-xs text-muted-foreground mt-1.5 flex items-center gap-1">
+                          📲 שילחו לוואטסאפ את הכרטיס
+                        </p>
                       </div>
                       {/* Next ticket button */}
                       {ticket.index < flatTickets.length - 1 && (
