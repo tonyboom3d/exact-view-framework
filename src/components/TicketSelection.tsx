@@ -104,20 +104,24 @@ const TicketSelection = ({ selections, onChange, onBuyTicket }: TicketSelectionP
 
                 {/* Bottom row: buy button (left) + progress bar with label (right) */}
                 <div className="flex items-center gap-3">
-                  {/* Buy button - compact, left side */}
-                  <Button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (isSoldOut) return;
-                      if (!isActive) onChange([{ type: ticket.type, quantity: 1 }]);
-                      onBuyTicket(ticket.type);
-                    }}
-                    disabled={isSoldOut}
-                    className="h-10 px-4 font-bold bg-cta hover:bg-cta/90 text-cta-foreground rounded-lg shadow text-[14px] whitespace-nowrap"
+                  {/* Progress bar with label - right side (flex-1) */}
+                  <motion.div
+                    className="flex-1"
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: 1 }}
+                    transition={{ duration: 0.6, delay: 0.3 + index * 0.12 }}
+                    style={{ transformOrigin: 'right' }}
                   >
-                    <ShoppingCart className="w-4 h-4 ml-1.5" />
-                    {`לרכישה - ₪${(ticket.price * qty).toLocaleString()}`}
-                  </Button>
+                    <p className="text-[12px] text-muted-foreground mb-1 text-right font-medium">
+                      {ticket.fomoPercent}% כרטיסים נרכשו
+                    </p>
+                    <div className="bg-muted rounded-full h-3">
+                    <div
+                        className="h-3 rounded-full transition-all"
+                        style={{ width: `${ticket.fomoPercent}%`, background: ticket.progressColor }}
+                      />
+                    </div>
+                  </motion.div>
 
                   {/* Quantity selector */}
                   <div className="flex items-center gap-2">
@@ -149,24 +153,20 @@ const TicketSelection = ({ selections, onChange, onBuyTicket }: TicketSelectionP
                     </Button>
                   </div>
 
-                  {/* Progress bar with label - right side (flex-1) */}
-                  <motion.div
-                    className="flex-1"
-                    initial={{ scaleX: 0 }}
-                    animate={{ scaleX: 1 }}
-                    transition={{ duration: 0.6, delay: 0.3 + index * 0.12 }}
-                    style={{ transformOrigin: 'right' }}
+                  {/* Buy button - left side */}
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (isSoldOut) return;
+                      if (!isActive) onChange([{ type: ticket.type, quantity: 1 }]);
+                      onBuyTicket(ticket.type);
+                    }}
+                    disabled={isSoldOut}
+                    className="h-10 px-4 font-bold bg-cta hover:bg-cta/90 text-cta-foreground rounded-lg shadow text-[14px] whitespace-nowrap"
                   >
-                    <p className="text-[12px] text-muted-foreground mb-1 text-right font-medium">
-                      {ticket.fomoPercent}% כרטיסים נרכשו
-                    </p>
-                    <div className="bg-muted rounded-full h-3">
-                    <div
-                        className="h-3 rounded-full transition-all"
-                        style={{ width: `${ticket.fomoPercent}%`, background: ticket.progressColor }}
-                      />
-                    </div>
-                  </motion.div>
+                    <ShoppingCart className="w-4 h-4 ml-1.5" />
+                    {`לרכישה - ₪${(ticket.price * qty).toLocaleString()}`}
+                  </Button>
                 </div>
               </div>
             </motion.div>
