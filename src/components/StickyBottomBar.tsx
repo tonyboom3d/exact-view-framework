@@ -12,7 +12,7 @@ interface StickyBottomBarProps {
 
 const StickyBottomBar = ({ step, totalPrice, ticketCount, onNext, onBack, disabled }: StickyBottomBarProps) => {
   // Step 1 has buy buttons on each ticket, step 4 has no bar, step 2 has inline button
-  if (step === 1 || step === 2 || step === 4) return null;
+  if (step === 1 || step === 2 || step === 3) return null;
 
   const labels: Record<number, string> = {
     2: 'המשך לסיכום הזמנה',
