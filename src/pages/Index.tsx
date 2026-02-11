@@ -83,11 +83,9 @@ const Index = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleNext = () => {
+   const handleNext = () => {
     if (step === 2) {
       if (!validateStep2()) return;
-      setStep(3);
-    } else if (step === 3) {
       setShowPayment(true);
       return;
     }
@@ -97,7 +95,7 @@ const Index = () => {
   const handlePaymentConfirm = () => {
     setShowPayment(false);
     toast({ title: 'התשלום בוצע בהצלחה!', description: 'זהו דמו בלבד — מעבר לדף תודה.' });
-    setStep(4);
+    setStep(3);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -106,7 +104,7 @@ const Index = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const steps = [1, 2, 3, 4];
+  const steps = [1, 2, 3];
 
   return (
     <div className="h-screen bg-background flex flex-col overflow-hidden">
@@ -182,12 +180,7 @@ const Index = () => {
             </motion.div>
           )}
           {step === 3 && (
-            <motion.div key="step3" initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}>
-              <OrderSummary selections={selections} />
-            </motion.div>
-          )}
-          {step === 4 && (
-            <motion.div key="step4" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}>
+            <motion.div key="step3" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}>
               <ThankYou orderNumber={orderNumber} referralCode={referralCode} selections={selections} />
             </motion.div>
           )}
