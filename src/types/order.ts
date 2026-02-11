@@ -8,6 +8,9 @@ export interface TicketInfo {
   fomoText: string;
   fomoPercent: number;
   soldOut: boolean;
+  color: string;
+  colorClass: string;
+  mapLabel: string;
 }
 
 export interface GuestInfo {
@@ -47,6 +50,9 @@ export const TICKETS: TicketInfo[] = [
     fomoText: '85% נמכר!',
     fomoPercent: 85,
     soldOut: false,
+    color: '#3B82F6',
+    colorClass: 'bg-blue-400',
+    mapLabel: 'אזור כללי',
   },
   {
     type: 'premier',
@@ -56,6 +62,9 @@ export const TICKETS: TicketInfo[] = [
     fomoText: '72% נמכר!',
     fomoPercent: 72,
     soldOut: false,
+    color: '#2563EB',
+    colorClass: 'bg-blue-600',
+    mapLabel: 'אזור פרמייר',
   },
   {
     type: 'vip',
@@ -65,5 +74,8 @@ export const TICKETS: TicketInfo[] = [
     fomoText: '100% נמכר!',
     fomoPercent: 100,
     soldOut: true,
+    color: '#1D4ED8',
+    colorClass: 'bg-blue-800',
+    mapLabel: 'VIP',
   },
 ];
