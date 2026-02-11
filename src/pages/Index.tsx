@@ -5,8 +5,9 @@ import TicketSelection from '@/components/TicketSelection';
 import BuyerDetails from '@/components/BuyerDetails';
 import OrderSummary from '@/components/OrderSummary';
 import ThankYou from '@/components/ThankYou';
-import { TICKETS, type TicketSelection as TicketSelectionType, type BuyerInfo, type GuestInfo } from '@/types/order';
+import { TICKETS, type TicketSelection as TicketSelectionType, type BuyerInfo, type GuestInfo, type TicketType } from '@/types/order';
 import { toast } from '@/hooks/use-toast';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const generateId = () => Math.random().toString(36).substring(2, 10).toUpperCase();
 
@@ -34,7 +35,6 @@ const Index = () => {
     [selections]
   );
 
-  // Ensure guests array matches expected count
   const syncGuests = useCallback(
     (ticketCount: number) => {
       const needed = Math.max(0, ticketCount - 1);
@@ -50,6 +50,15 @@ const Index = () => {
     setSelections(newSelections);
     const count = newSelections.reduce((sum, s) => sum + s.quantity, 0);
     syncGuests(count);
+  };
+
+  const handleBuyTicket = (type: TicketType) => {
+    if (totalTickets === 0) {
+      toast({ title: 'יש לבחור לפחות כרטיס אחד', variant: 'destructive' });
+      return;
+    }
+    setStep(2);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const validateStep2 = (): boolean => {
@@ -68,13 +77,7 @@ const Index = () => {
   };
 
   const handleNext = () => {
-    if (step === 1) {
-      if (totalTickets === 0) {
-        toast({ title: 'יש לבחור לפחות כרטיס אחד', variant: 'destructive' });
-        return;
-      }
-      setStep(2);
-    } else if (step === 2) {
+    if (step === 2) {
       if (!validateStep2()) return;
       setStep(3);
     } else if (step === 3) {
@@ -89,7 +92,6 @@ const Index = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Step indicator
   const steps = [1, 2, 3, 4];
 
   return (
@@ -97,48 +99,65 @@ const Index = () => {
       <StickyHeader />
 
       {/* Step Indicator */}
-      <div className="max-w-2xl mx-auto w-full px-4 py-4">
+      <motion.div
+        className="max-w-4xl mx-auto w-full px-4 py-4"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.2 }}
+      >
         <div className="flex items-center justify-center gap-2">
           {steps.map((s, i) => (
             <div key={s} className="flex items-center gap-2">
               <div
                 className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
                   s <= step
-                    ? 'bg-foreground text-background'
+                    ? 'bg-cta text-cta-foreground'
                     : 'bg-muted text-muted-foreground'
                 }`}
               >
                 {s}
               </div>
               {i < steps.length - 1 && (
-                <div className={`w-8 h-0.5 ${s < step ? 'bg-foreground' : 'bg-muted'}`} />
+                <div className={`w-8 h-0.5 ${s < step ? 'bg-cta' : 'bg-muted'}`} />
               )}
             </div>
           ))}
         </div>
-      </div>
+      </motion.div>
 
       {/* Content */}
-      <main className="flex-1 max-w-2xl mx-auto w-full px-4 pb-28">
-        {step === 1 && (
-          <TicketSelection selections={selections} onChange={handleSelectionsChange} />
-        )}
-        {step === 2 && (
-          <BuyerDetails
-            buyer={buyer}
-            onBuyerChange={setBuyer}
-            guests={guests}
-            onGuestsChange={setGuests}
-            useMyDetails={useMyDetails}
-            onUseMyDetailsChange={setUseMyDetails}
-            totalTickets={totalTickets}
-            errors={errors}
-          />
-        )}
-        {step === 3 && <OrderSummary selections={selections} />}
-        {step === 4 && (
-          <ThankYou orderNumber={orderNumber} referralCode={referralCode} selections={selections} />
-        )}
+      <main className="flex-1 max-w-4xl mx-auto w-full px-4 pb-28">
+        <AnimatePresence mode="wait">
+          {step === 1 && (
+            <motion.div key="step1" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <TicketSelection selections={selections} onChange={handleSelectionsChange} onBuyTicket={handleBuyTicket} />
+            </motion.div>
+          )}
+          {step === 2 && (
+            <motion.div key="step2" initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}>
+              <BuyerDetails
+                buyer={buyer}
+                onBuyerChange={setBuyer}
+                guests={guests}
+                onGuestsChange={setGuests}
+                useMyDetails={useMyDetails}
+                onUseMyDetailsChange={setUseMyDetails}
+                totalTickets={totalTickets}
+                errors={errors}
+              />
+            </motion.div>
+          )}
+          {step === 3 && (
+            <motion.div key="step3" initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}>
+              <OrderSummary selections={selections} />
+            </motion.div>
+          )}
+          {step === 4 && (
+            <motion.div key="step4" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}>
+              <ThankYou orderNumber={orderNumber} referralCode={referralCode} selections={selections} />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
 
       <StickyBottomBar
@@ -147,7 +166,7 @@ const Index = () => {
         ticketCount={totalTickets}
         onNext={handleNext}
         onBack={handleBack}
-        disabled={step === 1 && totalTickets === 0}
+        disabled={false}
       />
     </div>
   );
