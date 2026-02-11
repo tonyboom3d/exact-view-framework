@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Clock, MapPin, Calendar } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import tonyImg from '@/assets/tony-robbins.png';
 
 const StickyHeader = () => {
   const getTimeLeft = () => {
@@ -53,11 +54,17 @@ const StickyHeader = () => {
           </div>
         </div>
         <motion.div
-          className="mt-3 flex items-center justify-center gap-3 bg-cta/5 rounded-xl px-4 py-3"
+          className="relative mt-3 flex items-center justify-center gap-3 bg-cta/5 rounded-xl px-4 py-3 overflow-visible"
           initial={{ opacity: 0, scaleY: 0 }}
           animate={{ opacity: 1, scaleY: 1 }}
           transition={{ duration: 0.4, delay: 0.3 }}
         >
+          <img
+            src={tonyImg}
+            alt="Tony Robbins"
+            className="absolute right-2 -top-10 h-[80px] w-auto object-contain pointer-events-none"
+            style={{ transform: 'scaleX(-1)' }}
+          />
           <Clock className="w-5 h-5 text-destructive" />
           <span className="text-[15px] font-semibold text-foreground">
             המחיר עולה בעוד
