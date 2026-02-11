@@ -54,7 +54,7 @@ const StickyHeader = () => {
           </div>
         </div>
         <motion.div
-          className="relative mt-3 flex flex-col items-center justify-center gap-1 bg-cta/5 rounded-xl px-4 py-3 overflow-visible"
+          className="relative mt-6 flex flex-col items-center justify-center gap-1 bg-cta/5 rounded-xl px-4 py-3 overflow-visible"
           initial={{ opacity: 0, scaleY: 0 }}
           animate={{ opacity: 1, scaleY: 1 }}
           transition={{ duration: 0.4, delay: 0.3 }}
@@ -62,7 +62,7 @@ const StickyHeader = () => {
           <img
             src={tonyImg}
             alt="Tony Robbins"
-            className="absolute right-2 bottom-0 h-[120px] w-auto object-contain pointer-events-none"
+            className="absolute right-2 bottom-0 h-[140px] w-auto object-contain pointer-events-none"
             style={{ transform: 'scaleX(-1)' }}
           />
           <span className="text-[15px] font-semibold text-foreground mb-1">
