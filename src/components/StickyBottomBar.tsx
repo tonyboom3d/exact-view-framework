@@ -21,7 +21,7 @@ const StickyBottomBar = ({ step, totalPrice, ticketCount, onNext, onBack, disabl
 
   return (
     <div className="sticky bottom-0 z-50 bg-background/95 backdrop-blur-sm border-t border-border">
-      <div className="max-w-4xl mx-auto px-4 py-3">
+      <div className="max-w-4xl mx-auto w-[95%] py-3">
         <div className="flex gap-2">
           {step > 1 && (
             <Button
