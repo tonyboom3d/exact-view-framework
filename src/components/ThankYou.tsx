@@ -21,14 +21,17 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
   const [showDetails, setShowDetails] = useState(false);
 
   useEffect(() => {
-    // Trigger confetti on mount
-    confetti({
-      particleCount: 100,
-      spread: 70,
-      origin: { y: -0.1 },
-      gravity: 0.8,
-      ticks: 200,
-    });
+    const duration = 600;
+    const end = Date.now() + duration;
+    const fire = (angle: number, origin: { x: number; y: number }) => {
+      confetti({ particleCount: 60, angle, spread: 55, origin, ticks: 150 });
+    };
+    const interval = setInterval(() => {
+      if (Date.now() > end) return clearInterval(interval);
+      fire(60, { x: 0, y: 0.5 });
+      fire(120, { x: 1, y: 0.5 });
+    }, 150);
+    return () => clearInterval(interval);
   }, []);
 
   const referralLink = `https://upw-tickets.com/ref/${referralCode}`;
