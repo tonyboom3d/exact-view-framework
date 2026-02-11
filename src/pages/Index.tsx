@@ -24,6 +24,7 @@ const Index = () => {
   const [orderNumber] = useState(() => generateId());
   const [referralCode] = useState(() => generateId());
   const [showPayment, setShowPayment] = useState(false);
+  const [showPayer, setShowPayer] = useState(false);
 
   const totalTickets = useMemo(
     () => selections.reduce((sum, s) => sum + s.quantity, 0),
@@ -69,12 +70,14 @@ const Index = () => {
     const newErrors: Record<string, string> = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (!buyer.email.trim()) newErrors.email = 'שדה חובה';
-    else if (!emailRegex.test(buyer.email)) newErrors.email = 'אימייל לא תקין';
+    if (showPayer) {
+      if (!buyer.email.trim()) newErrors.email = 'שדה חובה';
+      else if (!emailRegex.test(buyer.email)) newErrors.email = 'אימייל לא תקין';
 
-    if (!buyer.firstName.trim()) newErrors.firstName = 'שדה חובה';
-    if (!buyer.lastName.trim()) newErrors.lastName = 'שדה חובה';
-    if (!buyer.phone.trim()) newErrors.phone = 'שדה חובה';
+      if (!buyer.firstName.trim()) newErrors.firstName = 'שדה חובה';
+      if (!buyer.lastName.trim()) newErrors.lastName = 'שדה חובה';
+      if (!buyer.phone.trim()) newErrors.phone = 'שדה חובה';
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -158,6 +161,8 @@ const Index = () => {
                 totalTickets={totalTickets}
                 errors={errors}
                 selections={selections}
+                showPayer={showPayer}
+                onShowPayerChange={setShowPayer}
               />
               <div className="flex gap-2 mt-6">
                 <Button
