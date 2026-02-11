@@ -62,7 +62,7 @@ const StickyHeader = () => {
           <img
             src={tonyImg}
             alt="Tony Robbins"
-            className="absolute right-2 bottom-0 h-[140px] w-auto object-contain pointer-events-none"
+            className="absolute right-2 bottom-0 h-[170px] w-auto object-contain pointer-events-none"
             style={{ transform: 'scaleX(-1)' }}
           />
           <span className="text-[15px] font-semibold text-foreground mb-1">
