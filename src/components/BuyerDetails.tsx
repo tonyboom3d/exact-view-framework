@@ -56,6 +56,8 @@ const BuyerDetails = ({
 
   const [openTicketIndex, setOpenTicketIndex] = useState(0);
   const [showPayer, setShowPayer] = useState(false);
+  const [showCompany, setShowCompany] = useState(false);
+  const [companyName, setCompanyName] = useState('');
   const phoneRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   // Ensure guests array matches totalTickets
@@ -76,9 +78,13 @@ const BuyerDetails = ({
     onGuestsChange(updated);
   };
 
+  const isTicketComplete = (idx: number) => {
+    const guest = guests[idx];
+    if (!guest) return false;
+    return guest.firstName.trim() !== '' && guest.lastName.trim() !== '' && guest.phone.trim() !== '';
+  };
+
   const handleLastFieldClick = (ticketIdx: number) => {
-    // When user clicks (focuses) on the last field (phone) of a ticket,
-    // auto-open the next ticket
     if (ticketIdx < flatTickets.length - 1) {
       setTimeout(() => {
         setOpenTicketIndex(ticketIdx + 1);
@@ -87,6 +93,12 @@ const BuyerDetails = ({
   };
 
   const toggleTicket = (idx: number) => {
+    // Only allow opening a ticket if all previous tickets are complete
+    if (idx > 0 && !isTicketComplete(idx - 1)) return;
+    // Allow opening any ticket before current too
+    for (let i = 0; i < idx; i++) {
+      if (!isTicketComplete(i)) return;
+    }
     setOpenTicketIndex((prev) => (prev === idx ? -1 : idx));
   };
 
@@ -128,8 +140,9 @@ const BuyerDetails = ({
                   placeholder="your@email.com"
                   value={buyer.email}
                   onChange={(e) => onBuyerChange({ ...buyer, email: e.target.value })}
-                  className={`mt-1 ${errors.email ? 'border-destructive' : ''}`}
+                  className={`mt-1 text-right ${errors.email ? 'border-destructive' : ''}`}
                   dir="ltr"
+                  style={{ textAlign: 'right' }}
                 />
                 {errors.email && <p className="text-xs text-destructive mt-1">{errors.email}</p>}
               </div>
@@ -140,7 +153,7 @@ const BuyerDetails = ({
                     placeholder="ישראל"
                     value={buyer.firstName}
                     onChange={(e) => onBuyerChange({ ...buyer, firstName: e.target.value })}
-                    className={`mt-1 ${errors.firstName ? 'border-destructive' : ''}`}
+                    className={`mt-1 text-right placeholder:text-right ${errors.firstName ? 'border-destructive' : ''}`}
                   />
                   {errors.firstName && <p className="text-xs text-destructive mt-1">{errors.firstName}</p>}
                 </div>
@@ -150,7 +163,7 @@ const BuyerDetails = ({
                     placeholder="ישראלי"
                     value={buyer.lastName}
                     onChange={(e) => onBuyerChange({ ...buyer, lastName: e.target.value })}
-                    className={`mt-1 ${errors.lastName ? 'border-destructive' : ''}`}
+                    className={`mt-1 text-right placeholder:text-right ${errors.lastName ? 'border-destructive' : ''}`}
                   />
                   {errors.lastName && <p className="text-xs text-destructive mt-1">{errors.lastName}</p>}
                 </div>
@@ -162,11 +175,46 @@ const BuyerDetails = ({
                   placeholder="050-1234567"
                   value={buyer.phone}
                   onChange={(e) => onBuyerChange({ ...buyer, phone: e.target.value })}
-                  className={`mt-1 ${errors.phone ? 'border-destructive' : ''}`}
+                  className={`mt-1 text-right ${errors.phone ? 'border-destructive' : ''}`}
                   dir="ltr"
+                  style={{ textAlign: 'right' }}
                 />
                 {errors.phone && <p className="text-xs text-destructive mt-1">{errors.phone}</p>}
               </div>
+
+              {/* Company name checkbox */}
+              <div className="flex items-center gap-2 mt-2">
+                <Checkbox
+                  id="showCompany"
+                  checked={showCompany}
+                  onCheckedChange={(v) => setShowCompany(v as boolean)}
+                />
+                <Label htmlFor="showCompany" className="text-sm cursor-pointer">
+                  הוספת שם חברה לחשבונית
+                </Label>
+              </div>
+
+              <AnimatePresence>
+                {showCompany && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="overflow-hidden"
+                  >
+                    <div>
+                      <Label className="text-sm font-medium">שם חברה *</Label>
+                      <Input
+                        placeholder="שם החברה"
+                        value={companyName}
+                        onChange={(e) => setCompanyName(e.target.value)}
+                        className="mt-1 text-right placeholder:text-right"
+                      />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </motion.div>
         )}
@@ -177,17 +225,29 @@ const BuyerDetails = ({
         {flatTickets.map((ticket) => {
           const isOpen = openTicketIndex === ticket.index;
           const guest = guests[ticket.index];
+          const canOpen = ticket.index === 0 || isTicketComplete(ticket.index - 1);
+          const allPreviousComplete = (() => {
+            for (let i = 0; i < ticket.index; i++) {
+              if (!isTicketComplete(i)) return false;
+            }
+            return true;
+          })();
 
           return (
             <div
               key={ticket.index}
-              className="rounded-xl border border-border bg-card overflow-hidden transition-shadow"
+              className={`rounded-xl border bg-card overflow-hidden transition-shadow ${
+                !allPreviousComplete ? 'border-border/50 opacity-50' : 'border-border'
+              }`}
             >
               {/* Header */}
               <button
                 type="button"
-                onClick={() => toggleTicket(ticket.index)}
-                className="w-full flex items-center justify-between p-4 text-right"
+                onClick={() => allPreviousComplete && toggleTicket(ticket.index)}
+                className={`w-full flex items-center justify-between p-4 text-right ${
+                  !allPreviousComplete ? 'cursor-not-allowed' : 'cursor-pointer'
+                }`}
+                disabled={!allPreviousComplete}
               >
                 <span className="text-sm font-bold text-foreground">
                   כרטיס {ticket.ticketName} #{ticket.ticketNumber}
@@ -217,7 +277,7 @@ const BuyerDetails = ({
                             placeholder="שם פרטי"
                             value={guest?.firstName || ''}
                             onChange={(e) => updateGuest(ticket.index, 'firstName', e.target.value)}
-                            className="mt-1"
+                            className="mt-1 text-right placeholder:text-right"
                           />
                         </div>
                         <div>
@@ -226,7 +286,7 @@ const BuyerDetails = ({
                             placeholder="שם משפחה"
                             value={guest?.lastName || ''}
                             onChange={(e) => updateGuest(ticket.index, 'lastName', e.target.value)}
-                            className="mt-1"
+                            className="mt-1 text-right placeholder:text-right"
                           />
                         </div>
                       </div>
@@ -237,8 +297,9 @@ const BuyerDetails = ({
                           placeholder="050-1234567"
                           value={guest?.phone || ''}
                           onChange={(e) => updateGuest(ticket.index, 'phone', e.target.value)}
-                          className="mt-1"
+                          className="mt-1 text-right"
                           dir="ltr"
+                          style={{ textAlign: 'right' }}
                           ref={(el) => { phoneRefs.current[ticket.index] = el; }}
                           onFocus={() => handleLastFieldClick(ticket.index)}
                         />
