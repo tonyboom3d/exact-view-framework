@@ -39,7 +39,7 @@ const Index = () => {
 
   const syncGuests = useCallback(
     (ticketCount: number) => {
-      const needed = Math.max(0, ticketCount - 1);
+      const needed = ticketCount;
       setGuests((prev) => {
         if (prev.length >= needed) return prev.slice(0, needed);
         return [...prev, ...Array.from({ length: needed - prev.length }, () => ({ firstName: '', lastName: '', phone: '' }))];
@@ -148,6 +148,7 @@ const Index = () => {
                 onUseMyDetailsChange={setUseMyDetails}
                 totalTickets={totalTickets}
                 errors={errors}
+                selections={selections}
               />
               <div className="flex gap-2 mt-6">
                 <Button
