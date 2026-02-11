@@ -100,7 +100,7 @@ const Index = () => {
 
       {/* Step Indicator */}
       <motion.div
-        className="max-w-4xl mx-auto w-full px-4 py-4"
+        className="max-w-5xl mx-auto w-full px-4 py-4"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.2 }}
