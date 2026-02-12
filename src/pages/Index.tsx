@@ -95,7 +95,6 @@ const Index = () => {
   const handlePaymentConfirm = () => {
     setShowPayment(false);
     setStep(3);
-    setStep(3);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
