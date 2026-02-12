@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Calendar, MapPin } from 'lucide-react';
 import tonyImg from '@/assets/tony-robbins.png';
 
 const StickyHeader = () => {
@@ -32,6 +33,28 @@ const StickyHeader = () => {
       transition={{ duration: 0.5, ease: 'easeOut' }}>
 
       <div className="max-w-5xl mx-auto w-[95%] py-2">
+        {/* Desktop (md+): event details in header */}
+        <div className="hidden md:flex md:items-center md:justify-between md:gap-4 md:mb-3">
+          <div className="text-right min-w-0">
+            <h1 className="text-[22px] font-bold text-foreground leading-tight truncate">
+              Tony Robbins
+            </h1>
+            <p className="text-[15px] text-foreground/80 font-semibold truncate">
+              Unleash the Power Within REMOTE
+            </p>
+            <div className="flex flex-wrap items-center justify-end gap-x-4 gap-y-0.5 text-[13px] text-muted-foreground mt-0.5">
+              <span className="flex items-center gap-1">
+                <Calendar className="w-3.5 h-3.5 shrink-0" />
+                4 ימים, 12-15 במרץ 2026
+              </span>
+              <span className="flex items-center gap-1">
+                <MapPin className="w-3.5 h-3.5 shrink-0" />
+                מלון פרימה מילניום, רעננה
+              </span>
+            </div>
+          </div>
+        </div>
+
         <motion.div
           className="relative flex-col gap-1 bg-cta/5 rounded-xl px-3 sm:px-4 py-2 sm:py-2.5 overflow-visible flex items-end justify-center"
           initial={{ opacity: 0, scaleY: 0 }}
