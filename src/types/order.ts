@@ -59,7 +59,7 @@ export const TICKETS: TicketInfo[] = [
   },
   {
     type: 'vip',
-    name: 'VIP Experience',
+    name: 'VIP',
     price: 3450,
     description: 'חוויית צפייה משודרגת ומיקום אסטרטגי באולם.',
     fomoText: '62% כרטיסים נרכשו',
