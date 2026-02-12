@@ -8,7 +8,7 @@ import BuyerDetails from '@/components/BuyerDetails';
 import OrderSummary from '@/components/OrderSummary';
 import ThankYou from '@/components/ThankYou';
 import LoadingOverlay from '@/components/LoadingOverlay';
-import { FALLBACK_TICKETS, type TicketSelection as TicketSelectionType, type BuyerInfo, type GuestInfo, type TicketType } from '@/types/order';
+import { type TicketSelection as TicketSelectionType, type BuyerInfo, type GuestInfo, type TicketType } from '@/types/order';
 import { useWixTickets } from '@/hooks/useWixTickets';
 import { useWixPayment } from '@/hooks/useWixPayment';
 import { toast } from '@/hooks/use-toast';
@@ -29,11 +29,8 @@ const Index = () => {
   const [companyName, setCompanyName] = useState('');
 
   // Wix integration hooks
-  const { tickets: wixTickets, loading: ticketsLoading } = useWixTickets();
+  const { tickets } = useWixTickets();
   const { createOrderAndPay, loading: paymentLoading, loadingMessage } = useWixPayment();
-
-  // Use Wix tickets if available, otherwise fallback for dev
-  const tickets = isInsideWix && wixTickets.length > 0 ? wixTickets : FALLBACK_TICKETS;
 
   const totalTickets = useMemo(
     () => selections.reduce((sum, s) => sum + s.quantity, 0),
@@ -181,7 +178,7 @@ const Index = () => {
                 onChange={handleSelectionsChange}
                 onBuyTicket={handleBuyTicket}
                 tickets={tickets}
-                loading={isInsideWix && ticketsLoading}
+                loading={false}
               />
             </motion.div>
           )}
