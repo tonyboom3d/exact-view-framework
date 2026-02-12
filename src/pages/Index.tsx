@@ -27,6 +27,7 @@ const Index = () => {
   const [referralCode, setReferralCode] = useState('');
   const [showPayer, setShowPayer] = useState(false);
   const [companyName, setCompanyName] = useState('');
+  const [showCompany, setShowCompany] = useState(false);
 
   // Wix integration hooks
   const { tickets } = useWixTickets();
@@ -71,20 +72,81 @@ const Index = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const nameRegex = /^[a-zA-Zא-ת\u0590-\u05FF\s']+$/;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const phoneRegex = /^05\d{8}$/;
+
+  const validateName = (value: string, label: string): string | null => {
+    if (!value.trim()) return `${label} הוא שדה חובה`;
+    if (!nameRegex.test(value.trim())) return `${label} יכול להכיל רק אותיות וגרש`;
+    return null;
+  };
+
+  const validatePhone = (value: string): string | null => {
+    const cleaned = value.replace(/[-\s]/g, '');
+    if (!cleaned) return 'טלפון הוא שדה חובה';
+    if (!phoneRegex.test(cleaned)) return 'מספר טלפון לא תקין (05XXXXXXXX)';
+    return null;
+  };
+
+  const validateEmail = (value: string): string | null => {
+    if (!value.trim()) return 'אימייל הוא שדה חובה';
+    if (!emailRegex.test(value.trim())) return 'כתובת אימייל לא תקינה';
+    return null;
+  };
+
   const validateStep2 = (): boolean => {
     const newErrors: Record<string, string> = {};
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const missingFields: string[] = [];
 
+    // Validate each guest ticket
+    guests.forEach((guest, idx) => {
+      const fnErr = validateName(guest.firstName, 'שם פרטי');
+      if (fnErr) { newErrors[`guest_${idx}_firstName`] = fnErr; missingFields.push(`כרטיס ${idx + 1} - שם פרטי`); }
+
+      const lnErr = validateName(guest.lastName, 'שם משפחה');
+      if (lnErr) { newErrors[`guest_${idx}_lastName`] = lnErr; missingFields.push(`כרטיס ${idx + 1} - שם משפחה`); }
+
+      const phErr = validatePhone(guest.phone);
+      if (phErr) { newErrors[`guest_${idx}_phone`] = phErr; missingFields.push(`כרטיס ${idx + 1} - טלפון`); }
+
+      // Email required for first ticket
+      if (idx === 0) {
+        const emErr = validateEmail(guest.email || '');
+        if (emErr) { newErrors[`guest_${idx}_email`] = emErr; missingFields.push(`כרטיס ${idx + 1} - אימייל`); }
+      }
+    });
+
+    // Validate payer fields if showPayer
     if (showPayer) {
-      if (!buyer.email.trim()) newErrors.email = 'שדה חובה';
-      else if (!emailRegex.test(buyer.email)) newErrors.email = 'אימייל לא תקין';
+      const emErr = validateEmail(buyer.email);
+      if (emErr) { newErrors.payer_email = emErr; missingFields.push('משלם - אימייל'); }
 
-      if (!buyer.firstName.trim()) newErrors.firstName = 'שדה חובה';
-      if (!buyer.lastName.trim()) newErrors.lastName = 'שדה חובה';
-      if (!buyer.phone.trim()) newErrors.phone = 'שדה חובה';
+      const fnErr = validateName(buyer.firstName, 'שם פרטי');
+      if (fnErr) { newErrors.payer_firstName = fnErr; missingFields.push('משלם - שם פרטי'); }
+
+      const lnErr = validateName(buyer.lastName, 'שם משפחה');
+      if (lnErr) { newErrors.payer_lastName = lnErr; missingFields.push('משלם - שם משפחה'); }
+
+      const phErr = validatePhone(buyer.phone);
+      if (phErr) { newErrors.payer_phone = phErr; missingFields.push('משלם - טלפון'); }
+
+      if (showCompany && !companyName.trim()) {
+        newErrors.payer_companyName = 'שם חברה הוא שדה חובה';
+        missingFields.push('משלם - שם חברה');
+      }
     }
 
     setErrors(newErrors);
+
+    if (missingFields.length > 0) {
+      toast({
+        title: 'יש שדות שלא מולאו כראוי',
+        description: missingFields.join(', '),
+        variant: 'destructive',
+      });
+    }
+
     return Object.keys(newErrors).length === 0;
   };
 
@@ -197,6 +259,10 @@ const Index = () => {
                 showPayer={showPayer}
                 onShowPayerChange={setShowPayer}
                 tickets={tickets}
+                showCompany={showCompany}
+                onShowCompanyChange={setShowCompany}
+                companyName={companyName}
+                onCompanyNameChange={setCompanyName}
               />
               <div className="flex gap-2 mt-6">
                 <Button
