@@ -101,41 +101,39 @@ const TicketSelection = ({ selections, onChange, onBuyTicket }: TicketSelectionP
                 {/* Description */}
                 <p className="text-[17px] sm:text-[18px] text-muted-foreground mb-3 sm:mb-4 line-clamp-2 min-h-[3em]">{ticket.description}</p>
 
-                {/* Mobile: stacked layout / Desktop: row layout */}
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-3">
-                  {/* Quantity selector + Buy button row */}
-                  <div className="flex items-center gap-2 justify-between sm:justify-end sm:order-2">
-                    {/* Quantity selector */}
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8 rounded-full"
-                        onClick={(e) => { e.stopPropagation(); if (!isSoldOut) { if (isActive) updateQuantity(ticket.type, 1); else onChange([{ type: ticket.type, quantity: 2 }]); } }}
-                        disabled={isSoldOut}
-                      >
-                        <Plus className="w-3.5 h-3.5" />
-                      </Button>
-                      <div className="flex items-center gap-1">
-                        {(isActive ? qty : 1) > 1 ? (
-                          <Users className="w-4 h-4 text-cta" />
-                        ) : (
-                          <User className="w-4 h-4 text-cta" />
-                        )}
-                        <span className="w-6 text-center font-bold text-foreground text-[18px]">{isActive ? qty : 1}</span>
-                      </div>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8 rounded-full"
-                        onClick={(e) => { e.stopPropagation(); if (!isSoldOut) { if (isActive) updateQuantity(ticket.type, -1); } }}
-                        disabled={isSoldOut || (isActive && qty <= 1) || !isActive}
-                      >
-                        <Minus className="w-3.5 h-3.5" />
-                      </Button>
-                    </div>
+                 {/* Mobile: stacked layout / Desktop: row layout */}
+                 <div className="flex flex-col gap-3">
+                   {/* Quantity selector */}
+                   <div className="flex items-center gap-2 justify-center sm:justify-start">
+                     <Button
+                       variant="outline"
+                       size="icon"
+                       className="h-8 w-8 rounded-full"
+                       onClick={(e) => { e.stopPropagation(); if (!isSoldOut) { if (isActive) updateQuantity(ticket.type, 1); else onChange([{ type: ticket.type, quantity: 2 }]); } }}
+                       disabled={isSoldOut}
+                     >
+                       <Plus className="w-3.5 h-3.5" />
+                     </Button>
+                     <div className="flex items-center gap-1">
+                       {(isActive ? qty : 1) > 1 ? (
+                         <Users className="w-4 h-4 text-cta" />
+                       ) : (
+                         <User className="w-4 h-4 text-cta" />
+                       )}
+                       <span className="w-6 text-center font-bold text-foreground text-[18px]">{isActive ? qty : 1}</span>
+                     </div>
+                     <Button
+                       variant="outline"
+                       size="icon"
+                       className="h-8 w-8 rounded-full"
+                       onClick={(e) => { e.stopPropagation(); if (!isSoldOut) { if (isActive) updateQuantity(ticket.type, -1); } }}
+                       disabled={isSoldOut || (isActive && qty <= 1) || !isActive}
+                     >
+                       <Minus className="w-3.5 h-3.5" />
+                     </Button>
+                   </div>
 
-                    {/* Buy button */}
+                   {/* Buy button */}
                     <Button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -144,42 +142,40 @@ const TicketSelection = ({ selections, onChange, onBuyTicket }: TicketSelectionP
                         onBuyTicket(ticket.type);
                       }}
                       disabled={isSoldOut}
-                      className="h-10 px-3 sm:px-4 font-bold bg-cta hover:bg-cta/90 text-cta-foreground rounded-lg shadow text-[16px] sm:text-[17px] whitespace-nowrap"
+                      className="w-full h-10 font-bold bg-cta hover:bg-cta/90 text-cta-foreground rounded-lg shadow text-[16px] sm:text-[17px]"
                     >
                       {qty > 1 ? `לרכישה - ₪${(ticket.price * qty).toLocaleString()}` : 'לרכישה'}
                     </Button>
-                  </div>
 
-                  {/* Progress bar - full width on mobile, below the buttons */}
-                  <motion.div
-                    className="w-full sm:flex-1 sm:order-1"
-                    initial={{ scaleX: 0 }}
-                    animate={{ scaleX: 1 }}
-                    transition={{ duration: 0.6, delay: 0.3 + index * 0.12 }}
-                    style={{ transformOrigin: 'right' }}
-                  >
-                    <p className="text-[15px] text-muted-foreground mb-1 text-right font-medium">
-                      {ticket.fomoPercent}% כרטיסים נרכשו
-                    </p>
-                    <div className="bg-muted rounded-full h-3 border border-border overflow-hidden">
-                      <div
-                        className="h-3 rounded-full relative overflow-hidden"
-                        style={{ width: `${ticket.fomoPercent}%`, background: ticket.progressColor }}
-                      >
-                        {!ticket.soldOut && (
-                          <div
-                            className="absolute inset-0 rounded-full"
-                            style={{
-                              background: `linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.35) 50%, transparent 100%)`,
-                              animation: 'progress-shimmer 3s ease-in-out infinite',
-                            }}
-                          />
-                        )}
+                    {/* Progress bar */}
+                    <motion.div
+                      initial={{ scaleX: 0 }}
+                      animate={{ scaleX: 1 }}
+                      transition={{ duration: 0.6, delay: 0.3 + index * 0.12 }}
+                      style={{ transformOrigin: 'right' }}
+                    >
+                      <p className="text-[15px] text-muted-foreground mb-1 text-right font-medium">
+                        {ticket.fomoPercent}% כרטיסים נרכשו
+                      </p>
+                      <div className="bg-muted rounded-full h-3 border border-border overflow-hidden">
+                        <div
+                          className="h-3 rounded-full relative overflow-hidden"
+                          style={{ width: `${ticket.fomoPercent}%`, background: ticket.progressColor }}
+                        >
+                          {!ticket.soldOut && (
+                            <div
+                              className="absolute inset-0 rounded-full"
+                              style={{
+                                background: `linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.35) 50%, transparent 100%)`,
+                                animation: 'progress-shimmer 3s ease-in-out infinite',
+                              }}
+                            />
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </motion.div>
-                </div>
-              </div>
+                    </motion.div>
+                  </div>
+               </div>
             </motion.div>
           );
         })}
