@@ -65,17 +65,19 @@ const StickyHeader = () => {
             className="absolute right-[-20px] sm:right-2 bottom-0 h-[140px] sm:h-[170px] w-auto object-contain pointer-events-none"
             style={{ transform: 'scaleX(-1)' }} />
 
-          <span className="text-[17px] sm:text-[19px] font-bold text-foreground mb-1">
-            מתחילים בעוד
-          </span>
-          <div className="gap-1 sm:gap-1.5 flex items-center justify-start" dir="ltr">
-            <FlipUnit value={pad(timeLeft.days)} label="ימים" />
-            <span className="text-base sm:text-xl font-bold text-destructive animate-pulse">:</span>
-            <FlipUnit value={pad(timeLeft.hours)} label="שעות" />
-            <span className="text-base sm:text-xl font-bold text-destructive animate-pulse">:</span>
-            <FlipUnit value={pad(timeLeft.minutes)} label="דקות" />
-            <span className="text-base sm:text-xl font-bold text-destructive animate-pulse">:</span>
-            <FlipUnit value={pad(timeLeft.seconds)} label="שניות" />
+          <div className="flex items-center gap-2 sm:gap-3">
+            <span className="text-[17px] sm:text-[19px] font-bold text-foreground whitespace-nowrap">
+              מתחילים בעוד
+            </span>
+            <div className="gap-1 sm:gap-1.5 flex items-center justify-start" dir="ltr">
+              <FlipUnit value={pad(timeLeft.days)} label="ימים" />
+              <span className="text-base sm:text-xl font-bold text-destructive animate-pulse">:</span>
+              <FlipUnit value={pad(timeLeft.hours)} label="שעות" />
+              <span className="text-base sm:text-xl font-bold text-destructive animate-pulse">:</span>
+              <FlipUnit value={pad(timeLeft.minutes)} label="דקות" />
+              <span className="text-base sm:text-xl font-bold text-destructive animate-pulse">:</span>
+              <FlipUnit value={pad(timeLeft.seconds)} label="שניות" />
+            </div>
           </div>
         </motion.div>
       </div>
