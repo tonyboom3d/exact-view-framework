@@ -253,7 +253,7 @@ const BuyerDetails = ({
               <button
                 type="button"
                 onClick={() => allPreviousComplete && toggleTicket(ticket.index)}
-                className={`w-full flex items-center justify-between p-4 text-right ${
+                className={`w-full flex items-center justify-between p-3 text-right ${
                   !allPreviousComplete ? 'cursor-not-allowed' : 'cursor-pointer'
                 }`}
                 disabled={!allPreviousComplete}
@@ -278,7 +278,7 @@ const BuyerDetails = ({
                     transition={{ duration: 0.25 }}
                     className="overflow-hidden"
                   >
-                    <div className="px-4 pb-4 space-y-3">
+                    <div className="px-4 pb-1 space-y-2">
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <Label className="text-[15px] font-medium">שם פרטי *</Label>
