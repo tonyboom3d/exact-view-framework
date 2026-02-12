@@ -79,10 +79,11 @@ export function useWixPayment() {
 
   // Listen for payment cancellation (user closed modal without paying)
   useEffect(() => {
-    const unsub = onMessage('PAYMENT_CANCELLED', () => {
+    const unsub = onMessage('PAYMENT_CANCELLED', (msg: any) => {
       setLoading(false);
       setLoadingMessage('');
-      setError(null);
+      const message = msg?.payload?.message || 'תהליך התשלום בוטל.';
+      setError(message);
     });
     return unsub;
   }, []);
