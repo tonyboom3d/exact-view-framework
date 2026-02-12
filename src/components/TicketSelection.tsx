@@ -45,8 +45,7 @@ const TicketSelection = ({ selections, onChange, onBuyTicket }: TicketSelectionP
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h2 className="text-[26px] font-bold text-foreground">בחרו את הכרטיסים שלכם</h2>
-        <p className="text-[17px] text-muted-foreground mt-1">בחרו את סוג הכרטיס והכמות הרצויה</p>
+        <h2 className="text-[28px] font-bold text-foreground">בחרו את הכרטיסים שלכם</h2>
       </motion.div>
 
       <div className="space-y-5">
