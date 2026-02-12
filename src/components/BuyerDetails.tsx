@@ -374,21 +374,19 @@ const BuyerDetails = ({
                           {errors[`guest_${ticket.index}_lastName`] && <p className="text-sm text-destructive mt-1">{errors[`guest_${ticket.index}_lastName`]}</p>}
                         </div>
                       </div>
-                      {ticket.index === 0 && (
-                        <div>
-                          <Label className="text-[15px] font-medium">אימייל *</Label>
-                          <Input
-                            type="email"
-                            placeholder="your@email.com"
-                            value={guest?.email || ''}
-                            onChange={(e) => updateGuest(ticket.index, 'email', e.target.value)}
-                            className={`mt-1 text-right ${errors[`guest_${ticket.index}_email`] ? 'border-destructive' : ''}`}
-                            dir="ltr"
-                            style={{ textAlign: 'right' }}
-                          />
-                          {errors[`guest_${ticket.index}_email`] && <p className="text-sm text-destructive mt-1">{errors[`guest_${ticket.index}_email`]}</p>}
-                        </div>
-                      )}
+                      <div>
+                        <Label className="text-[15px] font-medium">אימייל *</Label>
+                        <Input
+                          type="email"
+                          placeholder="your@email.com"
+                          value={guest?.email || ''}
+                          onChange={(e) => updateGuest(ticket.index, 'email', e.target.value)}
+                          className={`mt-1 text-right ${errors[`guest_${ticket.index}_email`] ? 'border-destructive' : ''}`}
+                          dir="ltr"
+                          style={{ textAlign: 'right' }}
+                        />
+                        {errors[`guest_${ticket.index}_email`] && <p className="text-sm text-destructive mt-1">{errors[`guest_${ticket.index}_email`]}</p>}
+                      </div>
                       <div>
                         <Label className="text-[15px] font-medium">טלפון *</Label>
                         <Input

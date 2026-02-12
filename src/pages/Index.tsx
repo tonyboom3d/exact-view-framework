@@ -111,11 +111,9 @@ const Index = () => {
       const phErr = validatePhone(guest.phone);
       if (phErr) { newErrors[`guest_${idx}_phone`] = phErr; missingFields.push(`כרטיס ${idx + 1} - טלפון`); }
 
-      // Email required for first ticket
-      if (idx === 0) {
-        const emErr = validateEmail(guest.email || '');
-        if (emErr) { newErrors[`guest_${idx}_email`] = emErr; missingFields.push(`כרטיס ${idx + 1} - אימייל`); }
-      }
+      // Email required for all tickets
+      const emErr = validateEmail(guest.email || '');
+      if (emErr) { newErrors[`guest_${idx}_email`] = emErr; missingFields.push(`כרטיס ${idx + 1} - אימייל`); }
     });
 
     // Validate payer fields if showPayer
