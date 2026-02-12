@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Minus, Plus, User, Users, ShoppingCart, Ticket } from 'lucide-react';
+import { Minus, Plus, User, Users, Ticket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { TICKETS, type TicketSelection as TicketSelectionType, type TicketType } from '@/types/order';
@@ -146,8 +146,7 @@ const TicketSelection = ({ selections, onChange, onBuyTicket }: TicketSelectionP
                       disabled={isSoldOut}
                       className="h-10 px-3 sm:px-4 font-bold bg-cta hover:bg-cta/90 text-cta-foreground rounded-lg shadow text-[16px] sm:text-[17px] whitespace-nowrap"
                     >
-                      <ShoppingCart className="w-4 h-4 ml-1.5" />
-                      {`לרכישה - ₪${(ticket.price * qty).toLocaleString()}`}
+                      {qty > 1 ? `לרכישה - ₪${(ticket.price * qty).toLocaleString()}` : 'לרכישה'}
                     </Button>
                   </div>
 
@@ -162,7 +161,7 @@ const TicketSelection = ({ selections, onChange, onBuyTicket }: TicketSelectionP
                     <p className="text-[15px] text-muted-foreground mb-1 text-right font-medium">
                       {ticket.fomoPercent}% כרטיסים נרכשו
                     </p>
-                    <div className="bg-muted/80 rounded-full h-3 border border-border/50 overflow-hidden">
+                    <div className="bg-muted rounded-full h-3 border border-border overflow-hidden">
                       <div
                         className="h-3 rounded-full relative overflow-hidden"
                         style={{ width: `${ticket.fomoPercent}%`, background: ticket.progressColor }}
