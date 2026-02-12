@@ -2,17 +2,20 @@ import { useState } from 'react';
 import { Minus, Plus, User, Users, Ticket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { TICKETS, type TicketSelection as TicketSelectionType, type TicketType } from '@/types/order';
+import { type TicketSelection as TicketSelectionType, type TicketType, type TicketInfo } from '@/types/order';
 import { motion } from 'framer-motion';
+import { Skeleton } from '@/components/ui/skeleton';
 import SeatingMap from '@/components/SeatingMap';
 
 interface TicketSelectionProps {
   selections: TicketSelectionType[];
   onChange: (selections: TicketSelectionType[]) => void;
   onBuyTicket: (type: TicketType) => void;
+  tickets: TicketInfo[];
+  loading?: boolean;
 }
 
-const TicketSelection = ({ selections, onChange, onBuyTicket }: TicketSelectionProps) => {
+const TicketSelection = ({ selections, onChange, onBuyTicket, tickets, loading }: TicketSelectionProps) => {
   const [hoveredTicket, setHoveredTicket] = useState<TicketType | null>(null);
 
   const getQuantity = (type: TicketType) =>
@@ -48,8 +51,28 @@ const TicketSelection = ({ selections, onChange, onBuyTicket }: TicketSelectionP
         <h2 className="text-[31px] font-bold text-foreground">בחרו את הכרטיסים שלכם</h2>
       </motion.div>
 
-      <div className="space-y-5">
-        {TICKETS.map((ticket, index) => {
+      {loading && (
+        <div className="space-y-5">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="rounded-xl border border-border overflow-hidden">
+              <Skeleton className="h-14 w-full" />
+              <div className="p-4 space-y-3">
+                <Skeleton className="h-5 w-3/4" />
+                <div className="flex items-end gap-4">
+                  <Skeleton className="flex-1 h-6" />
+                  <div className="flex flex-col gap-2 items-center">
+                    <Skeleton className="h-8 w-24" />
+                    <Skeleton className="h-10 w-24" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {!loading && <div className="space-y-5">
+        {tickets.map((ticket, index) => {
           const qty = activeType === ticket.type ? getQuantity(ticket.type) : 1;
           const isActive = activeType === ticket.type;
           const isHoveredFromMap = hoveredTicket === ticket.type;
@@ -183,7 +206,7 @@ const TicketSelection = ({ selections, onChange, onBuyTicket }: TicketSelectionP
             </motion.div>
           );
         })}
-      </div>
+      </div>}
 
       {/* Interactive Seating Map */}
       <motion.div
@@ -195,6 +218,7 @@ const TicketSelection = ({ selections, onChange, onBuyTicket }: TicketSelectionP
           hoveredTicket={hoveredTicket}
           activeTicket={activeType}
           onHoverZone={handleMapHover}
+          tickets={tickets}
         />
       </motion.div>
     </div>

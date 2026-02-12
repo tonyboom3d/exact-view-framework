@@ -1,6 +1,7 @@
-export type TicketType = 'general' | 'premier' | 'vip';
+export type TicketType = string;
 
 export interface TicketInfo {
+  wixId: string;
   type: TicketType;
   name: string;
   price: number;
@@ -43,8 +44,10 @@ export interface OrderState {
   referralCode: string;
 }
 
-export const TICKETS: TicketInfo[] = [
+// Fallback tickets for development / preview outside Wix
+export const FALLBACK_TICKETS: TicketInfo[] = [
   {
+    wixId: 'dev-general',
     type: 'general',
     name: 'General Admission',
     price: 2900,
@@ -58,6 +61,7 @@ export const TICKETS: TicketInfo[] = [
     mapLabel: 'אזור כללי',
   },
   {
+    wixId: 'dev-vip',
     type: 'vip',
     name: 'VIP',
     price: 3450,
@@ -71,6 +75,7 @@ export const TICKETS: TicketInfo[] = [
     mapLabel: 'VIP',
   },
   {
+    wixId: 'dev-premier',
     type: 'premier',
     name: 'Premier',
     price: 4500,

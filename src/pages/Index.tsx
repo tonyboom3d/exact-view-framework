@@ -1,18 +1,20 @@
 import { useState, useMemo, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
-import PaymentDialog from '@/components/PaymentDialog';
 import StickyHeader from '@/components/StickyHeader';
 import StickyBottomBar from '@/components/StickyBottomBar';
 import TicketSelection from '@/components/TicketSelection';
 import BuyerDetails from '@/components/BuyerDetails';
 import OrderSummary from '@/components/OrderSummary';
 import ThankYou from '@/components/ThankYou';
-import { TICKETS, type TicketSelection as TicketSelectionType, type BuyerInfo, type GuestInfo, type TicketType } from '@/types/order';
+import LoadingOverlay from '@/components/LoadingOverlay';
+import { FALLBACK_TICKETS, type TicketSelection as TicketSelectionType, type BuyerInfo, type GuestInfo, type TicketType } from '@/types/order';
+import { useWixTickets } from '@/hooks/useWixTickets';
+import { useWixPayment } from '@/hooks/useWixPayment';
 import { toast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const generateId = () => Math.random().toString(36).substring(2, 10).toUpperCase();
+const isInsideWix = window.parent !== window;
 
 const Index = () => {
   const [step, setStep] = useState(1);
@@ -21,10 +23,17 @@ const Index = () => {
   const [guests, setGuests] = useState<GuestInfo[]>([]);
   const [useMyDetails, setUseMyDetails] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [orderNumber] = useState(() => generateId());
-  const [referralCode] = useState(() => generateId());
-  const [showPayment, setShowPayment] = useState(false);
+  const [orderNumber, setOrderNumber] = useState('');
+  const [referralCode, setReferralCode] = useState('');
   const [showPayer, setShowPayer] = useState(false);
+  const [companyName, setCompanyName] = useState('');
+
+  // Wix integration hooks
+  const { tickets: wixTickets, loading: ticketsLoading } = useWixTickets();
+  const { createOrderAndPay, loading: paymentLoading, loadingMessage } = useWixPayment();
+
+  // Use Wix tickets if available, otherwise fallback for dev
+  const tickets = isInsideWix && wixTickets.length > 0 ? wixTickets : FALLBACK_TICKETS;
 
   const totalTickets = useMemo(
     () => selections.reduce((sum, s) => sum + s.quantity, 0),
@@ -34,10 +43,10 @@ const Index = () => {
   const totalPrice = useMemo(
     () =>
       selections.reduce((sum, s) => {
-        const t = TICKETS.find((ticket) => ticket.type === s.type);
+        const t = tickets.find((ticket) => ticket.type === s.type);
         return sum + (t?.price || 0) * s.quantity;
       }, 0),
-    [selections]
+    [selections, tickets]
   );
 
   const syncGuests = useCallback(
@@ -58,7 +67,6 @@ const Index = () => {
   };
 
   const handleBuyTicket = (type: TicketType) => {
-    // If no ticket selected yet, default to 1 of this type
     if (selections.length === 0 || selections[0].type !== type) {
       handleSelectionsChange([{ type, quantity: 1 }]);
     }
@@ -83,18 +91,42 @@ const Index = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-   const handleNext = () => {
+  const handleNext = async () => {
     if (step === 2) {
       if (!validateStep2()) return;
-      setShowPayment(true);
+
+      if (isInsideWix) {
+        // Send to Wix: create order + open payment
+        try {
+          const result = await createOrderAndPay({
+            selections,
+            ticketsList: tickets,
+            guests,
+            buyer,
+            showPayer,
+            companyName: companyName || undefined,
+            totalPrice,
+          });
+          setOrderNumber(result.orderNumber);
+          setReferralCode(result.referralCode);
+          setStep(3);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } catch (err: any) {
+          toast({
+            title: 'שגיאה',
+            description: err.message || 'אירעה שגיאה בתהליך התשלום',
+            variant: 'destructive',
+          });
+        }
+      } else {
+        // Dev mode: skip payment, go to thank you
+        setOrderNumber(Math.random().toString(36).substring(2, 10).toUpperCase());
+        setReferralCode(Math.random().toString(36).substring(2, 10).toUpperCase());
+        setStep(3);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
       return;
     }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handlePaymentConfirm = () => {
-    setShowPayment(false);
-    setStep(3);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -108,6 +140,7 @@ const Index = () => {
   return (
     <div className="h-screen bg-background flex flex-col overflow-hidden">
       <StickyHeader />
+      <LoadingOverlay visible={paymentLoading} message={loadingMessage} />
 
       <div className="flex-1 overflow-y-auto flex flex-col">
 
@@ -143,7 +176,13 @@ const Index = () => {
         <AnimatePresence mode="wait">
           {step === 1 && (
             <motion.div key="step1" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <TicketSelection selections={selections} onChange={handleSelectionsChange} onBuyTicket={handleBuyTicket} />
+              <TicketSelection
+                selections={selections}
+                onChange={handleSelectionsChange}
+                onBuyTicket={handleBuyTicket}
+                tickets={tickets}
+                loading={isInsideWix && ticketsLoading}
+              />
             </motion.div>
           )}
           {step === 2 && (
@@ -160,6 +199,7 @@ const Index = () => {
                 selections={selections}
                 showPayer={showPayer}
                 onShowPayerChange={setShowPayer}
+                tickets={tickets}
               />
               <div className="flex gap-2 mt-6">
                 <Button
@@ -171,6 +211,7 @@ const Index = () => {
                 </Button>
                 <Button
                   onClick={handleNext}
+                  disabled={paymentLoading}
                   className="flex-1 h-12 text-base font-bold bg-cta hover:bg-cta/90 text-cta-foreground rounded-xl shadow-lg"
                 >
                   מעבר לתשלום
@@ -180,7 +221,15 @@ const Index = () => {
           )}
           {step === 3 && (
             <motion.div key="step3" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}>
-              <ThankYou orderNumber={orderNumber} referralCode={referralCode} selections={selections} guests={guests} buyer={buyer} showPayer={showPayer} />
+              <ThankYou
+                orderNumber={orderNumber}
+                referralCode={referralCode}
+                selections={selections}
+                guests={guests}
+                buyer={buyer}
+                showPayer={showPayer}
+                tickets={tickets}
+              />
             </motion.div>
           )}
         </AnimatePresence>
@@ -193,12 +242,6 @@ const Index = () => {
         onNext={handleNext}
         onBack={handleBack}
         disabled={false}
-      />
-      <PaymentDialog
-        open={showPayment}
-        onOpenChange={setShowPayment}
-        onConfirm={handlePaymentConfirm}
-        totalPrice={totalPrice}
       />
       </div>
     </div>
