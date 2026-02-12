@@ -102,7 +102,7 @@ const TicketSelection = ({ selections, onChange, onBuyTicket }: TicketSelectionP
                 <p className="text-[17px] sm:text-[18px] text-muted-foreground mb-3 sm:mb-4 line-clamp-2 min-h-[3em]">{ticket.description}</p>
 
                  {/* Mobile: stacked layout / Desktop: row layout */}
-                 <div className="flex flex-col gap-3">
+                 <div className="flex flex-col gap-3 items-center sm:items-start">
                    {/* Quantity selector */}
                    <div className="flex items-center gap-2 justify-center sm:justify-start">
                      <Button
