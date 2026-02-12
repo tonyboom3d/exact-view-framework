@@ -41,7 +41,7 @@ const TicketSelection = ({ selections, onChange, onBuyTicket, tickets, loading }
   };
 
   return (
-    <div className="space-y-5 md:max-w-[calc(100%-30px)]">
+    <div className="space-y-5">
       <motion.div
         className="text-center mb-6"
         initial={{ opacity: 0, y: 20 }}
