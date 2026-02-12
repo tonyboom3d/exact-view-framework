@@ -5,8 +5,12 @@ import type { TicketSelection } from '@/types/order';
 
 interface PaymentResult {
   orderNumber: string;
-  referralCode: string;
+  referralCode?: string;
   status?: 'Successful' | 'Pending';
+  totalAmount?: number;
+  currency?: string;
+  customerEmail?: string;
+  pdfLink?: string;
 }
 
 export function useWixPayment() {
@@ -64,7 +68,8 @@ export function useWixPayment() {
       };
 
       // Single START_CHECKOUT command – Velo side will handle reserve/checkout/payment.
-      const paymentResult = await sendMessage<PaymentResult>('START_CHECKOUT', payload);
+      // Use long timeout (10 minutes) since user might take time to complete payment.
+      const paymentResult = await sendMessage<PaymentResult>('START_CHECKOUT', payload, 10 * 60 * 1000);
 
       setLoading(false);
       setLoadingMessage('');
