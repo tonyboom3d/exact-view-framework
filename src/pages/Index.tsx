@@ -138,15 +138,6 @@ const Index = () => {
     }
 
     setErrors(newErrors);
-
-    if (missingFields.length > 0) {
-      toast({
-        title: 'יש שדות שלא מולאו כראוי',
-        description: missingFields.join(', '),
-        variant: 'destructive',
-      });
-    }
-
     return Object.keys(newErrors).length === 0;
   };
 
