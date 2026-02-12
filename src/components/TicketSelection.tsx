@@ -101,9 +101,38 @@ const TicketSelection = ({ selections, onChange, onBuyTicket }: TicketSelectionP
                 {/* Description */}
                 <p className="text-[17px] sm:text-[18px] text-muted-foreground mb-3 sm:mb-4 line-clamp-2 min-h-[3em]">{ticket.description}</p>
 
-                 {/* Row layout: buttons left, progress bar right */}
+                 {/* Row layout: progress bar right, buttons left (RTL) */}
                  <div className="flex items-end gap-4">
-                   {/* Left side: quantity + buy button */}
+                   {/* Progress bar (appears on right in RTL) */}
+                   <motion.div
+                     className="flex-1 min-w-0"
+                     initial={{ scaleX: 0 }}
+                     animate={{ scaleX: 1 }}
+                     transition={{ duration: 0.6, delay: 0.3 + index * 0.12 }}
+                     style={{ transformOrigin: 'right' }}
+                   >
+                     <p className="text-[15px] text-muted-foreground mb-1 text-right font-medium">
+                       {ticket.fomoPercent}% כרטיסים נרכשו
+                     </p>
+                     <div className="bg-muted rounded-full h-3 border border-border overflow-hidden">
+                       <div
+                         className="h-3 rounded-full relative overflow-hidden"
+                         style={{ width: `${ticket.fomoPercent}%`, background: ticket.progressColor }}
+                       >
+                         {!ticket.soldOut && (
+                           <div
+                             className="absolute inset-0 rounded-full"
+                             style={{
+                               background: `linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.35) 50%, transparent 100%)`,
+                               animation: 'progress-shimmer 3s ease-in-out infinite',
+                             }}
+                           />
+                         )}
+                       </div>
+                     </div>
+                   </motion.div>
+
+                   {/* Buttons (appears on left in RTL) */}
                    <div className="flex flex-col gap-2 items-center shrink-0">
                      {/* Quantity selector */}
                      <div className="flex items-center gap-2">
@@ -149,35 +178,6 @@ const TicketSelection = ({ selections, onChange, onBuyTicket }: TicketSelectionP
                        {qty > 1 ? `לרכישה - ₪${(ticket.price * qty).toLocaleString()}` : 'לרכישה'}
                      </Button>
                    </div>
-
-                   {/* Right side: Progress bar */}
-                   <motion.div
-                     className="flex-1 min-w-0"
-                     initial={{ scaleX: 0 }}
-                     animate={{ scaleX: 1 }}
-                     transition={{ duration: 0.6, delay: 0.3 + index * 0.12 }}
-                     style={{ transformOrigin: 'right' }}
-                   >
-                     <p className="text-[15px] text-muted-foreground mb-1 text-right font-medium">
-                       {ticket.fomoPercent}% כרטיסים נרכשו
-                     </p>
-                     <div className="bg-muted rounded-full h-3 border border-border overflow-hidden">
-                       <div
-                         className="h-3 rounded-full relative overflow-hidden"
-                         style={{ width: `${ticket.fomoPercent}%`, background: ticket.progressColor }}
-                       >
-                         {!ticket.soldOut && (
-                           <div
-                             className="absolute inset-0 rounded-full"
-                             style={{
-                               background: `linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.35) 50%, transparent 100%)`,
-                               animation: 'progress-shimmer 3s ease-in-out infinite',
-                             }}
-                           />
-                         )}
-                       </div>
-                     </div>
-                   </motion.div>
                  </div>
                </div>
             </motion.div>
