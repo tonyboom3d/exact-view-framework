@@ -173,7 +173,7 @@ const TicketSelection = ({ selections, onChange, onBuyTicket }: TicketSelectionP
                          onBuyTicket(ticket.type);
                        }}
                        disabled={isSoldOut}
-                       className="h-10 px-4 sm:px-10 font-bold bg-cta hover:bg-cta/90 text-cta-foreground rounded-lg shadow text-[14px] sm:text-[17px]"
+                       className="h-10 px-10 font-bold bg-cta hover:bg-cta/90 text-cta-foreground rounded-lg shadow text-[16px] sm:text-[17px]"
                      >
                        {qty > 1 ? `לרכישה - ₪${(ticket.price * qty).toLocaleString()}` : 'לרכישה'}
                      </Button>
