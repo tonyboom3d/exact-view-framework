@@ -57,11 +57,19 @@ export function useWixPayment() {
 
       // Flat array of all guest full names
       const allGuestNames = guests.map((g) => `${g.firstName} ${g.lastName}`.trim());
+      // Full guest details (one per ticket) for Wix Events checkout when multiple tickets
+      const guestsDetails = guests.map((g) => ({
+        firstName: g.firstName || '',
+        lastName: g.lastName || '',
+        email: g.email || '',
+        phone: g.phone || '',
+      }));
 
       const payload = {
         selectedTickets,
         mainBuyerDetails,
         allGuestNames,
+        guests: guestsDetails,
         payer: showPayer ? buyer : undefined,
         companyName: companyName || undefined,
         totalAmount: totalPrice,

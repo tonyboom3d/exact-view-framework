@@ -217,18 +217,18 @@ const Index = () => {
 
       <div className="flex-1 overflow-y-auto flex flex-col">
 
-      {/* Step Indicator */}
+      {/* Step Indicator - centered */}
       <motion.div
-        className="max-w-5xl mx-auto w-[95%] py-4"
+        className="max-w-5xl mx-auto w-[95%] py-4 flex justify-center"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.2 }}
       >
-        <div className="flex items-center justify-between max-w-5xl mx-auto">
+        <div className="flex items-center justify-center gap-0">
           {steps.map((s, i) => (
-            <div key={s} className="flex items-center flex-1">
+            <div key={s} className="flex items-center">
               <div
-                className={`w-10 h-10 rounded-full inline-flex items-center justify-center text-base font-bold leading-[0] pt-[1px] transition-all ${
+                className={`w-10 h-10 rounded-full flex items-center justify-center text-base font-bold leading-[0] pt-[1px] transition-all shrink-0 ${
                   s <= step
                     ? 'bg-cta text-cta-foreground'
                     : 'bg-muted text-muted-foreground'
@@ -237,7 +237,7 @@ const Index = () => {
                 {s}
               </div>
               {i < steps.length - 1 && (
-                <div className={`flex-1 h-0.5 mx-2 ${s < step ? 'bg-cta' : 'bg-muted'}`} />
+                <div className={`w-12 sm:w-16 h-0.5 mx-1 shrink-0 ${s < step ? 'bg-cta' : 'bg-muted'}`} />
               )}
             </div>
           ))}

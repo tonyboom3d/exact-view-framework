@@ -124,7 +124,7 @@ const TicketSelection = ({ selections, onChange, onBuyTicket, tickets, loading }
             >
               {/* Color band with ticket name + price + sold-out badge */}
               <div
-                className="px-5 py-3 flex items-center justify-between"
+                className="px-4 sm:px-5 py-2 flex items-center justify-between"
                 style={{ background: ticket.color }}
               >
                 <h3 className="font-bold text-[20px] text-white flex items-center gap-2">
@@ -145,12 +145,12 @@ const TicketSelection = ({ selections, onChange, onBuyTicket, tickets, loading }
                 </div>
               </div>
 
-              <div className="p-4 sm:p-5">
+              <div className="p-3 sm:p-4">
                 {/* Description */}
-                <p className="text-[17px] sm:text-[18px] text-muted-foreground mb-3 sm:mb-4 line-clamp-2 min-h-[3em]">{ticket.description}</p>
+                <p className="text-[16px] sm:text-[17px] text-muted-foreground mb-2 sm:mb-3 line-clamp-2 min-h-[2.75em]">{ticket.description}</p>
 
                  {/* Row layout: progress bar right, buttons left (RTL) */}
-                 <div className="flex items-end gap-4">
+                 <div className="flex items-end gap-3 sm:gap-4">
                    {/* Progress bar (appears on right in RTL) */}
                    <motion.div
                      className="flex-1 min-w-0"
@@ -159,7 +159,7 @@ const TicketSelection = ({ selections, onChange, onBuyTicket, tickets, loading }
                      transition={{ duration: 0.6, delay: 0.3 + index * 0.12 }}
                      style={{ transformOrigin: 'right' }}
                    >
-                     <p className="text-[15px] text-muted-foreground mb-1 text-right font-medium">
+                     <p className="text-[14px] text-muted-foreground mb-0.5 text-right font-medium">
                        {ticket.fomoPercent}% כרטיסים נרכשו
                      </p>
                      <div className="bg-muted rounded-full h-3 border border-border overflow-hidden">
@@ -181,7 +181,7 @@ const TicketSelection = ({ selections, onChange, onBuyTicket, tickets, loading }
                    </motion.div>
 
                    {/* Buttons (appears on left in RTL) */}
-                   <div className="flex flex-col gap-2 items-center shrink-0">
+                   <div className="flex flex-col gap-1.5 items-center shrink-0">
                      {/* Quantity selector */}
                      <div className="flex items-center gap-2">
                        <Button
