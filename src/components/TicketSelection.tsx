@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Minus, Plus, User, Users, Ticket } from 'lucide-react';
+import { Minus, Plus, User, Users, Ticket, Calendar, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { type TicketSelection as TicketSelectionType, type TicketType, type TicketInfo } from '@/types/order';
@@ -42,13 +42,38 @@ const TicketSelection = ({ selections, onChange, onBuyTicket, tickets, loading }
 
   return (
     <div className="space-y-5">
+      {/* Event Info Banner */}
       <motion.div
-        className="text-center mb-6"
+        className="text-center"
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
+        <h1 className="text-[24px] sm:text-[28px] font-bold text-foreground leading-tight">
+          Tony Robbins
+        </h1>
+        <p className="text-[16px] sm:text-[18px] text-foreground/80 font-semibold mb-2">
+          Unleash the Power Within REMOTE
+        </p>
+        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[14px] sm:text-[15px] text-muted-foreground">
+          <span className="flex items-center gap-1">
+            <Calendar className="w-3.5 h-3.5" />
+            4 ימים, 12-15 במרץ 2026
+          </span>
+          <span className="flex items-center gap-1">
+            <MapPin className="w-3.5 h-3.5" />
+            מלון פרימה מילניום, רעננה
+          </span>
+        </div>
+      </motion.div>
+
+      <motion.div
+        className="text-center"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
       >
-        <h2 className="text-[31px] font-bold text-foreground">בחרו את הכרטיסים שלכם</h2>
+        <h2 className="text-[26px] sm:text-[31px] font-bold text-foreground">בחרו את הכרטיסים שלכם</h2>
       </motion.div>
 
       {loading && (
