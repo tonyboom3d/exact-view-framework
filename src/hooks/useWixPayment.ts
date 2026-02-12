@@ -6,6 +6,7 @@ import type { TicketSelection } from '@/types/order';
 interface PaymentResult {
   orderNumber: string;
   referralCode: string;
+  status?: 'Successful' | 'Pending';
 }
 
 export function useWixPayment() {
@@ -76,7 +77,7 @@ export function useWixPayment() {
     }
   }
 
-  // Listen for payment cancellation
+  // Listen for payment cancellation (user closed modal without paying)
   useEffect(() => {
     const unsub = onMessage('PAYMENT_CANCELLED', () => {
       setLoading(false);
@@ -86,5 +87,16 @@ export function useWixPayment() {
     return unsub;
   }, []);
 
-  return { createOrderAndPay, loading, loadingMessage, error };
+  // Listen for payment error (failed payment)
+  useEffect(() => {
+    const unsub = onMessage('PAYMENT_ERROR', (msg: any) => {
+      setLoading(false);
+      setLoadingMessage('');
+      const message = msg?.payload?.message || 'שגיאה בתהליך התשלום';
+      setError(message);
+    });
+    return unsub;
+  }, []);
+
+  return { createOrderAndPay, loading, loadingMessage, error, setError };
 }

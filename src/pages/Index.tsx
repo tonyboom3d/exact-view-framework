@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import StickyHeader from '@/components/StickyHeader';
@@ -31,7 +31,8 @@ const Index = () => {
 
   // Wix integration hooks
   const { tickets } = useWixTickets();
-  const { createOrderAndPay, loading: paymentLoading, loadingMessage } = useWixPayment();
+  const { createOrderAndPay, loading: paymentLoading, loadingMessage, error: paymentError, setError: setPaymentError } = useWixPayment();
+  const [paymentStatus, setPaymentStatus] = useState<'Successful' | 'Pending' | null>(null);
 
   const totalTickets = useMemo(
     () => selections.reduce((sum, s) => sum + s.quantity, 0),
@@ -159,14 +160,12 @@ const Index = () => {
           });
           setOrderNumber(result.orderNumber);
           setReferralCode(result.referralCode);
+          setPaymentStatus(result.status || 'Successful');
           setStep(3);
           window.scrollTo({ top: 0, behavior: 'smooth' });
         } catch (err: any) {
-          toast({
-            title: 'שגיאה',
-            description: err.message || 'אירעה שגיאה בתהליך התשלום',
-            variant: 'destructive',
-          });
+          // Error is handled by useWixPayment - it sets paymentError state
+          // No need to show toast here, the error message is displayed in UI
         }
       } else {
         // Dev mode: skip payment, go to thank you
@@ -187,10 +186,34 @@ const Index = () => {
 
   const steps = [1, 2, 3];
 
+  // Auto-clear payment error after 3.7 seconds
+  useEffect(() => {
+    if (paymentError) {
+      const timer = setTimeout(() => {
+        setPaymentError(null);
+      }, 3700);
+      return () => clearTimeout(timer);
+    }
+  }, [paymentError, setPaymentError]);
+
   return (
     <div className="h-screen bg-background flex flex-col overflow-hidden">
       <StickyHeader />
       <LoadingOverlay visible={paymentLoading} message={loadingMessage} />
+
+      {/* Payment error message */}
+      <AnimatePresence>
+        {paymentError && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="fixed top-4 left-4 right-4 z-[100] bg-destructive text-destructive-foreground px-4 py-3 rounded-lg shadow-lg text-center text-sm font-medium"
+          >
+            {paymentError}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="flex-1 overflow-y-auto flex flex-col">
 
@@ -283,6 +306,7 @@ const Index = () => {
                 buyer={buyer}
                 showPayer={showPayer}
                 tickets={tickets}
+                paymentStatus={paymentStatus}
               />
             </motion.div>
           )}

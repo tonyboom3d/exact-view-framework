@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Check, Copy, Gift, Calendar, ChevronDown, Mail, Facebook } from 'lucide-react';
+import { Check, Copy, Gift, Calendar, ChevronDown, Mail, Facebook, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { TicketSelection, TicketInfo, GuestInfo, BuyerInfo } from '@/types/order';
 import { toast } from '@/hooks/use-toast';
@@ -14,13 +14,17 @@ interface ThankYouProps {
   buyer: BuyerInfo;
   showPayer: boolean;
   tickets: TicketInfo[];
+  paymentStatus?: 'Successful' | 'Pending' | null;
 }
 
-const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPayer, tickets }: ThankYouProps) => {
+const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPayer, tickets, paymentStatus }: ThankYouProps) => {
   const [copied, setCopied] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
 
+  // Only show confetti when payment is successful (not pending)
   useEffect(() => {
+    if (paymentStatus === 'Pending') return;
+    
     const duration = 600;
     const end = Date.now() + duration;
     const fire = (angle: number, origin: { x: number; y: number }) => {
@@ -32,7 +36,7 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
       fire(120, { x: 1, y: 0.5 });
     }, 150);
     return () => clearInterval(interval);
-  }, []);
+  }, [paymentStatus]);
 
   const referralLink = 'https://upw-tickets.com/ref/SIG1J2JY';
   const shareTextWithDiscount = `נרשמתי לסדנה של טוני רובינס 🔥\n\nיש לי קישור עם 200 ₪ הנחה למי שמצטרף:\n\n${referralLink}\n\nמי שבעניין – זה הזמן.`;
@@ -178,6 +182,28 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
       </Button>
     </div>
   );
+
+  // If payment is pending, show loading state
+  if (paymentStatus === 'Pending') {
+    return (
+      <div className="space-y-6 text-center py-12">
+        <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto">
+          <Loader2 className="w-8 h-8 text-amber-600 animate-spin" />
+        </div>
+        <div className="space-y-3">
+          <h2 className="text-[24px] font-bold text-foreground">התשלום בבדיקה</h2>
+          <p className="text-[16px] text-muted-foreground leading-relaxed max-w-md mx-auto">
+            התשלום עדיין בבדיקה מול חברת האשראי.
+            <br />
+            לאחר השלמת התשלום הכרטיסים ישלחו אליך למייל.
+          </p>
+          <p className="text-[14px] text-muted-foreground/70 mt-4">
+            מספר הזמנה: {orderNumber}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-5 text-center">
