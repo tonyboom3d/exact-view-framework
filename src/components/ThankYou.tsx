@@ -34,8 +34,8 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
     return () => clearInterval(interval);
   }, []);
 
-  const referralLink = `https://upw-tickets.com/ref/${referralCode}`;
-  const shareText = `הי! רכשתי כרטיסים ל-Tony Robbins UPW 🔥\nקנה דרך הקישור שלי וקבל 200 ₪ הנחה:\n${referralLink}`;
+  const referralLink = 'https://upw-tickets.com/ref/SIG1J2JY';
+  const shareText = `נרשמתי לסדנה של טוני רובינס 🔥\n\nיש לי קישור עם 200 ₪ הנחה למי שמצטרף:\n\n${referralLink}\n\nמי שבעניין – זה הזמן.`;
 
   const activeSelections = selections.filter(s => s.quantity > 0);
   const totalTickets = activeSelections.reduce((sum, s) => sum + s.quantity, 0);
@@ -55,13 +55,20 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
     }
   };
 
+  const eventTitle = 'Tony Robbins — Unleash the Power Within REMOTE';
+  const eventLocation = 'מלון פרימה מילניום התדהר 2 רעננה';
+  const eventDescription = 'Tony Robbins UPW Event';
+  // March 12, 2026 16:00 to March 16, 2026 02:00 (Israel local time, UTC+2)
+  const calendarStartUTC = '20260312T140000Z';
+  const calendarEndUTC = '20260316T000000Z';
+
   const addToGoogleCalendar = () => {
     const params = new URLSearchParams({
       action: 'TEMPLATE',
-      text: 'Tony Robbins — Unleash the Power Within',
-      dates: '20250315T090000Z/20250318T210000Z',
-      location: 'Florida, USA',
-      details: 'Tony Robbins UPW Event',
+      text: eventTitle,
+      dates: `${calendarStartUTC}/${calendarEndUTC}`,
+      location: eventLocation,
+      details: eventDescription,
     });
     window.open(`https://calendar.google.com/calendar/render?${params.toString()}`, '_blank');
   };
@@ -71,11 +78,11 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
       'BEGIN:VCALENDAR',
       'VERSION:2.0',
       'BEGIN:VEVENT',
-      'DTSTART:20250315T090000Z',
-      'DTEND:20250318T210000Z',
-      'SUMMARY:Tony Robbins — Unleash the Power Within',
-      'LOCATION:Florida, USA',
-      'DESCRIPTION:Tony Robbins UPW Event',
+      `DTSTART:${calendarStartUTC}`,
+      `DTEND:${calendarEndUTC}`,
+      `SUMMARY:${eventTitle}`,
+      `LOCATION:${eventLocation}`,
+      `DESCRIPTION:${eventDescription}`,
       'END:VEVENT',
       'END:VCALENDAR',
     ].join('\n');
@@ -86,6 +93,19 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
     a.download = 'upw-event.ics';
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const addToMicrosoftCalendar = () => {
+    const params = new URLSearchParams({
+      subject: eventTitle,
+      startdt: '2026-03-12T16:00:00',
+      enddt: '2026-03-16T02:00:00',
+      location: eventLocation,
+      body: eventDescription,
+      path: '/calendar/action/compose',
+      rru: 'addevent',
+    });
+    window.open(`https://outlook.live.com/calendar/0/deeplink/compose?${params.toString()}`, '_blank');
   };
 
   const shareWhatsApp = () => {
@@ -118,15 +138,15 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
       </div>
 
       {/* Calendar buttons */}
-      <div className="flex gap-2 justify-center">
+      <div className="flex gap-2 justify-center flex-wrap">
         <Button
           variant="outline"
           size="sm"
           onClick={addToGoogleCalendar}
-           className="gap-1.5 text-[14px]"
+          className="gap-1.5 text-[14px]"
         >
           <Calendar className="w-3.5 h-3.5" />
-          Google Calendar
+          Google
         </Button>
         <Button
           variant="outline"
@@ -135,7 +155,16 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
           className="gap-1.5 text-[14px]"
         >
           <Calendar className="w-3.5 h-3.5" />
-          Apple Calendar
+          Apple
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={addToMicrosoftCalendar}
+          className="gap-1.5 text-[14px]"
+        >
+          <Calendar className="w-3.5 h-3.5" />
+          Outlook
         </Button>
       </div>
 
@@ -219,8 +248,8 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
         </AnimatePresence>
       </div>
 
-      {/* Win-Win Ambassador Section */}
-      <div className="rounded-xl border-2 border-dashed border-[hsl(var(--cta))]/30 bg-[hsl(var(--cta))]/5 p-5 space-y-3">
+      {/* Win-Win Ambassador Section - only for single ticket purchases */}
+      {totalTickets <= 1 && <div className="rounded-xl border-2 border-dashed border-[hsl(var(--cta))]/30 bg-[hsl(var(--cta))]/5 p-5 space-y-3">
         <div className="flex items-center justify-center gap-2">
           <Gift className="w-5 h-5 text-[hsl(var(--cta))]" />
           <p className="text-[21px] font-extrabold text-foreground">Win - Win</p>
@@ -285,7 +314,7 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
             שלח במייל
           </Button>
         </div>
-      </div>
+      </div>}
     </div>
   );
 };
