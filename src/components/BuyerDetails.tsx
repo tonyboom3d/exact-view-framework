@@ -1,8 +1,9 @@
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ChevronDown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { ChevronDown, Clock, AlertTriangle } from 'lucide-react';
 import type { TicketSelection, TicketInfo, BuyerInfo, GuestInfo } from '@/types/order';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -70,6 +71,35 @@ const BuyerDetails = ({
   const [openTicketIndex, setOpenTicketIndex] = useState(0);
   const phoneRefs = useRef<(HTMLInputElement | null)[]>([]);
 
+  // ── Reservation countdown timer (15 minutes) ──
+  const TIMER_DURATION = 15 * 60; // 15 minutes in seconds
+  const [secondsLeft, setSecondsLeft] = useState(TIMER_DURATION);
+  const [timerExpired, setTimerExpired] = useState(false);
+
+  useEffect(() => {
+    // Reset timer on mount (entering step 2)
+    setSecondsLeft(TIMER_DURATION);
+    setTimerExpired(false);
+
+    const interval = setInterval(() => {
+      setSecondsLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          setTimerExpired(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const timerMinutes = Math.floor(secondsLeft / 60);
+  const timerSeconds = secondsLeft % 60;
+  const timerText = `${String(timerMinutes).padStart(2, '0')}:${String(timerSeconds).padStart(2, '0')}`;
+  const isTimerWarning = secondsLeft <= 120; // Last 2 minutes = warning color
+
   // Ensure guests array matches totalTickets
   useEffect(() => {
     if (guests.length < totalTickets) {
@@ -116,6 +146,49 @@ const BuyerDetails = ({
         <h2 className="text-[27px] font-bold text-foreground">פרטי המשתתפים</h2>
         <p className="text-[18px] text-muted-foreground mt-1">נא למלא את הפרטים לכל כרטיס</p>
       </div>
+
+      {/* Reservation countdown timer */}
+      <div className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-[14px] font-medium transition-colors ${
+        isTimerWarning
+          ? 'bg-destructive/10 text-destructive border border-destructive/30'
+          : 'bg-amber-50 text-amber-700 border border-amber-200'
+      }`}>
+        <Clock className="w-4 h-4 shrink-0" />
+        <span>הכרטיסים שמורים עבורך עוד</span>
+        <span className="font-bold tabular-nums text-[16px]" dir="ltr">{timerText}</span>
+      </div>
+
+      {/* Timer expired modal overlay */}
+      <AnimatePresence>
+        {timerExpired && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-card rounded-2xl shadow-2xl p-6 max-w-sm w-full text-center space-y-4 border border-border"
+            >
+              <div className="w-14 h-14 bg-destructive/10 rounded-full flex items-center justify-center mx-auto">
+                <AlertTriangle className="w-7 h-7 text-destructive" />
+              </div>
+              <h3 className="text-[22px] font-bold text-foreground">פג תוקף ההזמנה</h3>
+              <p className="text-[16px] text-muted-foreground leading-relaxed">
+                הזמן שהוקצה למילוי הפרטים הסתיים.<br />
+                יש לבחור מחדש את הכרטיסים.
+              </p>
+              <Button
+                onClick={() => window.location.reload()}
+                className="w-full h-12 text-[16px] font-bold bg-cta hover:bg-cta/90 text-cta-foreground rounded-xl"
+              >
+                חזרה לבחירת כרטיסים
+              </Button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Payer checkbox */}
       <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50 border border-border">
