@@ -3,13 +3,6 @@ import { sendMessage, onMessage } from '@/lib/wixBridge';
 import type { GuestInfo, BuyerInfo, TicketInfo } from '@/types/order';
 import type { TicketSelection } from '@/types/order';
 
-interface CreateOrderData {
-  tickets: { ticketId: string; quantity: number }[];
-  guests: GuestInfo[];
-  payer?: BuyerInfo;
-  companyName?: string;
-}
-
 interface PaymentResult {
   orderNumber: string;
   referralCode: string;
@@ -35,10 +28,10 @@ export function useWixPayment() {
     setError(null);
 
     try {
-      // Step 1: Create order
-      setLoadingMessage('יוצר הזמנה...');
+      setLoadingMessage('מתחיל תהליך תשלום...');
 
-      const orderTickets = selections
+      // Build selected tickets array for START_CHECKOUT
+      const selectedTickets = selections
         .filter((s) => s.quantity > 0)
         .map((s) => {
           const ticket = ticketsList.find((t) => t.type === s.type);
@@ -48,37 +41,29 @@ export function useWixPayment() {
           };
         });
 
-      const orderData: CreateOrderData = {
-        tickets: orderTickets,
-        guests,
-        ...(showPayer ? { payer: buyer } : {}),
-        ...(companyName ? { companyName } : {}),
+      // Main buyer details (first guest)
+      const firstGuest = guests[0];
+      const mainBuyerDetails = {
+        firstName: firstGuest?.firstName || buyer.firstName || '',
+        lastName: firstGuest?.lastName || buyer.lastName || '',
+        email: firstGuest?.email || buyer.email || '',
+        phone: firstGuest?.phone || buyer.phone || '',
       };
 
-      const orderResponse = await sendMessage<{ orderId: string; paymentToken: string }>(
-        'CREATE_ORDER',
-        orderData
-      );
+      // Flat array of all guest full names
+      const allGuestNames = guests.map((g) => `${g.firstName} ${g.lastName}`.trim());
 
-      // Step 2: Open payment
-      setLoadingMessage('פותח חלון תשלום...');
+      const payload = {
+        selectedTickets,
+        mainBuyerDetails,
+        allGuestNames,
+        payer: showPayer ? buyer : undefined,
+        companyName: companyName || undefined,
+        totalAmount: totalPrice,
+      };
 
-      // Determine buyer info for payment - use payer details if showPayer, otherwise first guest
-      const paymentBuyer = showPayer
-        ? buyer
-        : {
-            firstName: guests[0]?.firstName || '',
-            lastName: guests[0]?.lastName || '',
-            phone: guests[0]?.phone || '',
-            email: guests[0]?.email || buyer.email || '',
-          };
-
-      const paymentResult = await sendMessage<PaymentResult>('OPEN_PAYMENT', {
-        orderId: orderResponse.orderId,
-        paymentToken: orderResponse.paymentToken,
-        amount: totalPrice,
-        buyerInfo: paymentBuyer,
-      });
+      // Single START_CHECKOUT command – Velo side will handle reserve/checkout/payment.
+      const paymentResult = await sendMessage<PaymentResult>('START_CHECKOUT', payload);
 
       setLoading(false);
       setLoadingMessage('');

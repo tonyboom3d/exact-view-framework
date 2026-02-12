@@ -1,18 +1,26 @@
 import { useState, useEffect } from 'react';
-import { sendMessage } from '@/lib/wixBridge';
+import { onVeloInit } from '@/lib/wixBridge';
 import { FALLBACK_TICKETS, type TicketInfo } from '@/types/order';
 
-interface WixTicketRaw {
-  _id: string;
-  name: string;
-  price?: number;
-  description?: string;
-  soldOut?: boolean;
+interface WixTicketMeta {
+  /**
+   * Logical key that matches the ticket `type` on the React side (e.g. "general", "vip", "premier").
+   */
+  key: string;
+  /**
+   * Real Wix Events ticket GUID to be used in START_CHECKOUT.
+   */
+  id: string;
+  /**
+   * Optional metadata coming from CMS / Velo.
+   */
   soldPercent?: number;
-  color?: string;
-  progressColor?: string;
-  colorClass?: string;
-  mapLabel?: string;
+  isSoldOut?: boolean;
+  /**
+   * Optional price override coming from CMS.
+   * If provided, it will override the fallback price in the UI.
+   */
+  price?: number;
 }
 
 const isInsideWix = window.parent !== window;
@@ -23,54 +31,70 @@ export function useWixTickets() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!isInsideWix) return;
+    console.log('[useWixTickets] isInsideWix:', isInsideWix);
 
-    let cancelled = false;
-
-    async function fetchTickets() {
-      try {
-        setLoading(true);
-        const data = await sendMessage<{ tickets: WixTicketRaw[] }>('GET_TICKETS');
-        if (cancelled) return;
-
-        // Merge Wix data into fallback tickets — update _id and names if different
-        setTickets((prev) => {
-          return prev.map((fallback) => {
-            // Try to match by type/name similarity
-            const wixTicket = data.tickets.find(
-              (w) =>
-                w.name.toLowerCase().includes(fallback.type) ||
-                fallback.name.toLowerCase().includes(w.name.toLowerCase()) ||
-                fallback.type === w.name.toLowerCase().replace(/\s+/g, '-')
-            );
-
-            if (wixTicket) {
-              return {
-                ...fallback,
-                wixId: wixTicket._id,
-                name: wixTicket.name || fallback.name,
-                price: wixTicket.price ?? fallback.price,
-                description: wixTicket.description || fallback.description,
-                soldOut: wixTicket.soldOut ?? fallback.soldOut,
-                fomoPercent: wixTicket.soldPercent ?? fallback.fomoPercent,
-                fomoText: wixTicket.soldPercent != null
-                  ? `${wixTicket.soldPercent}% כרטיסים נרכשו`
-                  : fallback.fomoText,
-              };
-            }
-            return fallback;
-          });
-        });
-      } catch (err) {
-        // Silently fail — fallback tickets remain
-        console.warn('Failed to fetch Wix tickets, using defaults:', err);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
+    if (!isInsideWix) {
+      console.log('[useWixTickets] Not inside Wix iframe, using fallback tickets');
+      return;
     }
 
-    fetchTickets();
-    return () => { cancelled = true; };
+    setLoading(true);
+    console.log('[useWixTickets] Waiting for INIT_EVENT_DATA from Velo...');
+
+    // Listen for INIT_EVENT_DATA pushed from Velo with minimal ticket metadata.
+    const unsubscribe = onVeloInit((payload: { tickets?: WixTicketMeta[] }) => {
+      console.log('[useWixTickets] Received INIT_EVENT_DATA payload:', payload);
+
+      if (!payload?.tickets || !Array.isArray(payload.tickets)) {
+        console.warn('[useWixTickets] Invalid payload, no tickets array');
+        setLoading(false);
+        return;
+      }
+
+      console.log('[useWixTickets] Processing', payload.tickets.length, 'tickets from CMS');
+
+      setTickets((prev) =>
+        prev.map((fallback) => {
+          const meta = payload.tickets!.find(
+            (t) => t.key.toLowerCase() === fallback.type.toLowerCase()
+          );
+
+          if (!meta) {
+            console.log(`[useWixTickets] No CMS match for type: ${fallback.type}`);
+            return fallback;
+          }
+
+          console.log(`[useWixTickets] Merging CMS data for ${fallback.type}:`, {
+            wixId: meta.id,
+            soldPercent: meta.soldPercent,
+            isSoldOut: meta.isSoldOut,
+            price: meta.price,
+          });
+
+          const soldPercent = meta.soldPercent ?? fallback.fomoPercent;
+
+          return {
+            ...fallback,
+            // Update technical / dynamic fields + allow price override from CMS
+            wixId: meta.id || fallback.wixId,
+            soldOut: meta.isSoldOut ?? fallback.soldOut,
+            price: meta.price ?? fallback.price,
+            fomoPercent: soldPercent,
+            fomoText:
+              soldPercent != null
+                ? `${soldPercent}% כרטיסים נרכשו`
+                : fallback.fomoText,
+          };
+        })
+      );
+
+      setLoading(false);
+      console.log('[useWixTickets] Tickets updated from CMS');
+    });
+
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   return { tickets, loading };

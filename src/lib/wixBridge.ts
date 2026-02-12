@@ -16,9 +16,13 @@ function initBridge() {
   if (initialized) return;
   initialized = true;
 
+  console.log('[wixBridge] Bridge initialized, listening for postMessage events');
+
   window.addEventListener('message', (event) => {
     const msg = event.data;
     if (!msg || typeof msg.type !== 'string') return;
+
+    console.log('[wixBridge] Received message:', { type: msg.type, hasRequestId: !!msg.requestId });
 
     // Match pending request by requestId
     if (msg.requestId && pendingRequests.has(msg.requestId)) {
@@ -34,6 +38,7 @@ function initBridge() {
     // Notify registered listeners
     const handlers = listeners.get(msg.type);
     if (handlers) {
+      console.log(`[wixBridge] Notifying ${handlers.length} listener(s) for type: ${msg.type}`);
       handlers.forEach((handler) => handler(msg));
     }
   });
@@ -86,4 +91,15 @@ export function onMessage(type: string, handler: MessageHandler): () => void {
       if (idx !== -1) handlers.splice(idx, 1);
     }
   };
+}
+
+/**
+ * Convenience helper for Velo-initiated INIT_EVENT_DATA messages.
+ * The handler receives the inner payload object.
+ */
+export function onVeloInit(handler: (payload: any) => void): () => void {
+  return onMessage('INIT_EVENT_DATA', (msg) => {
+    const payload = (msg as any)?.payload ?? (msg as any)?.data ?? msg;
+    handler(payload);
+  });
 }
