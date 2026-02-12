@@ -1,10 +1,11 @@
-import { type TicketType, TICKETS } from '@/types/order';
+import { type TicketType, type TicketInfo } from '@/types/order';
 import { motion } from 'framer-motion';
 
 interface SeatingMapProps {
   hoveredTicket: TicketType | null;
   activeTicket: TicketType | null;
   onHoverZone: (type: TicketType | null) => void;
+  tickets?: TicketInfo[];
 }
 
 const ZONE_COLORS: Record<TicketType, string> = {
@@ -91,7 +92,7 @@ function generateSeats() {
 
 const SEATS = generateSeats();
 
-const SeatingMap = ({ hoveredTicket, activeTicket, onHoverZone }: SeatingMapProps) => {
+const SeatingMap = ({ hoveredTicket, activeTicket, onHoverZone, tickets = [] }: SeatingMapProps) => {
   const getOpacity = (type: TicketType) => {
     if (!hoveredTicket && !activeTicket) return 1;
     if (hoveredTicket === type || activeTicket === type) return 1;
@@ -130,7 +131,7 @@ const SeatingMap = ({ hoveredTicket, activeTicket, onHoverZone }: SeatingMapProp
 
         {/* Seats */}
         {SEATS.map((seat, i) => {
-          const ticket = TICKETS.find(t => t.type === seat.type);
+          const ticket = tickets.find(t => t.type === seat.type);
           return (
             <motion.rect
               key={i}

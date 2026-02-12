@@ -3,8 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ChevronDown } from 'lucide-react';
-import { TICKETS, type TicketSelection } from '@/types/order';
-import type { BuyerInfo, GuestInfo } from '@/types/order';
+import type { TicketSelection, TicketInfo, BuyerInfo, GuestInfo } from '@/types/order';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface BuyerDetailsProps {
@@ -19,6 +18,7 @@ interface BuyerDetailsProps {
   selections: TicketSelection[];
   showPayer: boolean;
   onShowPayerChange: (v: boolean) => void;
+  tickets: TicketInfo[];
 }
 
 interface FlatTicket {
@@ -39,13 +39,14 @@ const BuyerDetails = ({
   selections,
   showPayer,
   onShowPayerChange,
+  tickets,
 }: BuyerDetailsProps) => {
   // Flatten selections into individual tickets
   const flatTickets = useMemo<FlatTicket[]>(() => {
     const result: FlatTicket[] = [];
     let globalIndex = 0;
     for (const sel of selections) {
-      const ticketInfo = TICKETS.find((t) => t.type === sel.type);
+      const ticketInfo = tickets.find((t) => t.type === sel.type);
       for (let i = 0; i < sel.quantity; i++) {
         result.push({
           index: globalIndex,

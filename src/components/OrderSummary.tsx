@@ -1,14 +1,15 @@
 import { Lock, ShieldCheck } from 'lucide-react';
-import { TICKETS, type TicketSelection } from '@/types/order';
+import type { TicketSelection, TicketInfo } from '@/types/order';
 
 interface OrderSummaryProps {
   selections: TicketSelection[];
+  tickets: TicketInfo[];
 }
 
-const OrderSummary = ({ selections }: OrderSummaryProps) => {
+const OrderSummary = ({ selections, tickets }: OrderSummaryProps) => {
   const activeSelections = selections.filter((s) => s.quantity > 0);
   const total = activeSelections.reduce((sum, s) => {
-    const ticket = TICKETS.find((t) => t.type === s.type);
+    const ticket = tickets.find((t) => t.type === s.type);
     return sum + (ticket?.price || 0) * s.quantity;
   }, 0);
 
@@ -21,7 +22,7 @@ const OrderSummary = ({ selections }: OrderSummaryProps) => {
 
       <div className="rounded-xl border border-border bg-background p-4 space-y-4">
         {activeSelections.map((s) => {
-          const ticket = TICKETS.find((t) => t.type === s.type);
+          const ticket = tickets.find((t) => t.type === s.type);
           if (!ticket) return null;
           return (
             <div key={s.type} className="flex items-center justify-between">

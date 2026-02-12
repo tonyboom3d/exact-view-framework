@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Check, Copy, Gift, Calendar, ChevronDown, Mail, Facebook } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { TICKETS, type TicketSelection } from '@/types/order';
-import type { GuestInfo, BuyerInfo } from '@/types/order';
+import type { TicketSelection, TicketInfo, GuestInfo, BuyerInfo } from '@/types/order';
 import { toast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
@@ -14,9 +13,10 @@ interface ThankYouProps {
   guests: GuestInfo[];
   buyer: BuyerInfo;
   showPayer: boolean;
+  tickets: TicketInfo[];
 }
 
-const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPayer }: ThankYouProps) => {
+const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPayer, tickets }: ThankYouProps) => {
   const [copied, setCopied] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
 
@@ -41,7 +41,7 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
   const activeSelections = selections.filter(s => s.quantity > 0);
   const totalTickets = activeSelections.reduce((sum, s) => sum + s.quantity, 0);
   const totalPrice = activeSelections.reduce((sum, s) => {
-    const ticket = TICKETS.find(t => t.type === s.type);
+    const ticket = tickets.find(t => t.type === s.type);
     return sum + (ticket?.price || 0) * s.quantity;
   }, 0);
 
@@ -227,7 +227,7 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
         
         <div className="space-y-1.5">
           {activeSelections.map((s) => {
-            const ticket = TICKETS.find((t) => t.type === s.type);
+            const ticket = tickets.find((t) => t.type === s.type);
             if (!ticket) return null;
             return (
                <div key={s.type} className="flex items-center justify-between text-[16px]">
@@ -268,7 +268,7 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
                   let ticketLabel = '';
                   let counter = 0;
                   for (const sel of activeSelections) {
-                    const ticket = TICKETS.find(t => t.type === sel.type);
+                    const ticket = tickets.find(t => t.type === sel.type);
                     for (let i = 0; i < sel.quantity; i++) {
                       if (counter === flatIndex) {
                         ticketLabel = `${ticket?.name} #${i + 1}`;
