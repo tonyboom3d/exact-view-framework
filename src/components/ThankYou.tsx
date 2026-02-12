@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Check, Copy, Gift, Calendar, ChevronDown, Mail, Facebook, Twitter } from 'lucide-react';
+import { Check, Copy, Gift, Calendar, ChevronDown, Mail, Facebook } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TICKETS, type TicketSelection } from '@/types/order';
 import type { GuestInfo, BuyerInfo } from '@/types/order';
@@ -35,7 +35,8 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
   }, []);
 
   const referralLink = 'https://upw-tickets.com/ref/SIG1J2JY';
-  const shareText = `נרשמתי לסדנה של טוני רובינס 🔥\n\nיש לי קישור עם 200 ₪ הנחה למי שמצטרף:\n\n${referralLink}\n\nמי שבעניין – זה הזמן.`;
+  const shareTextWithDiscount = `נרשמתי לסדנה של טוני רובינס 🔥\n\nיש לי קישור עם 200 ₪ הנחה למי שמצטרף:\n\n${referralLink}\n\nמי שבעניין – זה הזמן.`;
+  const shareTextGeneral = `נרשמתי לסדנה של טוני רובינס 🔥\n\nמי שרוצה להצטרף:\n\n${referralLink}\n\nמי שבעניין – זה הזמן.`;
 
   const activeSelections = selections.filter(s => s.quantity > 0);
   const totalTickets = activeSelections.reduce((sum, s) => sum + s.quantity, 0);
@@ -108,23 +109,75 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
     window.open(`https://outlook.live.com/calendar/0/deeplink/compose?${params.toString()}`, '_blank');
   };
 
+  const currentShareText = totalTickets <= 1 ? shareTextWithDiscount : shareTextGeneral;
+
   const shareWhatsApp = () => {
-    window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
+    window.open(`https://wa.me/?text=${encodeURIComponent(currentShareText)}`, '_blank');
   };
 
   const shareFacebook = () => {
     window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(referralLink)}`, '_blank');
   };
 
-  const shareTwitter = () => {
-    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`, '_blank');
+  const shareX = () => {
+    window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(currentShareText)}`, '_blank');
+  };
+
+  const shareInstagram = () => {
+    // Instagram doesn't have a direct share URL, copy text and notify user
+    navigator.clipboard.writeText(currentShareText).then(() => {
+      toast({ title: 'הטקסט הועתק! הדביקו אותו בסטורי או בהודעה באינסטגרם' });
+    }).catch(() => {
+      toast({ title: 'לא ניתן להעתיק', variant: 'destructive' });
+    });
   };
 
   const shareEmail = () => {
     const subject = encodeURIComponent('הזמנה ל-Tony Robbins UPW');
-    const body = encodeURIComponent(shareText);
+    const body = encodeURIComponent(currentShareText);
     window.open(`mailto:?subject=${subject}&body=${body}`);
   };
+
+  const ShareButtons = () => (
+    <div className="grid grid-cols-2 gap-2">
+      <Button
+        onClick={shareWhatsApp}
+        className="gap-1.5 text-[14px] h-10 font-medium bg-[#25D366] hover:bg-[#1da851] text-white border-0"
+      >
+        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492l4.613-1.46A11.93 11.93 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75c-2.17 0-4.207-.69-5.87-1.882l-.42-.312-2.735.866.725-2.652-.283-.45A9.72 9.72 0 012.25 12 9.75 9.75 0 0112 2.25 9.75 9.75 0 0121.75 12 9.75 9.75 0 0112 21.75z"/></svg>
+        WhatsApp
+      </Button>
+      <Button
+        onClick={shareFacebook}
+        className="gap-1.5 text-[14px] h-10 font-medium bg-[#1877F2] hover:bg-[#1565c0] text-white border-0"
+      >
+        <Facebook className="w-4 h-4" />
+        Facebook
+      </Button>
+      <Button
+        onClick={shareX}
+        className="gap-1.5 text-[14px] h-10 font-medium bg-[#000000] hover:bg-[#333333] text-white border-0"
+      >
+        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        X
+      </Button>
+      <Button
+        onClick={shareInstagram}
+        className="gap-1.5 text-[14px] h-10 font-medium text-white border-0"
+        style={{ background: 'linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)' }}
+      >
+        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+        Instagram
+      </Button>
+      <Button
+        onClick={shareEmail}
+        className="gap-1.5 text-[14px] h-10 font-medium bg-[#6B7280] hover:bg-[#4B5563] text-white border-0 col-span-2"
+      >
+        <Mail className="w-4 h-4" />
+        שלח במייל
+      </Button>
+    </div>
+  );
 
   return (
     <div className="space-y-5 text-center">
@@ -249,72 +302,41 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
       </div>
 
       {/* Win-Win Ambassador Section - only for single ticket purchases */}
-      {totalTickets <= 1 && <div className="rounded-xl border-2 border-dashed border-[hsl(var(--cta))]/30 bg-[hsl(var(--cta))]/5 p-5 space-y-3">
-        <div className="flex items-center justify-center gap-2">
-          <Gift className="w-5 h-5 text-[hsl(var(--cta))]" />
-          <p className="text-[21px] font-extrabold text-foreground">Win - Win</p>
-        </div>
-        <p className="text-[17px] text-muted-foreground leading-relaxed">
-          שתפו את הקישור לחברים שלכם ותרוויחו <span className="font-bold text-foreground">₪200</span> על כל הרשמה
-          <br />
-          ובנוסף <span className="font-bold text-foreground">₪200 הנחה</span> לחבר שלכם.
-        </p>
+      {totalTickets <= 1 && (
+        <div className="rounded-xl border-2 border-dashed border-[hsl(var(--cta))]/30 bg-[hsl(var(--cta))]/5 p-5 space-y-3">
+          <div className="flex items-center justify-center gap-2">
+            <Gift className="w-5 h-5 text-[hsl(var(--cta))]" />
+            <p className="text-[21px] font-extrabold text-foreground">Win - Win</p>
+          </div>
+          <p className="text-[17px] text-muted-foreground leading-relaxed">
+            שתפו את הקישור לחברים שלכם ותרוויחו <span className="font-bold text-foreground">₪200</span> על כל הרשמה
+            <br />
+            ובנוסף <span className="font-bold text-foreground">₪200 הנחה</span> לחבר שלכם.
+          </p>
 
-        {/* Referral link */}
-        <div className="bg-background rounded-lg p-3 flex items-center gap-2" dir="ltr">
-          <input
-            readOnly
-            value={referralLink}
-            className="flex-1 text-[14px] bg-transparent outline-none text-muted-foreground"
-          />
-          <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={copyLink}>
-            {copied ? <Check className="w-4 h-4 text-[hsl(var(--success))]" /> : <Copy className="w-4 h-4" />}
-          </Button>
-        </div>
+          {/* Referral link */}
+          <div className="bg-background rounded-lg p-3 flex items-center gap-2" dir="ltr">
+            <input
+              readOnly
+              value={referralLink}
+              className="flex-1 text-[14px] bg-transparent outline-none text-muted-foreground"
+            />
+            <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={copyLink}>
+              {copied ? <Check className="w-4 h-4 text-[hsl(var(--success))]" /> : <Copy className="w-4 h-4" />}
+            </Button>
+          </div>
 
-        {/* Share buttons */}
-        <div className="grid grid-cols-2 gap-2">
-          <Button
-            onClick={copyLink}
-            variant="outline"
-              className="gap-1.5 text-[14px] h-10 font-medium"
-          >
-            <Copy className="w-3.5 h-3.5" />
-            העתק קישור
-          </Button>
-          <Button
-            onClick={shareWhatsApp}
-            className="gap-1.5 text-[14px] h-10 font-medium bg-[hsl(142,70%,45%)] hover:bg-[hsl(142,70%,40%)] text-white"
-          >
-            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492l4.613-1.46A11.93 11.93 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75c-2.17 0-4.207-.69-5.87-1.882l-.42-.312-2.735.866.725-2.652-.283-.45A9.72 9.72 0 012.25 12 9.75 9.75 0 0112 2.25 9.75 9.75 0 0121.75 12 9.75 9.75 0 0112 21.75z"/></svg>
-            WhatsApp
-          </Button>
-          <Button
-            onClick={shareFacebook}
-            variant="outline"
-              className="gap-1.5 text-[14px] h-10 font-medium"
-          >
-            <Facebook className="w-3.5 h-3.5" />
-            Facebook
-          </Button>
-          <Button
-            onClick={shareTwitter}
-            variant="outline"
-            className="gap-1.5 text-[14px] h-10 font-medium"
-          >
-            <Twitter className="w-3.5 h-3.5" />
-            Twitter
-          </Button>
-          <Button
-            onClick={shareEmail}
-            variant="outline"
-            className="gap-1.5 text-[14px] h-10 font-medium col-span-2"
-          >
-            <Mail className="w-3.5 h-3.5" />
-            שלח במייל
-          </Button>
+          <ShareButtons />
         </div>
-      </div>}
+      )}
+
+      {/* Share buttons for multi-ticket purchases (no Win-Win) */}
+      {totalTickets > 1 && (
+        <div className="rounded-xl border border-border bg-background p-5 space-y-3">
+          <p className="text-[17px] font-bold text-foreground">שתפו חברים שגם ירצו להצטרף</p>
+          <ShareButtons />
+        </div>
+      )}
     </div>
   );
 };
