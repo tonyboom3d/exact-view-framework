@@ -65,7 +65,7 @@ const StickyHeader = () => {
             className="absolute right-[-20px] sm:right-2 bottom-0 h-[140px] sm:h-[170px] w-auto object-contain pointer-events-none"
             style={{ transform: 'scaleX(-1)' }} />
 
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex flex-col items-end gap-1">
             <span className="text-[17px] sm:text-[19px] font-bold text-foreground whitespace-nowrap">
               מתחילים בעוד
             </span>
