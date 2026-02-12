@@ -19,6 +19,10 @@ interface BuyerDetailsProps {
   showPayer: boolean;
   onShowPayerChange: (v: boolean) => void;
   tickets: TicketInfo[];
+  showCompany: boolean;
+  onShowCompanyChange: (v: boolean) => void;
+  companyName: string;
+  onCompanyNameChange: (v: string) => void;
 }
 
 interface FlatTicket {
@@ -40,6 +44,10 @@ const BuyerDetails = ({
   showPayer,
   onShowPayerChange,
   tickets,
+  showCompany,
+  onShowCompanyChange,
+  companyName,
+  onCompanyNameChange,
 }: BuyerDetailsProps) => {
   // Flatten selections into individual tickets
   const flatTickets = useMemo<FlatTicket[]>(() => {
@@ -60,8 +68,6 @@ const BuyerDetails = ({
   }, [selections]);
 
   const [openTicketIndex, setOpenTicketIndex] = useState(0);
-  const [showCompany, setShowCompany] = useState(false);
-  const [companyName, setCompanyName] = useState('');
   const phoneRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   // Ensure guests array matches totalTickets
@@ -142,11 +148,11 @@ const BuyerDetails = ({
                   placeholder="your@email.com"
                   value={buyer.email}
                   onChange={(e) => onBuyerChange({ ...buyer, email: e.target.value })}
-                  className={`mt-1 text-right ${errors.email ? 'border-destructive' : ''}`}
+                  className={`mt-1 text-right ${errors.payer_email ? 'border-destructive' : ''}`}
                   dir="ltr"
                   style={{ textAlign: 'right' }}
                 />
-                {errors.email && <p className="text-sm text-destructive mt-1">{errors.email}</p>}
+                {errors.payer_email && <p className="text-sm text-destructive mt-1">{errors.payer_email}</p>}
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -155,9 +161,9 @@ const BuyerDetails = ({
                     placeholder="ישראל"
                     value={buyer.firstName}
                     onChange={(e) => onBuyerChange({ ...buyer, firstName: e.target.value })}
-                    className={`mt-1 text-right placeholder:text-right ${errors.firstName ? 'border-destructive' : ''}`}
+                    className={`mt-1 text-right placeholder:text-right ${errors.payer_firstName ? 'border-destructive' : ''}`}
                   />
-                  {errors.firstName && <p className="text-sm text-destructive mt-1">{errors.firstName}</p>}
+                  {errors.payer_firstName && <p className="text-sm text-destructive mt-1">{errors.payer_firstName}</p>}
                 </div>
                 <div>
                   <Label className="text-[17px] font-medium">שם משפחה *</Label>
@@ -165,9 +171,9 @@ const BuyerDetails = ({
                     placeholder="ישראלי"
                     value={buyer.lastName}
                     onChange={(e) => onBuyerChange({ ...buyer, lastName: e.target.value })}
-                    className={`mt-1 text-right placeholder:text-right ${errors.lastName ? 'border-destructive' : ''}`}
+                    className={`mt-1 text-right placeholder:text-right ${errors.payer_lastName ? 'border-destructive' : ''}`}
                   />
-                  {errors.lastName && <p className="text-sm text-destructive mt-1">{errors.lastName}</p>}
+                  {errors.payer_lastName && <p className="text-sm text-destructive mt-1">{errors.payer_lastName}</p>}
                 </div>
               </div>
               <div>
@@ -177,11 +183,11 @@ const BuyerDetails = ({
                   placeholder="050-1234567"
                   value={buyer.phone}
                   onChange={(e) => onBuyerChange({ ...buyer, phone: e.target.value })}
-                  className={`mt-1 text-right ${errors.phone ? 'border-destructive' : ''}`}
+                  className={`mt-1 text-right ${errors.payer_phone ? 'border-destructive' : ''}`}
                   dir="ltr"
                   style={{ textAlign: 'right' }}
                 />
-                {errors.phone && <p className="text-sm text-destructive mt-1">{errors.phone}</p>}
+                {errors.payer_phone && <p className="text-sm text-destructive mt-1">{errors.payer_phone}</p>}
               </div>
 
               {/* Company name checkbox */}
@@ -189,7 +195,7 @@ const BuyerDetails = ({
                 <Checkbox
                   id="showCompany"
                   checked={showCompany}
-                  onCheckedChange={(v) => setShowCompany(v as boolean)}
+                  onCheckedChange={(v) => onShowCompanyChange(v as boolean)}
                 />
                 <Label htmlFor="showCompany" className="text-[17px] cursor-pointer">
                   הוספת שם חברה לחשבונית
@@ -210,9 +216,10 @@ const BuyerDetails = ({
                       <Input
                         placeholder="שם החברה"
                         value={companyName}
-                        onChange={(e) => setCompanyName(e.target.value)}
-                        className="mt-1 text-right placeholder:text-right"
+                        onChange={(e) => onCompanyNameChange(e.target.value)}
+                        className={`mt-1 text-right placeholder:text-right ${errors.payer_companyName ? 'border-destructive' : ''}`}
                       />
+                      {errors.payer_companyName && <p className="text-sm text-destructive mt-1">{errors.payer_companyName}</p>}
                     </div>
                   </motion.div>
                 )}
@@ -279,8 +286,9 @@ const BuyerDetails = ({
                             placeholder="שם פרטי"
                             value={guest?.firstName || ''}
                             onChange={(e) => updateGuest(ticket.index, 'firstName', e.target.value)}
-                            className="mt-1 text-right placeholder:text-right"
+                            className={`mt-1 text-right placeholder:text-right ${errors[`guest_${ticket.index}_firstName`] ? 'border-destructive' : ''}`}
                           />
+                          {errors[`guest_${ticket.index}_firstName`] && <p className="text-sm text-destructive mt-1">{errors[`guest_${ticket.index}_firstName`]}</p>}
                         </div>
                         <div>
                           <Label className="text-[15px] font-medium">שם משפחה *</Label>
@@ -288,8 +296,9 @@ const BuyerDetails = ({
                             placeholder="שם משפחה"
                             value={guest?.lastName || ''}
                             onChange={(e) => updateGuest(ticket.index, 'lastName', e.target.value)}
-                            className="mt-1 text-right placeholder:text-right"
+                            className={`mt-1 text-right placeholder:text-right ${errors[`guest_${ticket.index}_lastName`] ? 'border-destructive' : ''}`}
                           />
+                          {errors[`guest_${ticket.index}_lastName`] && <p className="text-sm text-destructive mt-1">{errors[`guest_${ticket.index}_lastName`]}</p>}
                         </div>
                       </div>
                       {ticket.index === 0 && (
@@ -300,10 +309,11 @@ const BuyerDetails = ({
                             placeholder="your@email.com"
                             value={guest?.email || ''}
                             onChange={(e) => updateGuest(ticket.index, 'email', e.target.value)}
-                            className="mt-1 text-right"
+                            className={`mt-1 text-right ${errors[`guest_${ticket.index}_email`] ? 'border-destructive' : ''}`}
                             dir="ltr"
                             style={{ textAlign: 'right' }}
                           />
+                          {errors[`guest_${ticket.index}_email`] && <p className="text-sm text-destructive mt-1">{errors[`guest_${ticket.index}_email`]}</p>}
                         </div>
                       )}
                       <div>
@@ -313,11 +323,12 @@ const BuyerDetails = ({
                           placeholder="050-1234567"
                           value={guest?.phone || ''}
                           onChange={(e) => updateGuest(ticket.index, 'phone', e.target.value)}
-                          className="mt-1 text-right"
+                          className={`mt-1 text-right ${errors[`guest_${ticket.index}_phone`] ? 'border-destructive' : ''}`}
                           dir="ltr"
                           style={{ textAlign: 'right' }}
                           ref={(el) => { phoneRefs.current[ticket.index] = el; }}
                         />
+                        {errors[`guest_${ticket.index}_phone`] && <p className="text-sm text-destructive mt-1">{errors[`guest_${ticket.index}_phone`]}</p>}
                         <div className="flex items-center gap-2 mt-1.5">
                           <Checkbox id={`whatsapp-${ticket.index}`} defaultChecked />
                           <Label htmlFor={`whatsapp-${ticket.index}`} className="text-[15px] text-muted-foreground cursor-pointer">
