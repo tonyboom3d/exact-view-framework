@@ -22,19 +22,19 @@ const PaymentDialog = ({ open, onOpenChange, onConfirm, totalPrice }: PaymentDia
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md" dir="rtl">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-lg">
+          <DialogTitle className="flex items-center gap-2 text-[19px]">
             <CreditCard className="w-5 h-5" />
             פרטי תשלום
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 mt-2">
-          <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-xs text-center font-medium">
+          <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-[12px] text-center font-medium">
             🔒 זהו דמו בלבד — לא מתבצע חיוב אמיתי
           </div>
 
           <div>
-            <Label className="text-sm font-medium">מספר כרטיס</Label>
+            <Label className="text-[15px] font-medium">מספר כרטיס</Label>
             <Input
               value={cardNumber}
               onChange={(e) => setCardNumber(e.target.value)}
@@ -45,7 +45,7 @@ const PaymentDialog = ({ open, onOpenChange, onConfirm, totalPrice }: PaymentDia
           </div>
 
           <div>
-            <Label className="text-sm font-medium">שם בעל הכרטיס</Label>
+            <Label className="text-[15px] font-medium">שם בעל הכרטיס</Label>
             <Input
               value={cardName}
               onChange={(e) => setCardName(e.target.value)}
@@ -55,7 +55,7 @@ const PaymentDialog = ({ open, onOpenChange, onConfirm, totalPrice }: PaymentDia
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label className="text-sm font-medium">תוקף</Label>
+              <Label className="text-[15px] font-medium">תוקף</Label>
               <Input
                 value={expiry}
                 onChange={(e) => setExpiry(e.target.value)}
@@ -65,7 +65,7 @@ const PaymentDialog = ({ open, onOpenChange, onConfirm, totalPrice }: PaymentDia
               />
             </div>
             <div>
-              <Label className="text-sm font-medium">CVV</Label>
+              <Label className="text-[15px] font-medium">CVV</Label>
               <Input
                 value={cvv}
                 onChange={(e) => setCvv(e.target.value)}
@@ -78,13 +78,13 @@ const PaymentDialog = ({ open, onOpenChange, onConfirm, totalPrice }: PaymentDia
           </div>
 
           <div className="border-t border-border pt-3 flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">סה״כ לתשלום</span>
-            <span className="text-lg font-extrabold text-foreground">₪{totalPrice.toLocaleString()}</span>
+             <span className="text-[15px] text-muted-foreground">סה״כ לתשלום</span>
+             <span className="text-[19px] font-extrabold text-foreground">₪{totalPrice.toLocaleString()}</span>
           </div>
 
           <Button
             onClick={onConfirm}
-            className="w-full h-12 text-base font-bold bg-cta hover:bg-cta/90 text-cta-foreground rounded-xl shadow-lg"
+            className="w-full h-12 text-[17px] font-bold bg-cta hover:bg-cta/90 text-cta-foreground rounded-xl shadow-lg"
           >
             <Lock className="w-4 h-4 ml-2" />
             אישור תשלום ₪{totalPrice.toLocaleString()}

@@ -100,7 +100,7 @@ const SeatingMap = ({ hoveredTicket, activeTicket, onHoverZone }: SeatingMapProp
 
   return (
     <div className="rounded-xl border border-border bg-muted/30 p-4">
-      <h3 className="text-base font-bold text-foreground text-center mb-3">מפת הושבה</h3>
+      <h3 className="text-[19px] font-bold text-foreground text-center mb-3">מפת הושבה</h3>
       <svg viewBox="50 20 370 280" className="w-full h-auto" style={{ direction: 'ltr' }}>
         {/* Venue outline */}
         <polygon
@@ -121,7 +121,7 @@ const SeatingMap = ({ hoveredTicket, activeTicket, onHoverZone }: SeatingMapProp
         <text
           x="77" y="165"
           textAnchor="middle"
-          fontSize="11"
+          fontSize="14"
           fontWeight="600"
           fill="hsl(var(--muted-foreground))"
         >
@@ -174,7 +174,7 @@ const SeatingMap = ({ hoveredTicket, activeTicket, onHoverZone }: SeatingMapProp
               )}
               <text
                 x="18" y="10"
-                fontSize="10"
+                fontSize="13"
                 fontWeight="500"
                 fill="hsl(var(--foreground))"
               >
@@ -184,7 +184,7 @@ const SeatingMap = ({ hoveredTicket, activeTicket, onHoverZone }: SeatingMapProp
           ))}
         </g>
       </svg>
-      <p className="text-xs text-muted-foreground text-center mt-2">
+      <p className="text-[12px] text-muted-foreground text-center mt-2">
         העבר את העכבר מעל הכרטיסים או המפה כדי לראות את אזור ההושבה
       </p>
     </div>
