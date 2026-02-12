@@ -13,6 +13,7 @@ import { useWixTickets } from '@/hooks/useWixTickets';
 import { useWixPayment } from '@/hooks/useWixPayment';
 import { toast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
+import { TEST_PREFILL_ENABLED, getTestGuest, getTestPayer } from '@/config/testPrefill';
 
 const isInsideWix = window.parent !== window;
 
@@ -58,6 +59,24 @@ const Index = () => {
     },
     []
   );
+
+  // מילוי אוטומטי לבדיקות בלבד – כשנכנסים לשלב 2
+  useEffect(() => {
+    if (!TEST_PREFILL_ENABLED || step !== 2 || totalTickets <= 0) return;
+    setGuests(
+      Array.from({ length: totalTickets }, (_, i) => {
+        const g = getTestGuest(i);
+        return { firstName: g.firstName, lastName: g.lastName, email: g.email, phone: g.phone };
+      })
+    );
+  }, [step, totalTickets]);
+
+  // מילוי פרטי משלם לבדיקות כשמסמנים "פרטי המשלם שונים"
+  useEffect(() => {
+    if (!TEST_PREFILL_ENABLED || !showPayer) return;
+    const payer = getTestPayer();
+    setBuyer({ firstName: payer.firstName, lastName: payer.lastName, email: payer.email, phone: payer.phone });
+  }, [showPayer]);
 
   const handleSelectionsChange = (newSelections: TicketSelectionType[]) => {
     setSelections(newSelections);
