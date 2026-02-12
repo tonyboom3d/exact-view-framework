@@ -8,9 +8,9 @@ interface SeatingMapProps {
 }
 
 const ZONE_COLORS: Record<TicketType, string> = {
-  general: '#4A90D9',
-  premier: '#C8A951',
-  vip: '#8E44AD',
+  general: '#2980b9',
+  premier: '#c8a951',
+  vip: '#7b1fa2',
 };
 
 const ZONE_LABELS: Record<TicketType, string> = {
