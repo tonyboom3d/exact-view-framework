@@ -35,20 +35,20 @@ const StickyHeader = () => {
       <div className="max-w-5xl mx-auto w-[95%] py-3">
         <div className="flex items-center justify-between gap-2">
           <div className="flex flex-col items-start gap-0.5 min-w-0">
-            <div className="flex items-center gap-1 text-[13px] sm:text-[15px] text-muted-foreground font-medium">
+            <div className="flex items-center gap-1 text-[16px] sm:text-[18px] text-muted-foreground font-medium">
               <Calendar className="w-4 h-4 shrink-0" />
               <span className="truncate">4 ימים, 12-15 במרץ 2026</span>
             </div>
-            <div className="flex items-center gap-1 text-[13px] sm:text-[15px] text-muted-foreground font-medium">
+            <div className="flex items-center gap-1 text-[16px] sm:text-[18px] text-muted-foreground font-medium">
               <MapPin className="w-4 h-4 shrink-0" />
               <span className="truncate">מלון פרימה מילניום, רעננה</span>
             </div>
           </div>
           <div className="text-left shrink-0">
-            <h1 className="text-[19px] sm:text-[22px] font-bold text-foreground leading-tight">
+            <h1 className="text-[22px] sm:text-[25px] font-bold text-foreground leading-tight">
               Tony Robbins
             </h1>
-            <p className="text-[13px] sm:text-[16px] text-foreground font-semibold">
+            <p className="text-[16px] sm:text-[19px] text-foreground font-semibold">
               Unleash the Power Within REMOTE
             </p>
           </div>
@@ -65,7 +65,7 @@ const StickyHeader = () => {
             className="absolute right-[-20px] sm:right-2 bottom-0 h-[140px] sm:h-[170px] w-auto object-contain pointer-events-none"
             style={{ transform: 'scaleX(-1)' }} />
 
-          <span className="text-[14px] sm:text-[16px] font-bold text-foreground mb-1">
+          <span className="text-[17px] sm:text-[19px] font-bold text-foreground mb-1">
             מתחילים בעוד
           </span>
           <div className="gap-1 sm:gap-1.5 flex items-center justify-start" dir="ltr">
@@ -91,7 +91,7 @@ const FlipUnit = ({ value, label }: {value: string;label: string;}) => {
         <FlipDigit key={`${i}-${digit}`} value={digit} />
         )}
       </div>
-      <span className="text-[10px] text-muted-foreground font-medium">{label}</span>
+      <span className="text-[13px] text-muted-foreground font-medium">{label}</span>
     </div>);
 
 };
@@ -106,7 +106,7 @@ const FlipDigit = ({ value }: {value: string;}) => {
           animate={{ rotateX: 0, opacity: 1 }}
           exit={{ rotateX: 90, opacity: 0 }}
           transition={{ duration: 0.3, ease: 'easeOut' }}
-          className="bg-destructive text-white font-mono text-[16px] sm:text-[20px] font-extrabold rounded-md w-[22px] sm:w-[28px] h-[30px] sm:h-[36px] flex items-center justify-center shadow-md"
+          className="bg-destructive text-white font-mono text-[19px] sm:text-[23px] font-extrabold rounded-md w-[22px] sm:w-[28px] h-[30px] sm:h-[36px] flex items-center justify-center shadow-md"
           style={{ perspective: '200px', backfaceVisibility: 'hidden' }}>
 
           {value}

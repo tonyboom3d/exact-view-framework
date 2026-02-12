@@ -106,8 +106,8 @@ const BuyerDetails = ({
   return (
     <div className="space-y-4">
       <div className="text-center mb-4">
-        <h2 className="text-xl font-bold text-foreground">פרטי המשתתפים</h2>
-        <p className="text-sm text-muted-foreground mt-1">נא למלא את הפרטים לכל כרטיס</p>
+        <h2 className="text-[24px] font-bold text-foreground">פרטי המשתתפים</h2>
+        <p className="text-[15px] text-muted-foreground mt-1">נא למלא את הפרטים לכל כרטיס</p>
       </div>
 
       {/* Payer checkbox */}
@@ -117,7 +117,7 @@ const BuyerDetails = ({
           checked={showPayer}
           onCheckedChange={(v) => onShowPayerChange(v as boolean)}
         />
-        <Label htmlFor="showPayer" className="text-sm cursor-pointer font-medium">
+        <Label htmlFor="showPayer" className="text-[15px] cursor-pointer font-medium">
           פרטי המשלם שונים מפרטי המשתתף
         </Label>
       </div>
@@ -133,9 +133,9 @@ const BuyerDetails = ({
             className="overflow-hidden"
           >
             <div className="p-4 rounded-xl border border-primary/30 bg-primary/5 space-y-3">
-              <h3 className="text-base font-bold text-foreground">פרטי המשלם</h3>
+              <h3 className="text-[19px] font-bold text-foreground">פרטי המשלם</h3>
               <div>
-                <Label className="text-sm font-medium">אימייל *</Label>
+                <Label className="text-[15px] font-medium">אימייל *</Label>
                 <Input
                   type="email"
                   placeholder="your@email.com"
@@ -149,7 +149,7 @@ const BuyerDetails = ({
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label className="text-sm font-medium">שם פרטי *</Label>
+                  <Label className="text-[15px] font-medium">שם פרטי *</Label>
                   <Input
                     placeholder="ישראל"
                     value={buyer.firstName}
@@ -159,7 +159,7 @@ const BuyerDetails = ({
                   {errors.firstName && <p className="text-xs text-destructive mt-1">{errors.firstName}</p>}
                 </div>
                 <div>
-                  <Label className="text-sm font-medium">שם משפחה *</Label>
+                  <Label className="text-[15px] font-medium">שם משפחה *</Label>
                   <Input
                     placeholder="ישראלי"
                     value={buyer.lastName}
@@ -170,7 +170,7 @@ const BuyerDetails = ({
                 </div>
               </div>
               <div>
-                <Label className="text-sm font-medium">טלפון *</Label>
+                <Label className="text-[15px] font-medium">טלפון *</Label>
                 <Input
                   type="tel"
                   placeholder="050-1234567"
@@ -190,7 +190,7 @@ const BuyerDetails = ({
                   checked={showCompany}
                   onCheckedChange={(v) => setShowCompany(v as boolean)}
                 />
-                <Label htmlFor="showCompany" className="text-sm cursor-pointer">
+                <Label htmlFor="showCompany" className="text-[15px] cursor-pointer">
                   הוספת שם חברה לחשבונית
                 </Label>
               </div>
@@ -205,7 +205,7 @@ const BuyerDetails = ({
                     className="overflow-hidden"
                   >
                     <div>
-                      <Label className="text-sm font-medium">שם חברה *</Label>
+                      <Label className="text-[15px] font-medium">שם חברה *</Label>
                       <Input
                         placeholder="שם החברה"
                         value={companyName}
@@ -250,7 +250,7 @@ const BuyerDetails = ({
                 }`}
                 disabled={!allPreviousComplete}
               >
-                <span className="text-sm font-bold text-foreground">
+                <span className="text-[15px] font-bold text-foreground">
                   כרטיס {ticket.ticketName} #{ticket.ticketNumber}
                 </span>
                 <ChevronDown
@@ -273,7 +273,7 @@ const BuyerDetails = ({
                     <div className="px-4 pb-4 space-y-3">
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <Label className="text-xs font-medium">שם פרטי *</Label>
+                          <Label className="text-[12px] font-medium">שם פרטי *</Label>
                           <Input
                             placeholder="שם פרטי"
                             value={guest?.firstName || ''}
@@ -282,7 +282,7 @@ const BuyerDetails = ({
                           />
                         </div>
                         <div>
-                          <Label className="text-xs font-medium">שם משפחה *</Label>
+                          <Label className="text-[12px] font-medium">שם משפחה *</Label>
                           <Input
                             placeholder="שם משפחה"
                             value={guest?.lastName || ''}
@@ -293,7 +293,7 @@ const BuyerDetails = ({
                       </div>
                       {ticket.index === 0 && (
                         <div>
-                          <Label className="text-xs font-medium">אימייל *</Label>
+                          <Label className="text-[12px] font-medium">אימייל *</Label>
                           <Input
                             type="email"
                             placeholder="your@email.com"
@@ -306,7 +306,7 @@ const BuyerDetails = ({
                         </div>
                       )}
                       <div>
-                        <Label className="text-xs font-medium">טלפון *</Label>
+                        <Label className="text-[12px] font-medium">טלפון *</Label>
                         <Input
                           type="tel"
                           placeholder="050-1234567"
@@ -319,7 +319,7 @@ const BuyerDetails = ({
                         />
                         <div className="flex items-center gap-2 mt-1.5">
                           <Checkbox id={`whatsapp-${ticket.index}`} defaultChecked />
-                          <Label htmlFor={`whatsapp-${ticket.index}`} className="text-xs text-muted-foreground cursor-pointer">
+                          <Label htmlFor={`whatsapp-${ticket.index}`} className="text-[12px] text-muted-foreground cursor-pointer">
                             שילחו לוואטסאפ את הכרטיס
                           </Label>
                         </div>
@@ -331,7 +331,7 @@ const BuyerDetails = ({
                             type="button"
                             disabled={!isTicketComplete(ticket.index)}
                             onClick={() => goToNextTicket(ticket.index)}
-                            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                            className={`px-4 py-1.5 rounded-lg text-[15px] font-medium transition-all ${
                               isTicketComplete(ticket.index)
                                 ? 'bg-blue-500 text-white hover:bg-blue-600'
                                 : 'bg-muted text-muted-foreground cursor-not-allowed'

@@ -45,7 +45,7 @@ const TicketSelection = ({ selections, onChange, onBuyTicket }: TicketSelectionP
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h2 className="text-[28px] font-bold text-foreground">בחרו את הכרטיסים שלכם</h2>
+        <h2 className="text-[31px] font-bold text-foreground">בחרו את הכרטיסים שלכם</h2>
       </motion.div>
 
       <div className="space-y-5">
@@ -79,17 +79,17 @@ const TicketSelection = ({ selections, onChange, onBuyTicket }: TicketSelectionP
                 className="px-5 py-3 flex items-center justify-between"
                 style={{ background: ticket.color }}
               >
-                <h3 className="font-bold text-[17px] text-white flex items-center gap-2">
+                <h3 className="font-bold text-[20px] text-white flex items-center gap-2">
                   <Ticket className="w-5 h-5" />
                   {ticket.name}
                 </h3>
                 <div className="flex items-center gap-2">
-                  <span className="text-[14px] font-bold text-white/90">
+                  <span className="text-[17px] font-bold text-white/90">
                     ₪{ticket.price.toLocaleString()}
                   </span>
                   {isSoldOut && (
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-                      <div className="bg-destructive text-white text-[14px] font-bold px-6 py-1.5 rounded -rotate-12 shadow-lg">
+                      <div className="bg-destructive text-white text-[17px] font-bold px-6 py-1.5 rounded -rotate-12 shadow-lg">
                         אזלו הכרטיסים
                       </div>
                     </div>
@@ -99,7 +99,7 @@ const TicketSelection = ({ selections, onChange, onBuyTicket }: TicketSelectionP
 
               <div className="p-4 sm:p-5">
                 {/* Description */}
-                <p className="text-[14px] sm:text-[15px] text-muted-foreground mb-3 sm:mb-4 line-clamp-2 min-h-[3em]">{ticket.description}</p>
+                <p className="text-[17px] sm:text-[18px] text-muted-foreground mb-3 sm:mb-4 line-clamp-2 min-h-[3em]">{ticket.description}</p>
 
                 {/* Mobile: stacked layout / Desktop: row layout */}
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-3">
@@ -122,7 +122,7 @@ const TicketSelection = ({ selections, onChange, onBuyTicket }: TicketSelectionP
                         ) : (
                           <User className="w-4 h-4 text-cta" />
                         )}
-                        <span className="w-6 text-center font-bold text-foreground text-[15px]">{isActive ? qty : 1}</span>
+                        <span className="w-6 text-center font-bold text-foreground text-[18px]">{isActive ? qty : 1}</span>
                       </div>
                       <Button
                         variant="outline"
@@ -144,7 +144,7 @@ const TicketSelection = ({ selections, onChange, onBuyTicket }: TicketSelectionP
                         onBuyTicket(ticket.type);
                       }}
                       disabled={isSoldOut}
-                      className="h-10 px-3 sm:px-4 font-bold bg-cta hover:bg-cta/90 text-cta-foreground rounded-lg shadow text-[13px] sm:text-[14px] whitespace-nowrap"
+                      className="h-10 px-3 sm:px-4 font-bold bg-cta hover:bg-cta/90 text-cta-foreground rounded-lg shadow text-[16px] sm:text-[17px] whitespace-nowrap"
                     >
                       <ShoppingCart className="w-4 h-4 ml-1.5" />
                       {`לרכישה - ₪${(ticket.price * qty).toLocaleString()}`}
@@ -159,7 +159,7 @@ const TicketSelection = ({ selections, onChange, onBuyTicket }: TicketSelectionP
                     transition={{ duration: 0.6, delay: 0.3 + index * 0.12 }}
                     style={{ transformOrigin: 'right' }}
                   >
-                    <p className="text-[12px] text-muted-foreground mb-1 text-right font-medium">
+                    <p className="text-[15px] text-muted-foreground mb-1 text-right font-medium">
                       {ticket.fomoPercent}% כרטיסים נרכשו
                     </p>
                     <div className="bg-muted/80 rounded-full h-3 border border-border/50 overflow-hidden">
