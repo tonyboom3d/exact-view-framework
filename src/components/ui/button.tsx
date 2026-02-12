@@ -21,6 +21,10 @@ const buttonVariants = cva(
         sm: "h-9 rounded-md px-3",
         lg: "h-11 rounded-md px-8",
         icon: "h-10 w-10",
+        // --- התוספת החדשה ---
+        // במובייל: רוחב מלא (w-full)
+        // בדסקטופ (md ומעלה): רוחב לפי התוכן (w-auto)
+        responsive: "h-10 w-full md:w-auto px-4",
       },
     },
     defaultVariants: {
@@ -31,8 +35,7 @@ const buttonVariants = cva(
 );
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
   asChild?: boolean;
 }
 
