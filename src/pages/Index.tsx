@@ -32,7 +32,7 @@ const Index = () => {
   const [showCompany, setShowCompany] = useState(false);
 
   // Wix integration hooks
-  const { tickets } = useWixTickets();
+  const { tickets, ensureWixData } = useWixTickets();
   const { createOrderAndPay, loading: paymentLoading, loadingMessage, error: paymentError, setError: setPaymentError } = useWixPayment();
   const [paymentStatus, setPaymentStatus] = useState<'Successful' | 'Pending' | null>(null);
 
@@ -175,6 +175,7 @@ const Index = () => {
             showPayer,
             companyName: companyName || undefined,
             totalPrice,
+            ensureWixData,
           });
           setOrderNumber(result.orderNumber);
           setReferralCode(result.referralCode);

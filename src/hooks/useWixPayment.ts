@@ -26,13 +26,28 @@ export function useWixPayment() {
     showPayer: boolean;
     companyName?: string;
     totalPrice: number;
+    ensureWixData?: () => Promise<TicketInfo[]>;
   }): Promise<PaymentResult> {
-    const { selections, ticketsList, guests, buyer, showPayer, companyName, totalPrice } = params;
+    const { selections, guests, buyer, showPayer, companyName, totalPrice, ensureWixData } = params;
 
     setLoading(true);
     setError(null);
 
     try {
+      setLoadingMessage('טוען נתוני כרטיסים...');
+
+      // Ensure we have real Wix ticket GUIDs before proceeding
+      let ticketsList = params.ticketsList;
+      if (ensureWixData) {
+        try {
+          ticketsList = await ensureWixData();
+          console.log('[useWixPayment] ensureWixData resolved, tickets ready');
+        } catch (err: any) {
+          console.warn('[useWixPayment] ensureWixData failed:', err.message);
+          throw err;
+        }
+      }
+
       setLoadingMessage('מתחיל תהליך תשלום...');
 
       // Build selected tickets array for START_CHECKOUT
@@ -46,11 +61,11 @@ export function useWixPayment() {
           };
         });
 
-      // Validate that all ticketIds are real Wix GUIDs (not fallback dev- IDs)
+      // Final safety check: validate that all ticketIds are real Wix GUIDs
       const guidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
       const invalidTicket = selectedTickets.find((t) => !guidRegex.test(t.ticketId));
       if (invalidTicket) {
-        console.warn('[useWixPayment] Invalid ticketId detected:', invalidTicket.ticketId, '– ticket data may not have loaded from Wix yet');
+        console.warn('[useWixPayment] Invalid ticketId after ensureWixData:', invalidTicket.ticketId);
         throw new Error('נתוני הכרטיסים עדיין לא נטענו. אנא רעננו את הדף ונסו שוב.');
       }
 
