@@ -66,7 +66,7 @@ const StickyHeader = () => {
             style={{ transform: 'scaleX(-1)' }} />
 
           {/* Countdown timer - left side */}
-          <div className="flex flex-col md:flex-row md:items-center items-end gap-0.5 md:gap-2">
+          <div className="flex flex-col md:flex-row-reverse md:items-center items-end gap-0.5 md:gap-2">
             {/* Mobile: "מתחילים בעוד" above timer */}
             <span className={`md:hidden font-bold text-foreground whitespace-nowrap transition-all duration-300 ${
               isScrolled 
