@@ -46,6 +46,14 @@ export function useWixPayment() {
           };
         });
 
+      // Validate that all ticketIds are real Wix GUIDs (not fallback dev- IDs)
+      const guidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      const invalidTicket = selectedTickets.find((t) => !guidRegex.test(t.ticketId));
+      if (invalidTicket) {
+        console.warn('[useWixPayment] Invalid ticketId detected:', invalidTicket.ticketId, '– ticket data may not have loaded from Wix yet');
+        throw new Error('נתוני הכרטיסים עדיין לא נטענו. אנא רעננו את הדף ונסו שוב.');
+      }
+
       // Main buyer details (first guest)
       const firstGuest = guests[0];
       const mainBuyerDetails = {
