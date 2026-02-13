@@ -142,20 +142,23 @@ const BuyerDetails = ({
 
   return (
     <div className="space-y-4">
-      <div className="text-center mb-4">
-        <h2 className="text-[27px] font-bold text-foreground">פרטי המשתתפים</h2>
-        <p className="text-[18px] text-muted-foreground mt-1">נא למלא את הפרטים לכל כרטיס</p>
-      </div>
+      <div className="flex items-start justify-between gap-3 mb-2">
+        {/* Title - right side (RTL) */}
+        <div>
+          <h2 className="text-[27px] font-bold text-foreground">פרטי המשתתפים</h2>
+          <p className="text-[16px] text-muted-foreground">נא למלא את הפרטים לכל כרטיס</p>
+        </div>
 
-      {/* Reservation countdown timer */}
-      <div className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-[14px] font-medium transition-colors ${
-        isTimerWarning
-          ? 'bg-destructive/10 text-destructive border border-destructive/30'
-          : 'bg-amber-50 text-amber-700 border border-amber-200'
-      }`}>
-        <Clock className="w-4 h-4 shrink-0" />
-        <span>הכרטיסים שמורים עבורך עוד</span>
-        <span className="font-bold tabular-nums text-[16px]" dir="ltr">{timerText}</span>
+        {/* Reservation countdown timer - left side (RTL) */}
+        <div className={`flex items-center gap-1.5 py-1.5 px-2.5 rounded-lg text-[13px] font-medium transition-colors shrink-0 ${
+          isTimerWarning
+            ? 'bg-destructive/10 text-destructive border border-destructive/30'
+            : 'bg-amber-50 text-amber-700 border border-amber-200'
+        }`}>
+          <Clock className="w-3.5 h-3.5 shrink-0" />
+          <span className="hidden sm:inline">שמורים עוד</span>
+          <span className="font-bold tabular-nums text-[15px]" dir="ltr">{timerText}</span>
+        </div>
       </div>
 
       {/* Timer expired modal overlay */}
