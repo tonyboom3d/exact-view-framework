@@ -66,8 +66,9 @@ const StickyHeader = () => {
             style={{ transform: 'scaleX(-1)' }} />
 
           {/* Countdown timer - left side */}
-          <div className="flex flex-col items-end gap-0.5">
-            <span className={`font-bold text-foreground whitespace-nowrap transition-all duration-300 ${
+          <div className="flex flex-col md:flex-row md:items-center items-end gap-0.5 md:gap-2">
+            {/* Mobile: "מתחילים בעוד" above timer */}
+            <span className={`md:hidden font-bold text-foreground whitespace-nowrap transition-all duration-300 ${
               isScrolled 
                 ? 'text-[12px] sm:text-[14px]' 
                 : 'text-[15px] sm:text-[17px]'
@@ -91,6 +92,14 @@ const StickyHeader = () => {
               }`}>:</span>
               <FlipUnit value={pad(timeLeft.seconds)} label="שניות" isScrolled={isScrolled} />
             </div>
+            {/* Desktop: "מתחילים בעוד" on same row, right of timer */}
+            <span className={`hidden md:block font-bold text-foreground whitespace-nowrap transition-all duration-300 ${
+              isScrolled 
+                ? 'text-[12px] md:text-[14px]' 
+                : 'text-[15px] md:text-[17px]'
+            }`}>
+              מתחילים בעוד
+            </span>
           </div>
 
           {/* Desktop (md+): event details - between timer and image, same row */}
