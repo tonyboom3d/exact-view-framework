@@ -65,6 +65,7 @@ const StickyHeader = () => {
             }`}
             style={{ transform: 'scaleX(-1)' }} />
 
+          {/* Countdown timer - left side */}
           <div className="flex flex-col items-end gap-0.5">
             <span className={`font-bold text-foreground whitespace-nowrap transition-all duration-300 ${
               isScrolled 
@@ -92,28 +93,28 @@ const StickyHeader = () => {
             </div>
           </div>
 
-          {/* Desktop (md+): event details below and to the right of image */}
+          {/* Desktop (md+): event details - between timer and image, same row */}
           <AnimatePresence>
             {!isScrolled && (
               <motion.div 
-                className="hidden md:flex md:flex-col md:items-end md:gap-1 md:mt-2 md:pr-[140px]"
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
+                className="hidden md:flex md:flex-col md:items-start md:justify-center absolute left-[320px] top-1/2 -translate-y-1/2 right-[140px]"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}>
-                <h1 className="text-[22px] font-bold text-foreground leading-tight text-right">
+                <h1 className="text-[20px] font-bold text-foreground leading-tight text-right">
                   Tony Robbins
                 </h1>
-                <p className="text-[15px] text-foreground/80 font-semibold text-right">
+                <p className="text-[14px] text-foreground/80 font-semibold text-right">
                   Unleash the Power Within REMOTE
                 </p>
-                <div className="flex flex-wrap items-center justify-end gap-x-4 gap-y-0.5 text-[13px] text-muted-foreground mt-0.5">
+                <div className="flex flex-wrap items-center justify-start gap-x-3 text-[12px] text-muted-foreground mt-0.5">
                   <span className="flex items-center gap-1">
-                    <Calendar className="w-3.5 h-3.5 shrink-0" />
+                    <Calendar className="w-3 h-3 shrink-0" />
                     4 ימים, 12-15 במרץ 2026
                   </span>
                   <span className="flex items-center gap-1">
-                    <MapPin className="w-3.5 h-3.5 shrink-0" />
+                    <MapPin className="w-3 h-3 shrink-0" />
                     מלון פרימה מילניום, רעננה
                   </span>
                 </div>
