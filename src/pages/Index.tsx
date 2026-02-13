@@ -16,6 +16,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { TEST_PREFILL_ENABLED, getTestGuest, getTestPayer } from '@/config/testPrefill';
 
 const isInsideWix = window.parent !== window;
+const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
 const Index = () => {
   const [step, setStep] = useState(1);
@@ -265,7 +266,7 @@ const Index = () => {
       <main className="flex-1 max-w-5xl mx-auto w-[95%] pb-28">
         <AnimatePresence mode="wait">
           {step === 1 && (
-            <motion.div key="step1" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <motion.div key="step1" initial={isMobile ? false : { opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
               <TicketSelection
                 selections={selections}
                 onChange={handleSelectionsChange}

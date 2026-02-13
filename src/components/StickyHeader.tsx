@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, MapPin } from 'lucide-react';
 import tonyImg from '@/assets/tony-robbins.png';
 
+const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
 const StickyHeader = () => {
   const getTimeLeft = () => {
     const target = new Date('2026-03-12T16:00:00+02:00').getTime();
@@ -41,7 +43,7 @@ const StickyHeader = () => {
         isScrolled ? 'py-1' : 'py-2'
       }`}
       style={{ transform: 'translateZ(0)' }}
-      initial={{ y: -60, opacity: 0 }}
+      initial={isMobile ? false : { y: -60, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}>
 
@@ -52,7 +54,7 @@ const StickyHeader = () => {
               ? 'px-2 sm:px-3 py-1 sm:py-1.5' 
               : 'px-3 sm:px-4 py-2 sm:py-2.5'
           }`}
-          initial={{ opacity: 0, y: 10 }}
+          initial={isMobile ? false : { opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.15 }}>
 

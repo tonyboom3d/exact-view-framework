@@ -7,6 +7,8 @@ import { motion } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
 import SeatingMap from '@/components/SeatingMap';
 
+const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
 interface TicketSelectionProps {
   selections: TicketSelectionType[];
   onChange: (selections: TicketSelectionType[]) => void;
@@ -45,7 +47,7 @@ const TicketSelection = ({ selections, onChange, onBuyTicket, tickets, loading }
       {/* Event Info Banner – mobile only (on desktop this appears in the header) */}
       <motion.div
         className="text-center md:hidden"
-        initial={{ opacity: 0, y: 15 }}
+        initial={isMobile ? false : { opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
       >
@@ -69,9 +71,9 @@ const TicketSelection = ({ selections, onChange, onBuyTicket, tickets, loading }
 
       <motion.div
         className="text-center"
-        initial={{ opacity: 0, y: 20 }}
+        initial={isMobile ? false : { opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
+        transition={{ duration: 0.5, delay: isMobile ? 0 : 0.1 }}
       >
         <h2 className="text-[26px] sm:text-[31px] font-bold text-foreground">בחרו את הכרטיסים שלכם</h2>
       </motion.div>
@@ -106,9 +108,9 @@ const TicketSelection = ({ selections, onChange, onBuyTicket, tickets, loading }
           return (
             <motion.div
               key={ticket.type}
-              initial={{ opacity: 0, y: 30 }}
+              initial={isMobile ? false : { opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.1 + index * 0.12 }}
+              transition={{ duration: 0.4, delay: isMobile ? 0 : 0.1 + index * 0.12 }}
               className={`relative rounded-xl border overflow-hidden transition-all duration-200 ${
                 isSoldOut
                   ? 'border-border bg-background opacity-70'
@@ -154,9 +156,9 @@ const TicketSelection = ({ selections, onChange, onBuyTicket, tickets, loading }
                    {/* Progress bar (appears on right in RTL) */}
                    <motion.div
                      className="flex-1 min-w-0"
-                     initial={{ scaleX: 0 }}
+                     initial={isMobile ? false : { scaleX: 0 }}
                      animate={{ scaleX: 1 }}
-                     transition={{ duration: 0.6, delay: 0.3 + index * 0.12 }}
+                     transition={{ duration: 0.6, delay: isMobile ? 0 : 0.3 + index * 0.12 }}
                      style={{ transformOrigin: 'right' }}
                    >
                      <p className="text-[14px] text-muted-foreground mb-0 text-right font-medium">
@@ -235,9 +237,9 @@ const TicketSelection = ({ selections, onChange, onBuyTicket, tickets, loading }
 
       {/* Interactive Seating Map */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={isMobile ? false : { opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.6 }}
+        transition={{ duration: 0.4, delay: isMobile ? 0 : 0.6 }}
       >
         <SeatingMap
           hoveredTicket={hoveredTicket}
