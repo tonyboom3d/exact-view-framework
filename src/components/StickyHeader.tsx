@@ -37,63 +37,64 @@ const StickyHeader = () => {
 
   return (
     <motion.header
-      className={`sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border transition-all duration-300 ${
+      className={`sticky top-0 z-50 bg-background border-b border-border transition-[padding] duration-300 will-change-transform ${
         isScrolled ? 'py-1' : 'py-2'
       }`}
+      style={{ transform: 'translateZ(0)' }}
       initial={{ y: -60, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5, ease: 'easeOut' }}>
+      transition={{ duration: 0.4, ease: 'easeOut' }}>
 
       <div className="max-w-5xl mx-auto w-[95%]">
         <motion.div
-          className={`relative flex-col gap-1 bg-cta/5 rounded-xl overflow-visible flex items-end justify-center transition-all duration-300 ${
+          className={`relative flex-col gap-1 bg-cta/5 rounded-xl overflow-visible flex items-end justify-center transition-[padding] duration-300 ${
             isScrolled 
               ? 'px-2 sm:px-3 py-1 sm:py-1.5' 
               : 'px-3 sm:px-4 py-2 sm:py-2.5'
           }`}
-          initial={{ opacity: 0, scaleY: 0 }}
-          animate={{ opacity: 1, scaleY: 1 }}
-          transition={{ duration: 0.4, delay: 0.2 }}>
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.15 }}>
 
           <img
             src={tonyImg}
             alt="Tony Robbins"
-            className={`absolute right-[-15px] sm:right-2 bottom-0 w-auto object-contain pointer-events-none transition-all duration-300 ${
+            className={`absolute right-[-15px] sm:right-2 bottom-0 w-auto object-contain pointer-events-none transition-[height] duration-300 ${
               isScrolled 
                 ? 'h-[60px] sm:h-[80px]' 
                 : 'h-[100px] sm:h-[100px]'
             }`}
-            style={{ transform: 'scaleX(-1)' }} />
+            style={{ transform: 'scaleX(-1) translateZ(0)' }} />
 
           {/* Countdown timer - left side */}
           <div className="flex flex-col md:flex-row-reverse md:items-center items-end gap-0.5 md:gap-2">
             {/* Mobile: "מתחילים בעוד" above timer */}
-            <span className={`md:hidden font-bold text-foreground whitespace-nowrap transition-all duration-300 ${
+            <span className={`md:hidden font-bold text-foreground whitespace-nowrap transition-[font-size] duration-300 ${
               isScrolled 
                 ? 'text-[12px] sm:text-[14px]' 
                 : 'text-[15px] sm:text-[17px]'
             }`}>
               מתחילים בעוד
             </span>
-            <div className={`gap-1 sm:gap-1.5 flex items-center justify-start transition-all duration-300 ${
+            <div className={`gap-1 sm:gap-1.5 flex items-center justify-start transition-[gap] duration-300 ${
               isScrolled ? 'gap-0.5 sm:gap-1' : ''
             }`} dir="ltr">
               <FlipUnit value={pad(timeLeft.days)} label="ימים" isScrolled={isScrolled} />
-              <span className={`font-bold text-destructive animate-pulse transition-all duration-300 ${
+              <span className={`font-bold text-destructive animate-pulse transition-[font-size] duration-300 ${
                 isScrolled ? 'text-xs sm:text-sm' : 'text-sm sm:text-lg'
               }`}>:</span>
               <FlipUnit value={pad(timeLeft.hours)} label="שעות" isScrolled={isScrolled} />
-              <span className={`font-bold text-destructive animate-pulse transition-all duration-300 ${
+              <span className={`font-bold text-destructive animate-pulse transition-[font-size] duration-300 ${
                 isScrolled ? 'text-xs sm:text-sm' : 'text-sm sm:text-lg'
               }`}>:</span>
               <FlipUnit value={pad(timeLeft.minutes)} label="דקות" isScrolled={isScrolled} />
-              <span className={`font-bold text-destructive animate-pulse transition-all duration-300 ${
+              <span className={`font-bold text-destructive animate-pulse transition-[font-size] duration-300 ${
                 isScrolled ? 'text-xs sm:text-sm' : 'text-sm sm:text-lg'
               }`}>:</span>
               <FlipUnit value={pad(timeLeft.seconds)} label="שניות" isScrolled={isScrolled} />
             </div>
             {/* Desktop: "מתחילים בעוד" on same row, right of timer */}
-            <span className={`hidden md:block font-bold text-foreground whitespace-nowrap transition-all duration-300 ${
+            <span className={`hidden md:block font-bold text-foreground whitespace-nowrap transition-[font-size] duration-300 ${
               isScrolled 
                 ? 'text-[12px] md:text-[14px]' 
                 : 'text-[15px] md:text-[17px]'
@@ -144,7 +145,7 @@ const FlipUnit = ({ value, label, isScrolled }: {value: string; label: string; i
         <FlipDigit key={`${i}-${digit}`} value={digit} isScrolled={isScrolled} />
         )}
       </div>
-      <span className={`text-muted-foreground font-medium transition-all duration-300 ${
+      <span className={`text-muted-foreground font-medium transition-[font-size] duration-300 ${
         isScrolled ? 'text-[9px] sm:text-[10px]' : 'text-[11px] sm:text-[12px]'
       }`}>{label}</span>
     </div>);
@@ -157,16 +158,16 @@ const FlipDigit = ({ value, isScrolled }: {value: string; isScrolled: boolean}) 
       <AnimatePresence mode="popLayout">
         <motion.div
           key={value}
-          initial={{ rotateX: -90, opacity: 0 }}
-          animate={{ rotateX: 0, opacity: 1 }}
-          exit={{ rotateX: 90, opacity: 0 }}
-          transition={{ duration: 0.3, ease: 'easeOut' }}
-          className={`bg-destructive text-white font-mono font-extrabold rounded-md flex items-center justify-center shadow-md transition-all duration-300 ${
+          initial={{ opacity: 0, y: -4 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 4 }}
+          transition={{ duration: 0.2, ease: 'easeOut' }}
+          className={`bg-destructive text-white font-mono font-extrabold rounded-md flex items-center justify-center shadow-md transition-[width,height,font-size] duration-300 will-change-transform ${
             isScrolled 
               ? 'text-[12px] sm:text-[15px] w-[14px] sm:w-[18px] h-[20px] sm:h-[24px]' 
               : 'text-[16px] sm:text-[19px] w-[18px] sm:w-[24px] h-[26px] sm:h-[30px]'
           }`}
-          style={{ perspective: '200px', backfaceVisibility: 'hidden' }}>
+          style={{ transform: 'translateZ(0)' }}>
           {value}
         </motion.div>
       </AnimatePresence>
