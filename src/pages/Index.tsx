@@ -236,7 +236,7 @@ const Index = () => {
 
       {/* Step Indicator - centered */}
       <motion.div
-        className="max-w-5xl mx-auto w-[95%] py-4 flex justify-center"
+        className="max-w-5xl mx-auto w-[95%] pt-3 pb-1 hidden md:flex justify-center"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.2 }}
