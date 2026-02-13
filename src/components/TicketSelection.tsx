@@ -145,9 +145,9 @@ const TicketSelection = ({ selections, onChange, onBuyTicket, tickets, loading }
                 </div>
               </div>
 
-              <div className="px-3 pt-3 pb-1.5 sm:px-4 sm:pt-4 sm:pb-2">
+              <div className="px-3 pt-2 pb-3 sm:px-4 sm:pt-2.5 sm:pb-4">
                 {/* Description */}
-                <p className="text-[16px] sm:text-[17px] text-muted-foreground mb-1 sm:mb-2 line-clamp-2 min-h-[2.75em]">{ticket.description}</p>
+                <p className="text-[16px] sm:text-[17px] text-muted-foreground mb-1 line-clamp-2 min-h-[2.5em]">{ticket.description}</p>
 
                  {/* Row layout: progress bar right, buttons left (RTL) */}
                  <div className="flex items-end gap-2 sm:gap-3">
