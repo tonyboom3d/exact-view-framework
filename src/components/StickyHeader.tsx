@@ -61,7 +61,7 @@ const StickyHeader = () => {
             className={`absolute right-[-15px] sm:right-2 bottom-0 w-auto object-contain pointer-events-none transition-all duration-300 ${
               isScrolled 
                 ? 'h-[60px] sm:h-[80px]' 
-                : 'h-[100px] sm:h-[120px]'
+                : 'h-[100px] sm:h-[100px]'
             }`}
             style={{ transform: 'scaleX(-1)' }} />
 
