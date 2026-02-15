@@ -335,7 +335,7 @@ const BuyerDetails = ({
                 disabled={!allPreviousComplete}
               >
                 <span className="text-[18px] font-bold text-foreground">
-                  כרטיס {ticket.ticketName} #{ticket.ticketNumber}
+                  כרטיס {ticket.index + 1}
                 </span>
                 <ChevronDown
                   className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${
@@ -412,7 +412,7 @@ const BuyerDetails = ({
                       </div>
                       {/* Next ticket button */}
                       {ticket.index < flatTickets.length - 1 && (
-                        <div className="flex justify-start mt-2">
+                        <div className="flex justify-end mt-2">
                           <button
                             type="button"
                             disabled={!isTicketComplete(ticket.index)}
@@ -423,7 +423,7 @@ const BuyerDetails = ({
                                 : 'bg-muted text-muted-foreground cursor-not-allowed'
                             }`}
                           >
-                            מילוי הכרטיס הבא →
+                            <span style={{ display: 'inline-block', transform: 'scaleX(-1)' }}>→</span> המשך לכרטיס הבא
                           </button>
                         </div>
                       )}

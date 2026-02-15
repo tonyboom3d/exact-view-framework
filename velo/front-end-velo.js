@@ -283,7 +283,11 @@ async function handleStartCheckout(eventId, data, ticketMetaMap) {
   // Step G: Start payment with Wix Pay (opens payment UI in browser)
   let paymentRes;
   try {
-    paymentRes = await wixPay.startPayment(payment.id);
+    paymentRes = await wixPay.startPayment(payment.id, {
+      termsAndConditionsLink: 'https://www.tonyrobbins.co.il/terms',
+      showThankYouPage: false,
+      skipUserInfoPage: true,
+    });
     console.log('handleStartCheckout: startPayment RAW result', JSON.stringify(paymentRes));
   } catch (error) {
     // If startPayment is rejected (e.g., user closed modal), treat as cancellation

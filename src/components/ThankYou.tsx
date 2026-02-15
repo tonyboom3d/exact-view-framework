@@ -247,6 +247,12 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
         </Button>
       </div>
 
+      {/* Event details */}
+      <div className="text-center text-[15px] text-muted-foreground space-y-0.5">
+        <p className="font-medium">4 ימים, 12-15 במרץ 2026</p>
+        <p>מלון פרימה מילניום, רעננה</p>
+      </div>
+
       {/* Order summary */}
       <div className="rounded-xl border border-border bg-background p-4 text-right space-y-3">
         <p className="text-[17px] font-bold text-foreground">סיכום הזמנה</p>
