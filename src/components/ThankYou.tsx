@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Check, Copy, Gift, Calendar, ChevronDown, Mail, Facebook, Loader2 } from 'lucide-react';
+import { Check, Calendar, ChevronDown, Mail, Facebook, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { TicketSelection, TicketInfo, GuestInfo, BuyerInfo } from '@/types/order';
 import { toast } from '@/hooks/use-toast';
@@ -18,7 +18,6 @@ interface ThankYouProps {
 }
 
 const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPayer, tickets, paymentStatus }: ThankYouProps) => {
-  const [copied, setCopied] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
 
   // Only show confetti when payment is successful (not pending)
@@ -38,9 +37,8 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
     return () => clearInterval(interval);
   }, [paymentStatus]);
 
-  const referralLink = 'https://upw-tickets.com/ref/SIG1J2JY';
-  const shareTextWithDiscount = `נרשמתי לסדנה של טוני רובינס 🔥\n\nיש לי קישור עם 200 ₪ הנחה למי שמצטרף:\n\n${referralLink}\n\nמי שבעניין – זה הזמן.`;
-  const shareTextGeneral = `נרשמתי לסדנה של טוני רובינס 🔥\n\nמי שרוצה להצטרף:\n\n${referralLink}\n\nמי שבעניין – זה הזמן.`;
+  const shareLink = 'https://www.tonyrobbins.co.il/';
+  const shareText = `נרשמתי לסדנת UPW REMOTE של טוני רובינס בישראל 🔥\n\n4 ימים של כלים, אסטרטגיות ושינוי אמיתי – 12-15 במרץ 2026.\n\n${shareLink}\n\nמי שבעניין – זה הזמן.`;
 
   const activeSelections = selections.filter(s => s.quantity > 0);
   const totalTickets = activeSelections.reduce((sum, s) => sum + s.quantity, 0);
@@ -48,17 +46,6 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
     const ticket = tickets.find(t => t.type === s.type);
     return sum + (ticket?.price || 0) * s.quantity;
   }, 0);
-
-  const copyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(referralLink);
-      setCopied(true);
-      toast({ title: 'הקישור הועתק!' });
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      toast({ title: 'לא ניתן להעתיק', variant: 'destructive' });
-    }
-  };
 
   const eventTitle = 'Tony Robbins — Unleash the Power Within REMOTE';
   const eventLocation = 'מלון פרימה מילניום התדהר 2 רעננה';
@@ -113,23 +100,21 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
     window.open(`https://outlook.live.com/calendar/0/deeplink/compose?${params.toString()}`, '_blank');
   };
 
-  const currentShareText = totalTickets <= 1 ? shareTextWithDiscount : shareTextGeneral;
-
   const shareWhatsApp = () => {
-    window.open(`https://wa.me/?text=${encodeURIComponent(currentShareText)}`, '_blank');
+    window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
   };
 
   const shareFacebook = () => {
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(referralLink)}`, '_blank');
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareLink)}`, '_blank');
   };
 
   const shareX = () => {
-    window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(currentShareText)}`, '_blank');
+    window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(shareText)}`, '_blank');
   };
 
   const shareInstagram = () => {
     // Instagram doesn't have a direct share URL, copy text and notify user
-    navigator.clipboard.writeText(currentShareText).then(() => {
+    navigator.clipboard.writeText(shareText).then(() => {
       toast({ title: 'הטקסט הועתק! הדביקו אותו בסטורי או בהודעה באינסטגרם' });
     }).catch(() => {
       toast({ title: 'לא ניתן להעתיק', variant: 'destructive' });
@@ -138,7 +123,7 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
 
   const shareEmail = () => {
     const subject = encodeURIComponent('הזמנה ל-Tony Robbins UPW');
-    const body = encodeURIComponent(currentShareText);
+    const body = encodeURIComponent(shareText);
     window.open(`mailto:?subject=${subject}&body=${body}`);
   };
 
@@ -333,42 +318,11 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
         </AnimatePresence>
       </div>
 
-      {/* Win-Win Ambassador Section - only for single ticket purchases */}
-      {totalTickets <= 1 && (
-        <div className="rounded-xl border-2 border-dashed border-[hsl(var(--cta))]/30 bg-[hsl(var(--cta))]/5 p-5 space-y-3">
-          <div className="flex items-center justify-center gap-2">
-            <Gift className="w-5 h-5 text-[hsl(var(--cta))]" />
-            <p className="text-[21px] font-extrabold text-foreground">Win - Win</p>
-          </div>
-          <p className="text-[17px] text-muted-foreground leading-relaxed">
-            שתפו את הקישור לחברים שלכם ותרוויחו <span className="font-bold text-foreground">₪200</span> על כל הרשמה
-            <br />
-            ובנוסף <span className="font-bold text-foreground">₪200 הנחה</span> לחבר שלכם.
-          </p>
-
-          {/* Referral link */}
-          <div className="bg-background rounded-lg p-3 flex items-center gap-2" dir="ltr">
-            <input
-              readOnly
-              value={referralLink}
-              className="flex-1 text-[14px] bg-transparent outline-none text-muted-foreground"
-            />
-            <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={copyLink}>
-              {copied ? <Check className="w-4 h-4 text-[hsl(var(--success))]" /> : <Copy className="w-4 h-4" />}
-            </Button>
-          </div>
-
-          <ShareButtons />
-        </div>
-      )}
-
-      {/* Share buttons for multi-ticket purchases (no Win-Win) */}
-      {totalTickets > 1 && (
-        <div className="rounded-xl border border-border bg-background p-5 space-y-3">
-          <p className="text-[17px] font-bold text-foreground">שתפו חברים שגם ירצו להצטרף</p>
-          <ShareButtons />
-        </div>
-      )}
+      {/* Share section */}
+      <div className="rounded-xl border border-border bg-background p-5 space-y-3">
+        <p className="text-[17px] font-bold text-foreground">שתפו חברים שגם ירצו להצטרף</p>
+        <ShareButtons />
+      </div>
     </div>
   );
 };

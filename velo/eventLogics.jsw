@@ -69,7 +69,7 @@ export async function saveAbandonedCart(cartData) {
 
         const record = {
             title: `${cartData.buyerName || 'Guest'} – ${new Date().toLocaleString('he-IL')}`,
-            status: 'pending',
+            status: 'in-progress',
             paymentId: cartData.paymentId || '',
             transactionId: '',
             orderNumber: cartData.orderNumber || '',
