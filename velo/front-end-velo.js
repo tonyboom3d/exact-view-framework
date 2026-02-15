@@ -1,6 +1,6 @@
 import { orders } from 'wix-events.v2';
 import wixPay from 'wix-pay-frontend';
-import { getTicketMeta, createEventPayment, confirmEventOrder } from 'backend/eventLogics';
+import { getTicketMeta, createEventPayment, confirmEventOrder, saveAbandonedCart, updateCartAfterPayment } from 'backend/eventLogics';
 
 $w.onReady(async function () {
   const EVENT_ID = '9e19a44f-9fc3-48f2-a9fd-83cedb993d1c'; 
@@ -280,6 +280,41 @@ async function handleStartCheckout(eventId, data, ticketMetaMap) {
     paymentId: payment.id,
   });
 
+  // Step F2: Save abandoned cart record to CMS (fire-and-forget – must not block checkout)
+  let cartId = null;
+  try {
+    const guestsFromPayload = data.guests || [];
+    const buyerName = `${mainBuyerDetails.firstName} ${mainBuyerDetails.lastName}`.trim();
+
+    // Build enriched selectedTickets with names & prices for the CMS record
+    const selectedTicketsForCms = selectedTickets.map((t) => {
+      const meta = ticketMetaMap[t.ticketId] || {};
+      return {
+        ticketId: t.ticketId,
+        ticketName: meta.name || 'כרטיס',
+        quantity: t.quantity,
+        price: meta.price || 0,
+      };
+    });
+
+    cartId = await saveAbandonedCart({
+      buyerName,
+      paymentId: payment.id,
+      orderNumber: checkoutRes.order.orderNumber || '',
+      totalAmount: amount,
+      selectedTickets: selectedTicketsForCms,
+      guests: guestsFromPayload,
+      hasDifferentPayer: !!payer,
+      payerDetails: payer
+        ? { firstName: payer.firstName, lastName: payer.lastName, email: payer.email, phone: payer.phone, companyName: companyName || '' }
+        : null,
+      affiliateId: '',
+    });
+    console.log('handleStartCheckout: abandoned cart saved', { cartId });
+  } catch (cartError) {
+    console.error('handleStartCheckout: abandoned cart save failed (non-blocking)', cartError);
+  }
+
   // Step G: Start payment with Wix Pay (opens payment UI in browser)
   let paymentRes;
   try {
@@ -292,6 +327,10 @@ async function handleStartCheckout(eventId, data, ticketMetaMap) {
   } catch (error) {
     // If startPayment is rejected (e.g., user closed modal), treat as cancellation
     console.log('handleStartCheckout: startPayment rejected/cancelled', error);
+    // Update cart status to cancelled (fire-and-forget)
+    if (cartId) {
+      updateCartAfterPayment(cartId, { status: 'cancelled', orderNumber: checkoutRes.order.orderNumber }).catch(() => {});
+    }
     return {
       status: 'Cancelled',
       orderNumber: checkoutRes.order.orderNumber,
@@ -318,6 +357,18 @@ async function handleStartCheckout(eventId, data, ticketMetaMap) {
       console.error('handleStartCheckout: failed to confirm order (payment was successful)', confirmError);
       // Don't fail the entire flow - payment was successful, order confirmation can be retried
     }
+  }
+
+  // Step I: Update abandoned cart record with payment result (fire-and-forget)
+  if (cartId) {
+    const cartStatus = finalStatus === 'Successful' ? 'paid' : (finalStatus === 'Cancelled' ? 'cancelled' : 'failed');
+    updateCartAfterPayment(cartId, {
+      status: cartStatus,
+      transactionId: paymentRes.transactionId || '',
+      orderNumber: checkoutRes.order.orderNumber,
+    }).catch((err) => {
+      console.error('handleStartCheckout: cart update after payment failed (non-blocking)', err);
+    });
   }
 
   return {

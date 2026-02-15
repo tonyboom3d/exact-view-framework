@@ -20,6 +20,7 @@ export interface GuestInfo {
   lastName: string;
   phone: string;
   email?: string;
+  sendToWhatsapp?: boolean;
 }
 
 export interface BuyerInfo {

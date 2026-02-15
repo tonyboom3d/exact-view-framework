@@ -105,15 +105,15 @@ const BuyerDetails = ({
     if (guests.length < totalTickets) {
       const newGuests = [...guests];
       while (newGuests.length < totalTickets) {
-        newGuests.push({ firstName: '', lastName: '', phone: '' });
+        newGuests.push({ firstName: '', lastName: '', phone: '', sendToWhatsapp: true });
       }
       onGuestsChange(newGuests);
     }
   }, [totalTickets, guests, onGuestsChange]);
 
-  const updateGuest = (index: number, field: keyof GuestInfo, value: string) => {
+  const updateGuest = (index: number, field: keyof GuestInfo, value: string | boolean) => {
     const updated = [...guests];
-    if (!updated[index]) updated[index] = { firstName: '', lastName: '', phone: '' };
+    if (!updated[index]) updated[index] = { firstName: '', lastName: '', phone: '', sendToWhatsapp: true };
     updated[index] = { ...updated[index], [field]: value };
     onGuestsChange(updated);
   };
@@ -404,7 +404,11 @@ const BuyerDetails = ({
                         />
                         {errors[`guest_${ticket.index}_phone`] && <p className="text-sm text-destructive mt-1">{errors[`guest_${ticket.index}_phone`]}</p>}
                         <div className="flex items-center gap-2 mt-1.5">
-                          <Checkbox id={`whatsapp-${ticket.index}`} defaultChecked />
+                          <Checkbox
+                            id={`whatsapp-${ticket.index}`}
+                            checked={guest?.sendToWhatsapp !== false}
+                            onCheckedChange={(v) => updateGuest(ticket.index, 'sendToWhatsapp', v as boolean)}
+                          />
                           <Label htmlFor={`whatsapp-${ticket.index}`} className="text-[15px] text-muted-foreground cursor-pointer">
                             שילחו לוואטסאפ את הכרטיס
                           </Label>
@@ -423,7 +427,7 @@ const BuyerDetails = ({
                                 : 'bg-muted text-muted-foreground cursor-not-allowed'
                             }`}
                           >
-                            <span style={{ display: 'inline-block', transform: 'scaleX(-1)' }}>→</span> המשך לכרטיס הבא
+                            המשך לכרטיס הבא <span style={{ display: 'inline-block', transform: 'scaleX(-1)' }}>→</span>
                           </button>
                         </div>
                       )}

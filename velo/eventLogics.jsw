@@ -1,0 +1,121 @@
+import wixData from 'wix-data';
+import wixPayBackend from 'wix-pay-backend';
+import { orders } from 'wix-events.v2';
+import { elevate } from 'wix-auth';
+
+// Flag for test mode: set to true to use 1 ILS price for all tickets (for testing only)
+const TEST_MODE_ENABLED = true;
+
+// Elevated function to confirm orders (requires MANAGE_ORDERS permission)
+const elevatedConfirmOrder = elevate(orders.confirmOrder);
+
+export async function getTicketMeta() {
+    const cmsTickets = await wixData.query('TonyRobbinsTickets').find({ suppressAuth: true });
+
+    return cmsTickets.items.map((item) => ({
+        key: item.ticketKey,
+        id: item.wixTicketId,
+        soldPercent: item.soldPercent,
+        isSoldOut: item.isSoldOut,
+        // If test mode is enabled, override price to 1 ILS for testing (regardless of CMS price)
+        price: TEST_MODE_ENABLED ? 1 : (item.price || 0),
+        name: item.name,
+    }));
+}
+
+export async function createEventPayment(paymentData) {
+    const { items, amount, userInfo } = paymentData;
+
+    const fullUserInfo = {
+        firstName: userInfo.firstName,
+        lastName: userInfo.lastName,
+        email: userInfo.email,
+        phone: userInfo.phone,
+        countryCode: 'ISR',
+    };
+
+    const payment = await wixPayBackend.createPayment({
+        items,
+        amount,
+        userInfo: fullUserInfo,
+    });
+
+    return payment;
+}
+
+/**
+ * Confirms an order in Wix Events after payment is successful.
+ * Changes order status from INITIATED/PENDING to PAID, which triggers
+ * the email with tickets to the buyer (and guests).
+ */
+export async function confirmEventOrder(eventId, orderNumber) {
+    console.log('confirmEventOrder: confirming order', { eventId, orderNumber });
+    const result = await elevatedConfirmOrder(eventId, { orderNumber: [orderNumber] });
+    console.log('confirmEventOrder: order confirmed', { confirmedOrders: result?.orders?.length });
+    return result;
+}
+
+// ── Abandoned Cart tracking ──────────────────────────────────────────
+
+/**
+ * Saves a new abandoned-cart record to the AbandonedCarts CMS collection.
+ * Called right after createEventPayment, before the user enters payment details.
+ * Returns the CMS item _id so it can be updated after payment.
+ */
+export async function saveAbandonedCart(cartData) {
+    try {
+        const record = {
+            title: `${cartData.buyerName || 'Guest'} – ${new Date().toLocaleString('he-IL')}`,
+            status: 'pending',
+            paymentId: cartData.paymentId || '',
+            transactionId: '',
+            orderNumber: cartData.orderNumber || '',
+            totalAmount: cartData.totalAmount || 0,
+            selectedTickets: JSON.stringify(cartData.selectedTickets || []),
+            guests: JSON.stringify(cartData.guests || []),
+            hasDifferentPayer: !!cartData.hasDifferentPayer,
+            payerDetails: cartData.payerDetails ? JSON.stringify(cartData.payerDetails) : '',
+            affiliateId: cartData.affiliateId || '',
+            createdAt: new Date(),
+        };
+
+        console.log('saveAbandonedCart: inserting record', { title: record.title, paymentId: record.paymentId });
+        const result = await wixData.insert('AbandonedCarts', record, { suppressAuth: true });
+        console.log('saveAbandonedCart: inserted', { _id: result._id });
+        return result._id;
+    } catch (error) {
+        console.error('saveAbandonedCart: failed (non-blocking)', error);
+        return null;
+    }
+}
+
+/**
+ * Updates an existing abandoned-cart record after payment completes.
+ * Fetches the record first, merges the update fields, then saves.
+ */
+export async function updateCartAfterPayment(cartId, updateData) {
+    try {
+        if (!cartId) {
+            console.warn('updateCartAfterPayment: no cartId, skipping');
+            return;
+        }
+
+        console.log('updateCartAfterPayment: fetching record', { cartId });
+        const record = await wixData.get('AbandonedCarts', cartId, { suppressAuth: true });
+        if (!record) {
+            console.warn('updateCartAfterPayment: record not found', { cartId });
+            return;
+        }
+
+        // Merge update fields
+        if (updateData.status) record.status = updateData.status;
+        if (updateData.transactionId) record.transactionId = updateData.transactionId;
+        if (updateData.orderNumber) record.orderNumber = updateData.orderNumber;
+
+        console.log('updateCartAfterPayment: updating record', { cartId, status: record.status });
+        await wixData.update('AbandonedCarts', record, { suppressAuth: true });
+        console.log('updateCartAfterPayment: updated successfully');
+    } catch (error) {
+        console.error('updateCartAfterPayment: failed (non-blocking)', error);
+    }
+}

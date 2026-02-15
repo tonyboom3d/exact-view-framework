@@ -55,7 +55,7 @@ const Index = () => {
       const needed = ticketCount;
       setGuests((prev) => {
         if (prev.length >= needed) return prev.slice(0, needed);
-        return [...prev, ...Array.from({ length: needed - prev.length }, () => ({ firstName: '', lastName: '', phone: '' }))];
+        return [...prev, ...Array.from({ length: needed - prev.length }, () => ({ firstName: '', lastName: '', phone: '', sendToWhatsapp: true }))];
       });
     },
     []
