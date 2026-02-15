@@ -58,12 +58,15 @@ export async function confirmEventOrder(eventId, orderNumber) {
 // ── Abandoned Cart tracking ──────────────────────────────────────────
 
 /**
- * Saves a new abandoned-cart record to the AbandonedCarts CMS collection.
+ * Saves or updates an abandoned-cart record in the AbandonedCarts CMS collection.
+ * Uses payerPhone to detect if the user already has an existing record (upsert).
  * Called right after createEventPayment, before the user enters payment details.
  * Returns the CMS item _id so it can be updated after payment.
  */
 export async function saveAbandonedCart(cartData) {
     try {
+        const payerPhone = (cartData.payerPhone || '').trim();
+
         const record = {
             title: `${cartData.buyerName || 'Guest'} – ${new Date().toLocaleString('he-IL')}`,
             status: 'pending',
@@ -75,14 +78,38 @@ export async function saveAbandonedCart(cartData) {
             guests: JSON.stringify(cartData.guests || []),
             hasDifferentPayer: !!cartData.hasDifferentPayer,
             payerDetails: cartData.payerDetails ? JSON.stringify(cartData.payerDetails) : '',
+            payerPhone,
             affiliateId: cartData.affiliateId || '',
-            createdAt: new Date(),
         };
 
-        console.log('saveAbandonedCart: inserting record', { title: record.title, paymentId: record.paymentId });
-        const result = await wixData.insert('AbandonedCarts', record, { suppressAuth: true });
-        console.log('saveAbandonedCart: inserted', { _id: result._id });
-        return result._id;
+        // Check if a record already exists for this phone number
+        let existingRecord = null;
+        if (payerPhone) {
+            const existing = await wixData.query('AbandonedCarts')
+                .eq('payerPhone', payerPhone)
+                .descending('_createdDate')
+                .limit(1)
+                .find({ suppressAuth: true });
+
+            if (existing.items.length > 0) {
+                existingRecord = existing.items[0];
+            }
+        }
+
+        if (existingRecord) {
+            // Update existing record with fresh data
+            Object.assign(existingRecord, record);
+            console.log('saveAbandonedCart: updating existing record', { _id: existingRecord._id, payerPhone });
+            const result = await wixData.update('AbandonedCarts', existingRecord, { suppressAuth: true });
+            console.log('saveAbandonedCart: updated', { _id: result._id });
+            return result._id;
+        } else {
+            // Insert new record
+            console.log('saveAbandonedCart: inserting new record', { title: record.title, payerPhone });
+            const result = await wixData.insert('AbandonedCarts', record, { suppressAuth: true });
+            console.log('saveAbandonedCart: inserted', { _id: result._id });
+            return result._id;
+        }
     } catch (error) {
         console.error('saveAbandonedCart: failed (non-blocking)', error);
         return null;

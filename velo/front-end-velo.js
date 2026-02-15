@@ -287,15 +287,24 @@ async function handleStartCheckout(eventId, data, ticketMetaMap) {
     const buyerName = `${mainBuyerDetails.firstName} ${mainBuyerDetails.lastName}`.trim();
 
     // Build enriched selectedTickets with names & prices for the CMS record
-    const selectedTicketsForCms = selectedTickets.map((t) => {
-      const meta = ticketMetaMap[t.ticketId] || {};
+    // Use items array (already resolved with correct names from ticketMetaMap in Step E)
+    const selectedTicketsForCms = selectedTickets.map((t, idx) => {
+      const itemInfo = items[idx] || {};
       return {
         ticketId: t.ticketId,
-        ticketName: meta.name || 'כרטיס',
+        ticketName: itemInfo.name || 'כרטיס',
         quantity: t.quantity,
-        price: meta.price || 0,
+        price: itemInfo.price || 0,
       };
     });
+
+    // Determine payer details: if separate payer use their info, otherwise use first guest (mainBuyer)
+    const payerDetailsForCms = payer
+      ? { firstName: payer.firstName, lastName: payer.lastName, email: payer.email, phone: payer.phone, companyName: companyName || '' }
+      : { firstName: mainBuyerDetails.firstName, lastName: mainBuyerDetails.lastName, email: mainBuyerDetails.email, phone: mainBuyerDetails.phone, companyName: '' };
+
+    // The payer phone is used as the unique identifier for upsert logic
+    const payerPhone = payer ? (payer.phone || '') : (mainBuyerDetails.phone || '');
 
     cartId = await saveAbandonedCart({
       buyerName,
@@ -305,9 +314,8 @@ async function handleStartCheckout(eventId, data, ticketMetaMap) {
       selectedTickets: selectedTicketsForCms,
       guests: guestsFromPayload,
       hasDifferentPayer: !!payer,
-      payerDetails: payer
-        ? { firstName: payer.firstName, lastName: payer.lastName, email: payer.email, phone: payer.phone, companyName: companyName || '' }
-        : null,
+      payerDetails: payerDetailsForCms,
+      payerPhone,
       affiliateId: '',
     });
     console.log('handleStartCheckout: abandoned cart saved', { cartId });
