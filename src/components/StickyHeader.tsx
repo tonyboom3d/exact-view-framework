@@ -7,7 +7,8 @@ const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
 const StickyHeader = () => {
   const getTimeLeft = () => {
-    const target = new Date('2026-03-12T16:00:00+02:00').getTime();
+    // March 11, 2026 16:00:00 GMT+0300
+    const target = new Date('2026-03-11T16:00:00+03:00').getTime();
     const now = Date.now();
     const diff = Math.max(0, Math.floor((target - now) / 1000));
     return {
