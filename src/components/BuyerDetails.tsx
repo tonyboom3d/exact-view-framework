@@ -105,7 +105,7 @@ const BuyerDetails = ({
     if (guests.length < totalTickets) {
       const newGuests = [...guests];
       while (newGuests.length < totalTickets) {
-        newGuests.push({ firstName: '', lastName: '', phone: '', sendToWhatsapp: true });
+        newGuests.push({ firstName: '', lastName: '', phone: '', wantWhatsapp: true });
       }
       onGuestsChange(newGuests);
     }
@@ -113,7 +113,7 @@ const BuyerDetails = ({
 
   const updateGuest = (index: number, field: keyof GuestInfo, value: string | boolean) => {
     const updated = [...guests];
-    if (!updated[index]) updated[index] = { firstName: '', lastName: '', phone: '', sendToWhatsapp: true };
+    if (!updated[index]) updated[index] = { firstName: '', lastName: '', phone: '', wantWhatsapp: true };
     updated[index] = { ...updated[index], [field]: value };
     onGuestsChange(updated);
   };
@@ -406,8 +406,8 @@ const BuyerDetails = ({
                         <div className="flex items-center gap-2 mt-1.5">
                           <Checkbox
                             id={`whatsapp-${ticket.index}`}
-                            checked={guest?.sendToWhatsapp !== false}
-                            onCheckedChange={(v) => updateGuest(ticket.index, 'sendToWhatsapp', v as boolean)}
+                            checked={guest?.wantWhatsapp !== false}
+                            onCheckedChange={(v) => updateGuest(ticket.index, 'wantWhatsapp', !!v)}
                           />
                           <Label htmlFor={`whatsapp-${ticket.index}`} className="text-[15px] text-muted-foreground cursor-pointer">
                             שילחו לוואטסאפ את הכרטיס

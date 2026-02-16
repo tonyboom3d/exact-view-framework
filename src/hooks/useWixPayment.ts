@@ -86,7 +86,7 @@ export function useWixPayment() {
         lastName: g.lastName || '',
         email: g.email || '',
         phone: g.phone || '',
-        sendToWhatsapp: g.sendToWhatsapp !== false,
+        wantWhatsapp: g.wantWhatsapp !== false,
       }));
 
       const payload = {
