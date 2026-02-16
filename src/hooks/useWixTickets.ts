@@ -31,6 +31,7 @@ export function useWixTickets() {
   const [tickets, setTickets] = useState<TicketInfo[]>(FALLBACK_TICKETS);
   const [loading, setLoading] = useState(false);
   const [wixDataReady, setWixDataReady] = useState(!isInsideWix); // true immediately outside Wix
+  const [isAdminTest, setIsAdminTest] = useState(false);
 
   // Promise that resolves when real Wix ticket data has arrived
   const wixReadyResolveRef = useRef<(() => void) | null>(null);
@@ -44,11 +45,17 @@ export function useWixTickets() {
   const ticketsRef = useRef(tickets);
   ticketsRef.current = tickets;
 
-  const mergeTicketData = useCallback((payload: { tickets?: WixTicketMeta[] }) => {
+  const mergeTicketData = useCallback((payload: { tickets?: WixTicketMeta[]; isAdminTest?: boolean }) => {
     if (!payload?.tickets || !Array.isArray(payload.tickets)) {
       console.warn('[useWixTickets] Invalid payload, no tickets array');
       setLoading(false);
       return;
+    }
+
+    // Extract admin test flag from Velo
+    if (payload.isAdminTest) {
+      setIsAdminTest(true);
+      console.log('[useWixTickets] Admin test mode enabled from Velo');
     }
 
     console.log('[useWixTickets] Processing', payload.tickets.length, 'tickets from CMS');
@@ -147,5 +154,5 @@ export function useWixTickets() {
     }
   }, [wixDataReady]);
 
-  return { tickets, loading, wixDataReady, ensureWixData };
+  return { tickets, loading, wixDataReady, ensureWixData, isAdminTest };
 }

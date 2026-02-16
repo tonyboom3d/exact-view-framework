@@ -3,7 +3,7 @@
  * הגדר TEST_PREFILL_ENABLED ל-false לפני מעבר לפרודקשן.
  */
 
-export const TEST_PREFILL_ENABLED = true;
+export const TEST_PREFILL_ENABLED = false;
 
 /** המייל שלך – משמש כרטיס ראשון ובמשלם (כשפרטי המשלם שונים) */
 export const TEST_EMAIL = 'tonyboom3d@hotmail.com';

@@ -3,7 +3,7 @@ import wixPay from 'wix-pay-frontend';
 import { getTicketMeta, createEventPayment, confirmEventOrder, saveAbandonedCart, updateCartAfterPayment } from 'backend/eventLogics';
 
 $w.onReady(async function () {
-  const EVENT_ID = '9e19a44f-9fc3-48f2-a9fd-83cedb993d1c'; 
+  const EVENT_ID = '86ac2d0f-e2dc-4c86-9c10-efeb710aa570'; 
 
   const htmlComponent = $w('#eventIframe')
 

@@ -13,7 +13,7 @@ import { useWixTickets } from '@/hooks/useWixTickets';
 import { useWixPayment } from '@/hooks/useWixPayment';
 import { toast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
-import { TEST_PREFILL_ENABLED, getTestGuest, getTestPayer } from '@/config/testPrefill';
+import { getTestGuest, getTestPayer } from '@/config/testPrefill';
 
 const isInsideWix = window.parent !== window;
 const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
@@ -32,7 +32,7 @@ const Index = () => {
   const [showCompany, setShowCompany] = useState(false);
 
   // Wix integration hooks
-  const { tickets, ensureWixData } = useWixTickets();
+  const { tickets, ensureWixData, isAdminTest } = useWixTickets();
   const { createOrderAndPay, loading: paymentLoading, loadingMessage, error: paymentError, setError: setPaymentError } = useWixPayment();
   const [paymentStatus, setPaymentStatus] = useState<'Successful' | 'Pending' | null>(null);
   const [pdfLink, setPdfLink] = useState<string | null>(null);
@@ -62,23 +62,23 @@ const Index = () => {
     []
   );
 
-  // מילוי אוטומטי לבדיקות בלבד – כשנכנסים לשלב 2
+  // מילוי אוטומטי לבדיקות – רק כשמצב admin test פעיל (מגיע מ-Velo דרך URL param + Secret Manager)
   useEffect(() => {
-    if (!TEST_PREFILL_ENABLED || step !== 2 || totalTickets <= 0) return;
+    if (!isAdminTest || step !== 2 || totalTickets <= 0) return;
     setGuests(
       Array.from({ length: totalTickets }, (_, i) => {
         const g = getTestGuest(i);
         return { firstName: g.firstName, lastName: g.lastName, email: g.email, phone: g.phone };
       })
     );
-  }, [step, totalTickets]);
+  }, [step, totalTickets, isAdminTest]);
 
-  // מילוי פרטי משלם לבדיקות כשמסמנים "פרטי המשלם שונים"
+  // מילוי פרטי משלם לבדיקות כשמסמנים "פרטי המשלם שונים" (admin test בלבד)
   useEffect(() => {
-    if (!TEST_PREFILL_ENABLED || !showPayer) return;
+    if (!isAdminTest || !showPayer) return;
     const payer = getTestPayer();
     setBuyer({ firstName: payer.firstName, lastName: payer.lastName, email: payer.email, phone: payer.phone });
-  }, [showPayer]);
+  }, [showPayer, isAdminTest]);
 
   const handleSelectionsChange = (newSelections: TicketSelectionType[]) => {
     setSelections(newSelections);
