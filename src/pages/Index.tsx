@@ -95,7 +95,7 @@ const Index = () => {
   };
 
   const nameRegex = /^[a-zA-Zא-ת\u0590-\u05FF\s']+$/;
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const emailRegex = /^[a-zA-Z0-9](?:[a-zA-Z0-9._%+-]*[a-zA-Z0-9])?@[a-zA-Z0-9](?:[a-zA-Z0-9.-]*[a-zA-Z0-9])?\.[a-zA-Z]{2,}$/;
   const phoneRegex = /^05\d{8}$/;
 
   const validateName = (value: string, label: string): string | null => {
