@@ -103,6 +103,12 @@ export function useWixPayment() {
       // Use long timeout (10 minutes) since user might take time to complete payment.
       const paymentResult = await sendMessage<PaymentResult>('START_CHECKOUT', payload, 10 * 60 * 1000);
 
+      // Payment completed – update message before hiding overlay
+      setLoadingMessage('יש להמתין מספר רגעים...');
+      
+      // Small delay to show the "wait" message before transitioning
+      await new Promise(resolve => setTimeout(resolve, 800));
+
       setLoading(false);
       setLoadingMessage('');
       return paymentResult;
