@@ -35,6 +35,7 @@ const Index = () => {
   const { tickets, ensureWixData } = useWixTickets();
   const { createOrderAndPay, loading: paymentLoading, loadingMessage, error: paymentError, setError: setPaymentError } = useWixPayment();
   const [paymentStatus, setPaymentStatus] = useState<'Successful' | 'Pending' | null>(null);
+  const [pdfLink, setPdfLink] = useState<string | null>(null);
 
   const totalTickets = useMemo(
     () => selections.reduce((sum, s) => sum + s.quantity, 0),
@@ -179,6 +180,7 @@ const Index = () => {
           });
           setOrderNumber(result.orderNumber);
           setReferralCode(result.referralCode);
+          setPdfLink(result.pdfLink || null);
           setPaymentStatus(result.status || 'Successful');
           setStep(3);
           window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -326,6 +328,7 @@ const Index = () => {
                 showPayer={showPayer}
                 tickets={tickets}
                 paymentStatus={paymentStatus}
+                pdfLink={pdfLink}
               />
             </motion.div>
           )}

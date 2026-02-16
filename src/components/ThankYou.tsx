@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Check, Calendar, ChevronDown, Mail, Facebook, Loader2 } from 'lucide-react';
+import { Check, Calendar, ChevronDown, Mail, Facebook, Loader2, Download, FileText, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { TicketSelection, TicketInfo, GuestInfo, BuyerInfo } from '@/types/order';
 import { toast } from '@/hooks/use-toast';
@@ -15,10 +15,25 @@ interface ThankYouProps {
   showPayer: boolean;
   tickets: TicketInfo[];
   paymentStatus?: 'Successful' | 'Pending' | null;
+  pdfLink?: string | null;
 }
 
-const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPayer, tickets, paymentStatus }: ThankYouProps) => {
+const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPayer, tickets, paymentStatus, pdfLink }: ThankYouProps) => {
   const [showDetails, setShowDetails] = useState(false);
+  const [pdfReady, setPdfReady] = useState(!!pdfLink);
+  const [currentPdfLink, setCurrentPdfLink] = useState(pdfLink || '');
+
+  // When pdfLink prop updates (e.g. initially null → loaded), update state
+  useEffect(() => {
+    if (pdfLink) {
+      setCurrentPdfLink(pdfLink);
+      setPdfReady(true);
+    }
+  }, [pdfLink]);
+
+  // Determine where tickets were sent
+  const buyerEmail = showPayer ? buyer.email : (guests[0]?.email || '');
+  const anyGuestWantsWhatsapp = guests.some(g => g.wantWhatsapp !== false);
 
   // Only show confetti when payment is successful (not pending)
   useEffect(() => {
@@ -199,6 +214,72 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
       <div>
         <h2 className="text-[28px] font-bold text-foreground">ההזמנה התקבלה!</h2>
         <p className="text-[17px] text-muted-foreground mt-1">מספר הזמנה: {orderNumber}</p>
+      </div>
+
+      {/* Ticket PDF Download Section */}
+      <div className="rounded-xl border border-border bg-background p-5 space-y-3">
+        <div className="flex items-center justify-center gap-2">
+          <FileText className="w-5 h-5 text-primary" />
+          <p className="text-[17px] font-bold text-foreground">הכרטיסים שלך</p>
+        </div>
+
+        {pdfReady && currentPdfLink ? (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <a
+              href={currentPdfLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium text-[15px] hover:opacity-90 transition-opacity shadow-md"
+            >
+              <Download className="w-5 h-5" />
+              הורד כרטיסים (PDF)
+            </a>
+          </motion.div>
+        ) : (
+          <div className="flex flex-col items-center gap-3 py-3">
+            <div className="relative w-16 h-20">
+              {/* Document skeleton animation */}
+              <motion.div
+                className="absolute inset-0 rounded-lg bg-muted/60 border border-border overflow-hidden"
+                animate={{ opacity: [0.5, 1, 0.5] }}
+                transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+              >
+                <div className="absolute top-2 right-2 left-2 h-1.5 rounded-full bg-muted-foreground/15" />
+                <div className="absolute top-5 right-2 left-4 h-1.5 rounded-full bg-muted-foreground/10" />
+                <div className="absolute top-8 right-2 left-3 h-1.5 rounded-full bg-muted-foreground/15" />
+                <div className="absolute top-11 right-2 left-5 h-1.5 rounded-full bg-muted-foreground/10" />
+                <div className="absolute bottom-2 left-1/2 -translate-x-1/2">
+                  <Loader2 className="w-4 h-4 text-primary/60 animate-spin" />
+                </div>
+              </motion.div>
+              {/* Corner fold */}
+              <div className="absolute top-0 left-0 w-4 h-4 bg-background border-b border-r border-border rounded-br-sm" />
+            </div>
+            <p className="text-[14px] text-muted-foreground">
+              הכרטיסים בהכנה...
+            </p>
+          </div>
+        )}
+
+        {/* Delivery indicators */}
+        <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
+          {buyerEmail && (
+            <div className="inline-flex items-center gap-1.5 text-[13px] text-muted-foreground">
+              <Mail className="w-3.5 h-3.5 text-blue-500" />
+              <span>נשלח ל-{buyerEmail}</span>
+            </div>
+          )}
+          {anyGuestWantsWhatsapp && (
+            <div className="inline-flex items-center gap-1.5 text-[13px] text-muted-foreground">
+              <MessageCircle className="w-3.5 h-3.5 text-[#25D366]" />
+              <span>נשלח לוואטסאפ</span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Calendar buttons */}
