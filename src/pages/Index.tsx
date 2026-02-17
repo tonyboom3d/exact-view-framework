@@ -294,6 +294,9 @@ const Index = () => {
           }}
           onTimeout={() => {
             setPendingPayment(null);
+            if (typeof window !== 'undefined' && window.top) {
+              window.top.location.href = 'https://www.tonyrobbins.co.il/';
+            }
           }}
         />
       )}
