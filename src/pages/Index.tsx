@@ -45,6 +45,7 @@ const Index = () => {
     setPendingPayment,
     pollPaymentStatus,
     sendPendingWhatsapp,
+    cancelPendingPayment,
     clearPendingPayment,
     checkExistingPendingOrder,
   } = useWixPayment();
@@ -280,6 +281,7 @@ const Index = () => {
           pendingData={pendingPayment}
           pollPaymentStatus={pollPaymentStatus}
           sendPendingWhatsapp={sendPendingWhatsapp}
+          cancelPendingPayment={cancelPendingPayment}
           onPaymentConfirmed={({ orderNumber: on, ticketsPdf: tp }) => {
             clearPendingPayment();
             setOrderNumber(on);
@@ -291,6 +293,10 @@ const Index = () => {
           onPaymentFailed={() => {
             clearPendingPayment();
             setPaymentError('התשלום לא אושר על ידי חברת האשראי. ניתן לנסות שוב.');
+          }}
+          onCancelled={() => {
+            clearPendingPayment();
+            setPaymentError('ההזמנה בוטלה. ניתן לנסות שוב.');
           }}
           onTimeout={() => {
             setPendingPayment(null);

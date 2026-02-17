@@ -10,8 +10,10 @@ interface PendingPaymentOverlayProps {
   onPaymentConfirmed: (data: { orderNumber: string; ticketsPdf?: string }) => void;
   onPaymentFailed: () => void;
   onTimeout: () => void;
+  onCancelled: () => void;
   pollPaymentStatus: (paymentId: string) => Promise<{ status: string; ticketsPdf?: string }>;
   sendPendingWhatsapp: (phone: string, firstName: string, orderNumber: string) => Promise<void>;
+  cancelPendingPayment: (paymentId: string) => Promise<void>;
 }
 
 type OverlayPhase = 'polling' | 'confirmed' | 'failed' | 'timeout';
@@ -25,16 +27,20 @@ const PendingPaymentOverlay = ({
   onPaymentConfirmed,
   onPaymentFailed,
   onTimeout,
+  onCancelled,
   pollPaymentStatus,
   sendPendingWhatsapp,
+  cancelPendingPayment,
 }: PendingPaymentOverlayProps) => {
   const [phase, setPhase] = useState<OverlayPhase>('polling');
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [isCancelling, setIsCancelling] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTimeRef = useRef<number>(Date.now());
   const whatsappSentRef = useRef(false);
   const resolvedRef = useRef(false);
+  const manuallyCancelledRef = useRef(false);
 
   const cleanup = useCallback(() => {
     if (intervalRef.current) {
@@ -46,6 +52,25 @@ const PendingPaymentOverlay = ({
       timerRef.current = null;
     }
   }, []);
+
+  const handleManualCancel = useCallback(async () => {
+    if (resolvedRef.current || !pendingData?.paymentId) return;
+
+    setIsCancelling(true);
+    manuallyCancelledRef.current = true;
+    resolvedRef.current = true;
+    cleanup();
+
+    try {
+      await cancelPendingPayment(pendingData.paymentId);
+      console.log('[PendingOverlay] Manual cancel completed');
+    } catch (err) {
+      console.warn('[PendingOverlay] Manual cancel failed:', err);
+    }
+
+    setIsCancelling(false);
+    onCancelled();
+  }, [pendingData, cancelPendingPayment, onCancelled, cleanup]);
 
   useEffect(() => {
     if (!visible || !pendingData?.paymentId) return;
@@ -105,8 +130,8 @@ const PendingPaymentOverlay = ({
         resolvedRef.current = true;
         cleanup();
 
-        // Send WhatsApp notification (fire-and-forget)
-        if (!whatsappSentRef.current && pendingData.buyerPhone) {
+        // Send WhatsApp notification ONLY if user didn't manually cancel (fire-and-forget)
+        if (!whatsappSentRef.current && !manuallyCancelledRef.current && pendingData.buyerPhone) {
           whatsappSentRef.current = true;
           sendPendingWhatsapp(
             pendingData.buyerPhone,
@@ -189,6 +214,21 @@ const PendingPaymentOverlay = ({
               <div className="rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 p-3">
                 <p className="text-[13px] text-amber-800 dark:text-amber-200 font-medium">
                   ⏳ אנא אל תסגרו חלונית זו ואל תרעננו את הדף
+                </p>
+              </div>
+
+              {/* Manual cancel option */}
+              <div className="pt-2 border-t border-border/50">
+                <p className="text-[13px] text-muted-foreground leading-relaxed">
+                  אם לא ביצעת תשלום בפועל ניתן לסגור את החלונית{' '}
+                  <button
+                    onClick={handleManualCancel}
+                    disabled={isCancelling}
+                    className="text-primary hover:text-primary/80 underline underline-offset-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isCancelling ? 'מבטל...' : 'בלחיצה כאן'}
+                  </button>
+                  {' '}ולדלג על ההמתנה
                 </p>
               </div>
 

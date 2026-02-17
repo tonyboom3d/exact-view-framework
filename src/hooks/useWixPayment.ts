@@ -201,6 +201,20 @@ export function useWixPayment() {
   }, []);
 
   /**
+   * Cancels a pending payment manually (user clicked "skip waiting").
+   * Updates CMS status to 'cancelled' and cancels the Wix Events order.
+   */
+  const cancelPendingPayment = useCallback(async (paymentId: string) => {
+    try {
+      await sendMessage('CANCEL_PENDING_PAYMENT', { paymentId }, 15000);
+      console.log('[useWixPayment] Pending payment cancelled manually');
+    } catch (err) {
+      console.warn('[useWixPayment] cancelPendingPayment failed:', err);
+      throw err;
+    }
+  }, []);
+
+  /**
    * Clears the pending payment state and localStorage.
    */
   const clearPendingPayment = useCallback(() => {
@@ -283,6 +297,7 @@ export function useWixPayment() {
     setPendingPayment,
     pollPaymentStatus,
     sendPendingWhatsapp,
+    cancelPendingPayment,
     clearPendingPayment,
     checkExistingPendingOrder,
   };
