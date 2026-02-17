@@ -8,9 +8,11 @@ import BuyerDetails from '@/components/BuyerDetails';
 import OrderSummary from '@/components/OrderSummary';
 import ThankYou from '@/components/ThankYou';
 import LoadingOverlay from '@/components/LoadingOverlay';
+import PendingPaymentOverlay from '@/components/PendingPaymentOverlay';
 import { type TicketSelection as TicketSelectionType, type BuyerInfo, type GuestInfo, type TicketType } from '@/types/order';
 import { useWixTickets } from '@/hooks/useWixTickets';
 import { useWixPayment } from '@/hooks/useWixPayment';
+import type { PendingPaymentData } from '@/hooks/useWixPayment';
 import { toast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getTestGuest, getTestPayer } from '@/config/testPrefill';
@@ -33,9 +35,23 @@ const Index = () => {
 
   // Wix integration hooks
   const { tickets, ensureWixData, isAdminTest } = useWixTickets();
-  const { createOrderAndPay, loading: paymentLoading, loadingMessage, error: paymentError, setError: setPaymentError } = useWixPayment();
+  const {
+    createOrderAndPay,
+    loading: paymentLoading,
+    loadingMessage,
+    error: paymentError,
+    setError: setPaymentError,
+    pendingPayment,
+    setPendingPayment,
+    pollPaymentStatus,
+    sendPendingWhatsapp,
+    clearPendingPayment,
+    checkExistingPendingOrder,
+  } = useWixPayment();
   const [paymentStatus, setPaymentStatus] = useState<'Successful' | 'Pending' | null>(null);
   const [pdfLink, setPdfLink] = useState<string | null>(null);
+  const [showPendingDialog, setShowPendingDialog] = useState(false);
+  const [existingPendingData, setExistingPendingData] = useState<PendingPaymentData | null>(null);
 
   const totalTickets = useMemo(
     () => selections.reduce((sum, s) => sum + s.quantity, 0),
@@ -79,6 +95,34 @@ const Index = () => {
     const payer = getTestPayer();
     setBuyer({ firstName: payer.firstName, lastName: payer.lastName, email: payer.email, phone: payer.phone });
   }, [showPayer, isAdminTest]);
+
+  // Check localStorage for a pending order from a previous session
+  useEffect(() => {
+    if (!isInsideWix) return;
+
+    checkExistingPendingOrder().then((result) => {
+      if (!result) return;
+
+      const { data, currentStatus, ticketsPdf } = result;
+
+      if (currentStatus === 'paid') {
+        // Order was confirmed while user was away
+        setOrderNumber(data.orderNumber);
+        setPaymentStatus('Successful');
+        setPdfLink(ticketsPdf || null);
+        clearPendingPayment();
+        setStep(3);
+        toast({ title: 'ההזמנה שלך אושרה!', description: `מספר הזמנה: ${data.orderNumber}` });
+      } else if (currentStatus === 'pending-payment' || currentStatus === 'in-progress') {
+        // Still pending – show dialog
+        setExistingPendingData(data);
+        setShowPendingDialog(true);
+      } else {
+        // Cancelled, failed, or unknown – clean up
+        clearPendingPayment();
+      }
+    });
+  }, []);
 
   const handleSelectionsChange = (newSelections: TicketSelectionType[]) => {
     setSelections(newSelections);
@@ -178,6 +222,14 @@ const Index = () => {
             totalPrice,
             ensureWixData,
           });
+
+          if (result.status === 'Pending') {
+            // Pending payment – PendingPaymentOverlay will handle polling
+            // pendingPayment state was already set by useWixPayment
+            setOrderNumber(result.orderNumber);
+            return;
+          }
+
           setOrderNumber(result.orderNumber);
           setReferralCode(result.referralCode);
           setPdfLink(result.pdfLink || null);
@@ -186,7 +238,6 @@ const Index = () => {
           window.scrollTo({ top: 0, behavior: 'smooth' });
         } catch (err: any) {
           // Error is handled by useWixPayment - it sets paymentError state
-          // No need to show toast here, the error message is displayed in UI
         }
       } else {
         // Dev mode: skip payment, go to thank you
@@ -221,6 +272,88 @@ const Index = () => {
     <div className="h-screen bg-background flex flex-col overflow-hidden">
       <StickyHeader />
       <LoadingOverlay visible={paymentLoading} message={loadingMessage} />
+
+      {/* Pending payment polling overlay */}
+      {pendingPayment && (
+        <PendingPaymentOverlay
+          visible={!!pendingPayment}
+          pendingData={pendingPayment}
+          pollPaymentStatus={pollPaymentStatus}
+          sendPendingWhatsapp={sendPendingWhatsapp}
+          onPaymentConfirmed={({ orderNumber: on, ticketsPdf: tp }) => {
+            clearPendingPayment();
+            setOrderNumber(on);
+            setPdfLink(tp || null);
+            setPaymentStatus('Successful');
+            setStep(3);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          onPaymentFailed={() => {
+            clearPendingPayment();
+            setPaymentError('התשלום לא אושר על ידי חברת האשראי. ניתן לנסות שוב.');
+          }}
+          onTimeout={() => {
+            setPendingPayment(null);
+          }}
+        />
+      )}
+
+      {/* Returning user: existing pending order dialog */}
+      <AnimatePresence>
+        {showPendingDialog && existingPendingData && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[150] flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="mx-4 max-w-sm w-full rounded-2xl bg-card border border-border shadow-2xl p-6 text-center space-y-4"
+            >
+              <div className="w-14 h-14 mx-auto rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                <span className="text-2xl">⏳</span>
+              </div>
+              <h3 className="text-[18px] font-bold text-foreground">יש לך הזמנה ממתינה</h3>
+              <p className="text-[14px] text-muted-foreground leading-relaxed">
+                ביצעת הזמנה מספר <span className="font-bold">{existingPendingData.orderNumber}</span>
+                {' '}בתאריך{' '}
+                <span className="font-medium">
+                  {new Date(existingPendingData.timestamp).toLocaleString('he-IL', {
+                    dateStyle: 'short',
+                    timeStyle: 'short',
+                  })}
+                </span>
+                {' '}שעדיין ממתינה לאישור חברת האשראי.
+              </p>
+              <div className="space-y-2 pt-2">
+                <Button
+                  onClick={() => {
+                    setShowPendingDialog(false);
+                    setPendingPayment(existingPendingData);
+                  }}
+                  className="w-full h-11 text-[15px] font-bold bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl"
+                >
+                  להמשיך לחכות לאישור
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowPendingDialog(false);
+                    setExistingPendingData(null);
+                    clearPendingPayment();
+                  }}
+                  className="w-full h-11 text-[15px] font-medium rounded-xl"
+                >
+                  לבצע הזמנה חדשה
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Payment error message */}
       <AnimatePresence>

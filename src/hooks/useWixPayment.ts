@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { sendMessage, onMessage } from '@/lib/wixBridge';
 import type { GuestInfo, BuyerInfo, TicketInfo } from '@/types/order';
 import type { TicketSelection } from '@/types/order';
@@ -11,12 +11,29 @@ interface PaymentResult {
   currency?: string;
   customerEmail?: string;
   pdfLink?: string;
+  paymentId?: string;
+  buyerPhone?: string;
+  buyerFirstName?: string;
 }
+
+export interface PendingPaymentData {
+  orderNumber: string;
+  paymentId: string;
+  buyerPhone: string;
+  buyerFirstName: string;
+  totalAmount: number;
+  currency: string;
+  customerEmail: string;
+  timestamp: number;
+}
+
+const PENDING_ORDER_KEY = 'pendingOrder';
 
 export function useWixPayment() {
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [pendingPayment, setPendingPayment] = useState<PendingPaymentData | null>(null);
 
   async function createOrderAndPay(params: {
     selections: TicketSelection[];
@@ -103,11 +120,43 @@ export function useWixPayment() {
       // Use long timeout (10 minutes) since user might take time to complete payment.
       const paymentResult = await sendMessage<PaymentResult>('START_CHECKOUT', payload, 10 * 60 * 1000);
 
+      // Check if this is a Pending result (polling flow)
+      if (paymentResult.status === 'Pending' && paymentResult.paymentId) {
+        console.log('[useWixPayment] Payment is Pending – entering polling flow', {
+          paymentId: paymentResult.paymentId,
+          orderNumber: paymentResult.orderNumber,
+        });
+
+        const pendingData: PendingPaymentData = {
+          orderNumber: paymentResult.orderNumber,
+          paymentId: paymentResult.paymentId,
+          buyerPhone: paymentResult.buyerPhone || '',
+          buyerFirstName: paymentResult.buyerFirstName || '',
+          totalAmount: paymentResult.totalAmount || 0,
+          currency: paymentResult.currency || 'ILS',
+          customerEmail: paymentResult.customerEmail || '',
+          timestamp: Date.now(),
+        };
+
+        // Save to localStorage for returning users
+        try {
+          localStorage.setItem(PENDING_ORDER_KEY, JSON.stringify(pendingData));
+        } catch (e) { /* localStorage might be unavailable */ }
+
+        setLoading(false);
+        setLoadingMessage('');
+        setPendingPayment(pendingData);
+        return paymentResult;
+      }
+
       // Payment completed – update message before hiding overlay
       setLoadingMessage('יש להמתין מספר רגעים...');
       
       // Small delay to show the "wait" message before transitioning
       await new Promise(resolve => setTimeout(resolve, 800));
+
+      // Clear any pending order from localStorage on successful payment
+      try { localStorage.removeItem(PENDING_ORDER_KEY); } catch (e) { /* */ }
 
       setLoading(false);
       setLoadingMessage('');
@@ -119,6 +168,88 @@ export function useWixPayment() {
       throw err;
     }
   }
+
+  /**
+   * Polls the CMS for payment status changes. Returns the resolved status.
+   * Called by PendingPaymentOverlay every 5 seconds for 60 seconds.
+   */
+  const pollPaymentStatus = useCallback(async (paymentId: string) => {
+    try {
+      const result = await sendMessage<{ status: string; orderNumber?: string; ticketsPdf?: string }>(
+        'CHECK_PAYMENT_STATUS',
+        { paymentId },
+        10000
+      );
+      return result;
+    } catch (err) {
+      console.warn('[useWixPayment] pollPaymentStatus failed:', err);
+      return { status: 'error' };
+    }
+  }, []);
+
+  /**
+   * Sends a WhatsApp notification to the buyer that their payment is being verified.
+   * Called after 60 seconds of polling with no result.
+   */
+  const sendPendingWhatsapp = useCallback(async (phone: string, firstName: string, orderNumber: string) => {
+    try {
+      await sendMessage('SEND_PENDING_WHATSAPP', { phone, firstName, orderNumber }, 15000);
+      console.log('[useWixPayment] Pending WhatsApp notification sent');
+    } catch (err) {
+      console.warn('[useWixPayment] sendPendingWhatsapp failed:', err);
+    }
+  }, []);
+
+  /**
+   * Clears the pending payment state and localStorage.
+   */
+  const clearPendingPayment = useCallback(() => {
+    setPendingPayment(null);
+    try { localStorage.removeItem(PENDING_ORDER_KEY); } catch (e) { /* */ }
+  }, []);
+
+  /**
+   * Checks localStorage for a pending order from a previous session.
+   * Returns the data if found and < 24 hours old, otherwise null.
+   */
+  const checkExistingPendingOrder = useCallback(async (): Promise<{
+    data: PendingPaymentData;
+    currentStatus: string;
+    ticketsPdf?: string;
+  } | null> => {
+    try {
+      const stored = localStorage.getItem(PENDING_ORDER_KEY);
+      if (!stored) return null;
+
+      const data: PendingPaymentData = JSON.parse(stored);
+      const hoursPassed = (Date.now() - data.timestamp) / (1000 * 60 * 60);
+
+      if (hoursPassed > 24) {
+        localStorage.removeItem(PENDING_ORDER_KEY);
+        return null;
+      }
+
+      // Check current status from CMS
+      const result = await sendMessage<{ status: string; orderNumber?: string; ticketsPdf?: string }>(
+        'CHECK_PAYMENT_STATUS',
+        { paymentId: data.paymentId },
+        10000
+      );
+
+      return { data, currentStatus: result.status, ticketsPdf: result.ticketsPdf };
+    } catch (err) {
+      console.warn('[useWixPayment] checkExistingPendingOrder failed:', err);
+      return null;
+    }
+  }, []);
+
+  // Listen for intermediate "payment received" signal – update loading text
+  useEffect(() => {
+    const unsub = onMessage('PAYMENT_PROCESSING', () => {
+      setLoadingMessage('רק רגע בבקשה...');
+    });
+    return unsub;
+  }, []);
 
   // Listen for payment cancellation (user closed modal without paying)
   useEffect(() => {
@@ -142,5 +273,17 @@ export function useWixPayment() {
     return unsub;
   }, []);
 
-  return { createOrderAndPay, loading, loadingMessage, error, setError };
+  return {
+    createOrderAndPay,
+    loading,
+    loadingMessage,
+    error,
+    setError,
+    pendingPayment,
+    setPendingPayment,
+    pollPaymentStatus,
+    sendPendingWhatsapp,
+    clearPendingPayment,
+    checkExistingPendingOrder,
+  };
 }
