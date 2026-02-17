@@ -224,7 +224,7 @@ const PendingPaymentOverlay = ({
                   <button
                     onClick={handleManualCancel}
                     disabled={isCancelling}
-                    className="text-primary hover:text-primary/80 underline underline-offset-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="text-red-600 hover:text-red-700 dark:text-red-500 dark:hover:text-red-600 underline underline-offset-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isCancelling ? 'מבטל...' : 'בלחיצה כאן'}
                   </button>
