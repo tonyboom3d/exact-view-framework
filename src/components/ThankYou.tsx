@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Check, Calendar, ChevronDown, Mail, Facebook, Loader2, Download, FileText, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { TicketSelection, TicketInfo, GuestInfo, BuyerInfo } from '@/types/order';
 import { toast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
+import { sendMessage } from '@/lib/wixBridge';
 
 interface ThankYouProps {
   orderNumber: string;
@@ -30,6 +31,52 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
       setPdfReady(true);
     }
   }, [pdfLink]);
+
+  // Poll for PDF if not available initially
+  const pdfPollAttempts = useRef(0);
+  const maxPdfPolls = 10; // 10 attempts × 5 seconds = 50 seconds max
+  
+  useEffect(() => {
+    // Don't poll if we already have the PDF or if no orderNumber
+    if (pdfReady || currentPdfLink || !orderNumber) return;
+    
+    // Only poll if payment was successful
+    if (paymentStatus !== 'Successful') return;
+
+    let cancelled = false;
+
+    const pollForPdf = async () => {
+      while (!cancelled && pdfPollAttempts.current < maxPdfPolls) {
+        pdfPollAttempts.current += 1;
+        console.log(`🟡 [ThankYou] Polling for PDF, attempt ${pdfPollAttempts.current}/${maxPdfPolls}`);
+        
+        try {
+          const response = await sendMessage<{ pdfUrl: string }>('GET_PDF', { orderNumber });
+          if (response?.pdfUrl) {
+            console.log('🟡 [ThankYou] ✅ PDF found:', response.pdfUrl);
+            setCurrentPdfLink(response.pdfUrl);
+            setPdfReady(true);
+            return; // Stop polling
+          }
+        } catch (err) {
+          console.warn('🟡 [ThankYou] PDF poll error:', err);
+        }
+        
+        // Wait 5 seconds before next attempt
+        await new Promise(resolve => setTimeout(resolve, 5000));
+      }
+      
+      if (!cancelled && pdfPollAttempts.current >= maxPdfPolls) {
+        console.warn('🟡 [ThankYou] ❌ PDF polling exhausted, max attempts reached');
+      }
+    };
+
+    pollForPdf();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [orderNumber, paymentStatus, pdfReady, currentPdfLink]);
 
   // Determine where tickets were sent
   const buyerEmail = showPayer ? buyer.email : (guests[0]?.email || '');
