@@ -320,12 +320,13 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
               <span>נשלח ל-{buyerEmail}</span>
             </div>
           )}
-          {anyGuestWantsWhatsapp && (
+          {/* WhatsApp indicator – hidden for now, kept for future use */}
+          {/* {anyGuestWantsWhatsapp && (
             <div className="inline-flex items-center gap-1.5 text-[13px] text-muted-foreground">
               <MessageCircle className="w-3.5 h-3.5 text-[#25D366]" />
               <span>נשלח לוואטסאפ</span>
             </div>
-          )}
+          )} */}
         </div>
       </div>
 

@@ -403,7 +403,8 @@ const BuyerDetails = ({
                           ref={(el) => { phoneRefs.current[ticket.index] = el; }}
                         />
                         {errors[`guest_${ticket.index}_phone`] && <p className="text-sm text-destructive mt-1">{errors[`guest_${ticket.index}_phone`]}</p>}
-                        <div className="flex items-center gap-2 mt-1.5">
+                        {/* WhatsApp opt-in checkbox – hidden for now, kept for future use */}
+                        {/* <div className="flex items-center gap-2 mt-1.5">
                           <Checkbox
                             id={`whatsapp-${ticket.index}`}
                             checked={guest?.wantWhatsapp !== false}
@@ -412,7 +413,7 @@ const BuyerDetails = ({
                           <Label htmlFor={`whatsapp-${ticket.index}`} className="text-[15px] text-muted-foreground cursor-pointer">
                             שילחו לוואטסאפ את הכרטיס
                           </Label>
-                        </div>
+                        </div> */}
                       </div>
                       {/* Next ticket button */}
                       {ticket.index < flatTickets.length - 1 && (
