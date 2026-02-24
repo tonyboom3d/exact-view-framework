@@ -21,6 +21,11 @@ interface WixTicketMeta {
    * If provided, it will override the fallback price in the UI.
    */
   price?: number;
+  /**
+   * Optional custom text for the sold-out tag (from CMS textOnTag field).
+   * Defaults to "אזלו הכרטיסים" when not provided.
+   */
+  tagText?: string;
 }
 
 const isInsideWix = window.parent !== window;
@@ -76,6 +81,7 @@ export function useWixTickets() {
           soldPercent: meta.soldPercent,
           isSoldOut: meta.isSoldOut,
           price: meta.price,
+          tagText: meta.tagText,
         });
 
         const soldPercent = meta.soldPercent ?? fallback.fomoPercent;
@@ -90,6 +96,7 @@ export function useWixTickets() {
             soldPercent != null
               ? `${soldPercent}% כרטיסים נרכשו`
               : fallback.fomoText,
+          tagText: meta.tagText || fallback.tagText,
         };
       })
     );
