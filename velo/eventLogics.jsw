@@ -20,6 +20,7 @@ export async function getTicketMeta() {
         // If test mode is enabled, override price to 1 ILS for testing (regardless of CMS price)
         price: TEST_MODE_ENABLED ? 1 : (item.price || 0),
         name: item.name,
+        tagText: item.textOnTag || '',
     }));
 }
 

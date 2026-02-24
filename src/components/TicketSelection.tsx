@@ -7,6 +7,15 @@ import { motion } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
 import SeatingMap from '@/components/SeatingMap';
 
+const isInsideWixIframe = typeof window !== 'undefined' && window.parent !== window;
+
+function sendTrackingEvent(type: string, data: Record<string, unknown>) {
+  if (!isInsideWixIframe) return;
+  try {
+    window.parent.postMessage({ type, data }, '*');
+  } catch (_) { /* non-blocking */ }
+}
+
 const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
 interface TicketSelectionProps {
@@ -137,10 +146,11 @@ const TicketSelection = ({ selections, onChange, onBuyTicket, tickets, loading }
                   <span className="text-[17px] font-bold text-white/90">
                     ₪{ticket.price.toLocaleString()}
                   </span>
-                  {isSoldOut && (
+                  {/* Show tag if: (1) soldOut with text, or (2) not soldOut but has tagText */}
+                  {(isSoldOut || ticket.tagText) && (
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
                       <div className="bg-destructive text-white text-[17px] font-bold px-6 py-1.5 rounded -rotate-12 shadow-lg">
-                        אזלו הכרטיסים
+                        {isSoldOut ? (ticket.tagText || 'אזלו הכרטיסים') : ticket.tagText}
                       </div>
                     </div>
                   )}
@@ -219,6 +229,13 @@ const TicketSelection = ({ selections, onChange, onBuyTicket, tickets, loading }
                        onClick={(e) => {
                          e.stopPropagation();
                          if (isSoldOut) return;
+                         const buyQty = isActive ? qty : 1;
+                         sendTrackingEvent('TRACK_ADD_TO_CART', {
+                           name: ticket.name,
+                           price: ticket.price,
+                           quantity: buyQty,
+                           currency: 'ILS',
+                         });
                          if (!isActive) onChange([{ type: ticket.type, quantity: 1 }]);
                          onBuyTicket(ticket.type);
                        }}

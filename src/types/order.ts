@@ -13,6 +13,7 @@ export interface TicketInfo {
   progressColor: string;
   colorClass: string;
   mapLabel: string;
+  tagText?: string;
 }
 
 export interface GuestInfo {
