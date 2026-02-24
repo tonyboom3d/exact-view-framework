@@ -150,7 +150,11 @@ const TicketSelection = ({ selections, onChange, onBuyTicket, tickets, loading }
                   {(isSoldOut || ticket.tagText) && (
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
                       <div className="bg-destructive text-white text-[17px] font-bold px-6 py-1.5 rounded -rotate-12 shadow-lg">
+<<<<<<< HEAD
                         {isSoldOut ? (ticket.tagText || 'אזלו הכרטיסים') : ticket.tagText}
+=======
+                        {ticket.tagText || 'אזלו הכרטיסים'}
+>>>>>>> abbea5b0494e415a4b3dfcbdd923f1ba572f05dc
                       </div>
                     </div>
                   )}

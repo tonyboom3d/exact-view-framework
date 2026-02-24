@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Home } from 'lucide-react';
 import StickyHeader from '@/components/StickyHeader';
 import StickyBottomBar from '@/components/StickyBottomBar';
 import TicketSelection from '@/components/TicketSelection';
@@ -412,6 +412,21 @@ const Index = () => {
         <AnimatePresence mode="wait">
           {step === 1 && (
             <motion.div key="step1" initial={isMobile ? false : { opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <div className="flex justify-end pt-3 pb-1">
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="bg-black hover:bg-black/80 text-white flex items-center gap-1.5 text-[14px] font-medium h-9 px-3 rounded-lg"
+                  onClick={() => {
+                    const url = 'https://www.tonyrobbins.co.il/';
+                    if (window.top) window.top.location.href = url;
+                    else window.location.href = url;
+                  }}
+                >
+                  <Home className="w-4 h-4" />
+                  חזרה לדף הבית
+                </Button>
+              </div>
               <TicketSelection
                 selections={selections}
                 onChange={handleSelectionsChange}

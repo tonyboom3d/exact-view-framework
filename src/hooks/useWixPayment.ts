@@ -116,6 +116,14 @@ export function useWixPayment() {
         totalAmount: totalPrice,
       };
 
+      // Fire StartPayment tracking event (fire-and-forget, no response expected)
+      try {
+        window.parent.postMessage({
+          type: 'TRACK_START_PAYMENT',
+          data: { totalAmount: totalPrice, currency: 'ILS' },
+        }, '*');
+      } catch (_) { /* non-blocking */ }
+
       // Single START_CHECKOUT command – Velo side will handle reserve/checkout/payment.
       // Use long timeout (10 minutes) since user might take time to complete payment.
       const paymentResult = await sendMessage<PaymentResult>('START_CHECKOUT', payload, 10 * 60 * 1000);
