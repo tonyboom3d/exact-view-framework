@@ -163,34 +163,36 @@ const TicketSelection = ({ selections, onChange, onBuyTicket, tickets, loading }
 
                  {/* Row layout: progress bar right, buttons left (RTL) */}
                  <div className="flex items-end gap-2 sm:gap-3">
-                   {/* Progress bar (appears on right in RTL) */}
-                   <motion.div
-                     className="flex-1 min-w-0"
-                     initial={isMobile ? false : { scaleX: 0 }}
-                     animate={{ scaleX: 1 }}
-                     transition={{ duration: 0.6, delay: isMobile ? 0 : 0.3 + index * 0.12 }}
-                     style={{ transformOrigin: 'right' }}
-                   >
-                     <p className="text-[14px] text-muted-foreground mb-0 text-right font-medium">
-                       {ticket.fomoPercent}% כרטיסים נרכשו
-                     </p>
-                     <div className="bg-muted rounded-full h-3 border border-border overflow-hidden">
-                       <div
-                         className="h-3 rounded-full relative overflow-hidden"
-                         style={{ width: `${ticket.fomoPercent}%`, background: ticket.progressColor }}
-                       >
-                         {!ticket.soldOut && (
-                           <div
-                             className="absolute inset-0 rounded-full"
-                             style={{
-                               background: `linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.35) 50%, transparent 100%)`,
-                               animation: 'progress-shimmer 3s ease-in-out infinite',
-                             }}
-                           />
-                         )}
+                   {/* Progress bar – show only when fomoPercent > 0 */}
+                   {(ticket.fomoPercent ?? 0) > 0 && (
+                     <motion.div
+                       className="flex-1 min-w-0"
+                       initial={isMobile ? false : { scaleX: 0 }}
+                       animate={{ scaleX: 1 }}
+                       transition={{ duration: 0.6, delay: isMobile ? 0 : 0.3 + index * 0.12 }}
+                       style={{ transformOrigin: 'right' }}
+                     >
+                       <p className="text-[14px] text-muted-foreground mb-0 text-right font-medium">
+                         {ticket.fomoPercent}% כרטיסים נרכשו
+                       </p>
+                       <div className="bg-muted rounded-full h-3 border border-border overflow-hidden">
+                         <div
+                           className="h-3 rounded-full relative overflow-hidden"
+                           style={{ width: `${ticket.fomoPercent}%`, background: ticket.progressColor }}
+                         >
+                           {!ticket.soldOut && (
+                             <div
+                               className="absolute inset-0 rounded-full"
+                               style={{
+                                 background: `linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.35) 50%, transparent 100%)`,
+                                 animation: 'progress-shimmer 3s ease-in-out infinite',
+                               }}
+                             />
+                           )}
+                         </div>
                        </div>
-                     </div>
-                   </motion.div>
+                     </motion.div>
+                   )}
 
                    {/* Buttons (appears on left in RTL) */}
                    <div className="flex flex-col gap-1 items-center shrink-0">
