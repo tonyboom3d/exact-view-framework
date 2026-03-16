@@ -69,7 +69,7 @@ const TicketSelection = ({ selections, onChange, onBuyTicket, tickets, loading }
         <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[14px] text-muted-foreground">
           <span className="flex items-center gap-1">
             <Calendar className="w-3.5 h-3.5" />
-            4 ימים, 12-15 במרץ 2026
+            4 ימים, 16-19 ביוני 2026
           </span>
           <span className="flex items-center gap-1">
             <MapPin className="w-3.5 h-3.5" />

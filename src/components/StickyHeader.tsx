@@ -69,42 +69,44 @@ const StickyHeader = () => {
             }`}
             style={{ transform: 'scaleX(-1) translateZ(0)' }} />
 
-          {/* Countdown timer - left side */}
-          <div className="flex flex-col md:flex-row-reverse md:items-center items-end gap-0.5 md:gap-2">
-            {/* Mobile: "מתחילים בעוד" above timer */}
-            <span className={`md:hidden font-bold text-foreground whitespace-nowrap transition-[font-size] duration-300 ${
-              isScrolled 
-                ? 'text-[12px] sm:text-[14px]' 
-                : 'text-[15px] sm:text-[17px]'
-            }`}>
-              מתחילים בעוד
-            </span>
-            <div className={`gap-1 sm:gap-1.5 flex items-center justify-start transition-[gap] duration-300 ${
-              isScrolled ? 'gap-0.5 sm:gap-1' : ''
-            }`} dir="ltr">
-              <FlipUnit value={pad(timeLeft.days)} label="ימים" isScrolled={isScrolled} />
-              <span className={`font-bold text-destructive animate-pulse transition-[font-size] duration-300 ${
-                isScrolled ? 'text-xs sm:text-sm' : 'text-sm sm:text-lg'
-              }`}>:</span>
-              <FlipUnit value={pad(timeLeft.hours)} label="שעות" isScrolled={isScrolled} />
-              <span className={`font-bold text-destructive animate-pulse transition-[font-size] duration-300 ${
-                isScrolled ? 'text-xs sm:text-sm' : 'text-sm sm:text-lg'
-              }`}>:</span>
-              <FlipUnit value={pad(timeLeft.minutes)} label="דקות" isScrolled={isScrolled} />
-              <span className={`font-bold text-destructive animate-pulse transition-[font-size] duration-300 ${
-                isScrolled ? 'text-xs sm:text-sm' : 'text-sm sm:text-lg'
-              }`}>:</span>
-              <FlipUnit value={pad(timeLeft.seconds)} label="שניות" isScrolled={isScrolled} />
+          {/* Countdown timer - left side (temporarily hidden, keep code for future use) */}
+          {false && (
+            <div className="flex flex-col md:flex-row-reverse md:items-center items-end gap-0.5 md:gap-2">
+              {/* Mobile: "מתחילים בעוד" above timer */}
+              <span className={`md:hidden font-bold text-foreground whitespace-nowrap transition-[font-size] duration-300 ${
+                isScrolled 
+                  ? 'text-[12px] sm:text-[14px]' 
+                  : 'text-[15px] sm:text-[17px]'
+              }`}>
+                מתחילים בעוד
+              </span>
+              <div className={`gap-1 sm:gap-1.5 flex items-center justify-start transition-[gap] duration-300 ${
+                isScrolled ? 'gap-0.5 sm:gap-1' : ''
+              }`} dir="ltr">
+                <FlipUnit value={pad(timeLeft.days)} label="ימים" isScrolled={isScrolled} />
+                <span className={`font-bold text-destructive animate-pulse transition-[font-size] duration-300 ${
+                  isScrolled ? 'text-xs sm:text-sm' : 'text-sm sm:text-lg'
+                }`}>:</span>
+                <FlipUnit value={pad(timeLeft.hours)} label="שעות" isScrolled={isScrolled} />
+                <span className={`font-bold text-destructive animate-pulse transition-[font-size] duration-300 ${
+                  isScrolled ? 'text-xs sm:text-sm' : 'text-sm sm:text-lg'
+                }`}>:</span>
+                <FlipUnit value={pad(timeLeft.minutes)} label="דקות" isScrolled={isScrolled} />
+                <span className={`font-bold text-destructive animate-pulse transition-[font-size] duration-300 ${
+                  isScrolled ? 'text-xs sm:text-sm' : 'text-sm sm:text-lg'
+                }`}>:</span>
+                <FlipUnit value={pad(timeLeft.seconds)} label="שניות" isScrolled={isScrolled} />
+              </div>
+              {/* Desktop: "מתחילים בעוד" on same row, right of timer */}
+              <span className={`hidden md:block font-bold text-foreground whitespace-nowrap transition-[font-size] duration-300 ${
+                isScrolled 
+                  ? 'text-[12px] md:text-[14px]' 
+                  : 'text-[15px] md:text-[17px]'
+              }`}>
+                מתחילים בעוד
+              </span>
             </div>
-            {/* Desktop: "מתחילים בעוד" on same row, right of timer */}
-            <span className={`hidden md:block font-bold text-foreground whitespace-nowrap transition-[font-size] duration-300 ${
-              isScrolled 
-                ? 'text-[12px] md:text-[14px]' 
-                : 'text-[15px] md:text-[17px]'
-            }`}>
-              מתחילים בעוד
-            </span>
-          </div>
+          )}
 
           {/* Desktop (md+): event details - between timer and image, same row */}
           <AnimatePresence>
@@ -124,7 +126,7 @@ const StickyHeader = () => {
                 <div className="flex flex-wrap items-center justify-start gap-x-3 text-[12px] text-muted-foreground mt-0.5">
                   <span className="flex items-center gap-1">
                     <Calendar className="w-3 h-3 shrink-0" />
-                    4 ימים, 12-15 במרץ 2026
+                    4 ימים, 16-19 ביוני 2026
                   </span>
                   <span className="flex items-center gap-1">
                     <MapPin className="w-3 h-3 shrink-0" />
