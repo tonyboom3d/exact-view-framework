@@ -32,7 +32,7 @@ const SeatingMap = (_props: SeatingMapProps) => {
               <h4 className="font-bold text-[16px] text-foreground mb-1">Premier</h4>
               <p>
                 המושבים הקרובים ביותר לבמה, בשתי השורות הראשונות של הגוש המרכזי. אזור זה מסומן
-                בצבע זהב. הכרטיסים הללו הם Sold Out ואינם זמינים למכירה.
+                בצבע זהב.
               </p>
             </section>
 

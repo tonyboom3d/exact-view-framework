@@ -1,22 +1,36 @@
 import { orders } from 'wix-events.v2';
 import wixPay from 'wix-pay-frontend';
-import { getTicketMeta, createEventPayment, confirmEventOrder, saveAbandonedCart, updateCartAfterPayment } from 'backend/eventLogics';
+import wixWindowFrontend from 'wix-window-frontend';
+import { session } from 'wix-storage';
+import { getTicketMeta, createEventPayment, confirmEventOrder, saveAbandonedCart, updateCartAfterPayment, checkPaymentStatus, sendPendingPaymentWhatsapp, cancelPendingPayment, getOrderDetails } from 'backend/eventLogics';
 
 $w.onReady(async function () {
-  const EVENT_ID = '86ac2d0f-e2dc-4c86-9c10-efeb710aa570'; 
+  const PRODUCTION_EVENT_ID = '86ac2d0f-e2dc-4c86-9c10-efeb710aa570';
+  const TEST_EVENT_ID = '9e19a44f-9fc3-48f2-a9fd-83cedb993d1c';
 
   const htmlComponent = $w('#eventIframe')
+
+  // Check if admin test mode is active (set by masterPage.js after URL token validation)
+  const isAdminTest = session.getItem('isAdminTest') === 'true';
+
+  // In admin test mode, use the test event (with test tickets at 1 ILS)
+  const EVENT_ID = isAdminTest ? TEST_EVENT_ID : PRODUCTION_EVENT_ID;
+
+  if (isAdminTest) {
+    console.log('[veloEventHandler] Admin test mode is ACTIVE – using test event', TEST_EVENT_ID);
+  }
 
   // Store ticket meta for later use in checkout
   let ticketMetaMap = {};
 
   // 1. On load – fetch ticket meta from backend (CMS) and send INIT_EVENT_DATA
   try {
-    const ticketsPayload = await getTicketMeta();
+    const ticketsPayload = await getTicketMeta(isAdminTest);
 
     console.log('INIT_EVENT_DATA: loaded tickets from CMS', {
       count: ticketsPayload.length,
       keys: ticketsPayload.map((t) => t.key),
+      isAdminTest,
     });
 
     // Build a map for quick lookup by ticketId
@@ -29,6 +43,7 @@ $w.onReady(async function () {
       payload: {
         eventId: EVENT_ID,
         tickets: ticketsPayload,
+        isAdminTest,
       },
     });
   } catch (error) {
@@ -44,9 +59,8 @@ $w.onReady(async function () {
 
     // Handle REQUEST_INIT – the iframe is asking for ticket data (re-send INIT_EVENT_DATA)
     if (message.type === 'REQUEST_INIT') {
-      console.log('REQUEST_INIT: iframe requested ticket data, re-fetching and sending...');
       try {
-        const ticketsPayload = await getTicketMeta();
+        const ticketsPayload = await getTicketMeta(isAdminTest);
         // Refresh the local map too
         ticketsPayload.forEach((t) => {
           ticketMetaMap[t.id] = t;
@@ -56,11 +70,139 @@ $w.onReady(async function () {
           payload: {
             eventId: EVENT_ID,
             tickets: ticketsPayload,
+            isAdminTest,
           },
         });
-        console.log('REQUEST_INIT: re-sent INIT_EVENT_DATA with', ticketsPayload.length, 'tickets');
       } catch (error) {
         console.error('REQUEST_INIT: failed to re-fetch ticket metadata', error);
+      }
+      return;
+    }
+
+    // Handle CHECK_PAYMENT_STATUS – iframe polls CMS for payment status updates
+    if (message.type === 'CHECK_PAYMENT_STATUS') {
+      const { paymentId } = message.data || {};
+      const requestId = message.requestId;
+      try {
+        const statusResult = await checkPaymentStatus(paymentId);
+        htmlComponent.postMessage({
+          type: 'CHECK_PAYMENT_STATUS',
+          requestId,
+          success: true,
+          data: statusResult,
+        });
+      } catch (err) {
+        htmlComponent.postMessage({
+          type: 'CHECK_PAYMENT_STATUS',
+          requestId,
+          success: false,
+          error: String(err),
+        });
+      }
+      return;
+    }
+
+    // Handle GET_PDF – iframe requests PDF link for a specific order
+    if (message.type === 'GET_PDF') {
+      const { orderNumber, eventId } = message.data || {};
+      const requestId = message.requestId;
+      // console.log('🟡 GET_PDF: fetching PDF for order', { orderNumber, eventId: eventId || EVENT_ID });
+      try {
+        const orderDetails = await getOrderDetails(orderNumber, eventId || EVENT_ID);
+        const pdfUrl = orderDetails?.ticketsPdf || '';
+        // console.log('🟡 GET_PDF: result', { orderNumber, hasPdf: !!pdfUrl, pdfUrl: pdfUrl ? pdfUrl.substring(0, 80) + '...' : 'EMPTY' });
+        htmlComponent.postMessage({
+          type: 'GET_PDF',
+          requestId,
+          success: true,
+          data: { pdfUrl },
+        });
+      } catch (err) {
+        console.error('🟡 GET_PDF: ❌ failed', err);
+        htmlComponent.postMessage({
+          type: 'GET_PDF',
+          requestId,
+          success: false,
+          error: String(err),
+        });
+      }
+      return;
+    }
+
+    // Handle SEND_PENDING_WHATSAPP – iframe requests WhatsApp notification after 60s polling timeout
+    if (message.type === 'SEND_PENDING_WHATSAPP') {
+      const { phone, firstName, orderNumber } = message.data || {};
+      const requestId = message.requestId;
+      try {
+        const waResult = await sendPendingPaymentWhatsapp(phone, firstName, orderNumber);
+        htmlComponent.postMessage({
+          type: 'SEND_PENDING_WHATSAPP',
+          requestId,
+          success: true,
+          data: waResult,
+        });
+      } catch (err) {
+        htmlComponent.postMessage({
+          type: 'SEND_PENDING_WHATSAPP',
+          requestId,
+          success: false,
+          error: String(err),
+        });
+      }
+      return;
+    }
+
+    // Handle CANCEL_PENDING_PAYMENT – user manually cancelled pending payment (clicked "skip waiting")
+    if (message.type === 'CANCEL_PENDING_PAYMENT') {
+      const { paymentId } = message.data || {};
+      const requestId = message.requestId;
+      try {
+        const cancelResult = await cancelPendingPayment(paymentId);
+        htmlComponent.postMessage({
+          type: 'CANCEL_PENDING_PAYMENT',
+          requestId,
+          success: true,
+          data: cancelResult,
+        });
+      } catch (err) {
+        htmlComponent.postMessage({
+          type: 'CANCEL_PENDING_PAYMENT',
+          requestId,
+          success: false,
+          error: String(err),
+        });
+      }
+      return;
+    }
+
+    // Handle TRACK_ADD_TO_CART – fire-and-forget, no response needed
+    if (message.type === 'TRACK_ADD_TO_CART') {
+      const { name, price, quantity, currency } = message.data || {};
+      try {
+        wixWindowFrontend.trackEvent('AddToCart', {
+          name: name || '',
+          price: price || 0,
+          quantity: quantity || 1,
+          currency: currency || 'ILS',
+          origin: 'Ticket Selection',
+        });
+        // console.log('[veloEventHandler] TRACK_ADD_TO_CART fired', { name, price, quantity });
+      } catch (trackErr) {
+        console.error('[veloEventHandler] TRACK_ADD_TO_CART failed', trackErr);
+      }
+      return;
+    }
+
+    // Handle TRACK_START_PAYMENT – fire-and-forget, no response needed
+    if (message.type === 'TRACK_START_PAYMENT') {
+      const { totalAmount, currency } = message.data || {};
+      try {
+        wixWindowFrontend.trackEvent('StartPayment', {
+          origin: 'Ticket Checkout',
+        });
+        // console.log('[veloEventHandler] TRACK_START_PAYMENT fired', { totalAmount, currency });
+      } catch (trackErr) {
+        console.error('[veloEventHandler] TRACK_START_PAYMENT failed', trackErr);
       }
       return;
     }
@@ -72,37 +214,26 @@ $w.onReady(async function () {
       const requestId = message.requestId; // Preserve requestId for response matching
       
       try {
-        console.log('START_CHECKOUT: received payload from iframe', {
-          selectedTickets: payload.selectedTickets,
-          mainBuyerDetails: payload.mainBuyerDetails,
-          hasPayer: !!payload.payer,
-          totalAmountFromIframe: payload.totalAmount,
-          requestId,
+        // console.log('START_CHECKOUT: received payload from iframe', {
+        //   selectedTickets: payload.selectedTickets,
+        //   mainBuyerDetails: payload.mainBuyerDetails,
+        //   hasPayer: !!payload.payer,
+        //   totalAmountFromIframe: payload.totalAmount,
+        //   requestId,
+        // });
+
+        const result = await handleStartCheckout(EVENT_ID, payload, ticketMetaMap, () => {
+          // Intermediate notification: payment popup closed with a valid result.
+          // Update the iframe loading message before heavy processing (confirm/PDF/WhatsApp).
+          htmlComponent.postMessage({ type: 'PAYMENT_PROCESSING' });
         });
 
-        const result = await handleStartCheckout(EVENT_ID, payload, ticketMetaMap);
-
-        if (result.status === 'Successful') {
-          console.log('PAYMENT_SUCCESS: checkout & payment completed', {
-            orderNumber: result.orderNumber,
-            amount: result.amount,
-            currency: result.currency,
-          });
-          htmlComponent.postMessage({
-            type: 'PAYMENT_SUCCESS',
-            requestId, // Include requestId so the iframe Promise resolves
-            success: true,
-            data: {
-              orderNumber: result.orderNumber,
-              totalAmount: result.amount,
-              currency: result.currency || 'ILS',
-              customerEmail: result.customerEmail,
-              pdfLink: result.ticketsPdf,
-              status: 'Successful',
-            },
-          });
-        } else if (result.status === 'Pending') {
-          console.log('PAYMENT_PENDING: payment is pending verification');
+        if (result.status === 'successful') {
+          // console.log('PAYMENT_SUCCESS: checkout & payment completed', {
+          //   orderNumber: result.orderNumber,
+          //   amount: result.amount,
+          //   currency: result.currency,
+          // });
           htmlComponent.postMessage({
             type: 'PAYMENT_SUCCESS',
             requestId,
@@ -113,11 +244,30 @@ $w.onReady(async function () {
               currency: result.currency || 'ILS',
               customerEmail: result.customerEmail,
               pdfLink: result.ticketsPdf,
-              status: 'Pending',
+              status: 'Successful', // React ThankYou expects capitalized
             },
           });
-        } else if (result.status === 'Cancelled') {
-          console.log('PAYMENT_CANCELLED: user cancelled payment');
+        } else if (result.status === 'pending') {
+          // IMPORTANT: "Pending" from wixPay.startPayment does NOT mean payment succeeded.
+          // With Grow/Meshulam, closing the popup without paying returns "Pending".
+          // Do NOT treat this as success. The webhook wixPay_onPaymentUpdate will
+          // fire later with the real status (Successful / Cancelled / Failed).
+          htmlComponent.postMessage({
+            type: 'PAYMENT_PENDING',
+            requestId,
+            success: true,
+            data: {
+              orderNumber: result.orderNumber,
+              totalAmount: result.amount,
+              currency: result.currency || 'ILS',
+              customerEmail: result.customerEmail,
+              status: 'Pending',
+              paymentId: result.paymentId,
+              buyerPhone: result.buyerPhone,
+              buyerFirstName: result.buyerFirstName,
+            },
+          });
+        } else if (result.status === 'cancelled') {
           htmlComponent.postMessage({
             type: 'PAYMENT_CANCELLED',
             requestId,
@@ -126,7 +276,7 @@ $w.onReady(async function () {
           });
         } else {
           // Failed or other status
-          console.log('PAYMENT_FAILED: payment failed', { status: result.status });
+          // console.log('PAYMENT_FAILED: payment failed', { status: result.status });
           htmlComponent.postMessage({
             type: 'PAYMENT_ERROR',
             requestId,
@@ -136,18 +286,25 @@ $w.onReady(async function () {
         }
       } catch (error) {
         console.error('START_CHECKOUT: error in checkout/payment flow', error);
+        const errorCode = error?.details?.applicationError?.code || '';
+        let userMessage = 'משהו השתבש בתהליך ההזמנה, אנא נסה שוב.';
+        if (errorCode === 'INVALID_FORM_RESPONSE') {
+          userMessage = 'אחד מהפרטים שהוזנו אינו תקין (אימייל, שם או טלפון). אנא בדקו ונסו שוב.';
+        } else if (errorCode === 'INVALID_RESERVATION') {
+          userMessage = 'ההזמנה פגה תוקף, אנא נסו שוב.';
+        }
         htmlComponent.postMessage({
           type: 'PAYMENT_ERROR',
           requestId,
           success: false,
-          error: 'משהו השתבש בתהליך ההזמנה, אנא נסה שוב.',
+          error: userMessage,
         });
       }
     }
   });
 });
 
-async function handleStartCheckout(eventId, data, ticketMetaMap) {
+async function handleStartCheckout(eventId, data, ticketMetaMap, onPaymentReceived) {
   const {
     selectedTickets,
     mainBuyerDetails,
@@ -157,23 +314,26 @@ async function handleStartCheckout(eventId, data, ticketMetaMap) {
     totalAmount: totalAmountFromIframe, // Amount calculated in the UI (fallback if CMS has no prices)
   } = data;
 
-  console.log('handleStartCheckout: start', {
-    eventId,
-    selectedTickets,
-    mainBuyerDetails,
-    hasPayer: !!payer,
-    companyName,
-  });
+  // console.log('handleStartCheckout: start', {
+  //   eventId,
+  //   selectedTickets,
+  //   mainBuyerDetails,
+  //   hasPayer: !!payer,
+  //   companyName,
+  // });
 
   // Step A: Reserve tickets (wix-events.v2)
-  const reservationRes = await orders.createReservation(eventId, {
-    ticketQuantities: selectedTickets.map((t) => ({
-      ticketDefinitionId: t.ticketId,
-      quantity: t.quantity,
-    })),
-  });
+  const ticketQuantities = selectedTickets.map((t) => ({
+    ticketDefinitionId: t.ticketId,
+    quantity: t.quantity,
+  }));
+  // console.log('handleStartCheckout: creating reservation', { eventId, ticketQuantities });
+
+  const reservationRes = await orders.createReservation(eventId, { ticketQuantities });
+  // console.log('handleStartCheckout: reservationRes RAW', JSON.stringify(reservationRes));
+
   const reservationId = reservationRes._id || reservationRes.id;
-  console.log('handleStartCheckout: reservation created', { reservationId });
+  // console.log('handleStartCheckout: reservation created', { reservationId });
 
   // Step B: Build guests array — one per ticket, each with form inputValues
   // Event form fields: firstName, lastName, email, phone
@@ -201,7 +361,7 @@ async function handleStartCheckout(eventId, data, ticketMetaMap) {
     });
   }
 
-  console.log('handleStartCheckout: checkout with guests', { guestCount: guests.length, primaryEmail });
+  // console.log('handleStartCheckout: checkout with guests', { guestCount: guests.length, primaryEmail });
 
   // Step C: Checkout in Wix Events (v2)
   // If payer is provided (showPayer = true), use payer as the Wix Events buyer.
@@ -210,14 +370,21 @@ async function handleStartCheckout(eventId, data, ticketMetaMap) {
     ? { firstName: payer.firstName, lastName: payer.lastName, email: payer.email }
     : { firstName: mainBuyerDetails.firstName, lastName: mainBuyerDetails.lastName, email: mainBuyerDetails.email };
 
+  // console.log('handleStartCheckout: calling orders.checkout', {
+  //   eventId,
+  //   reservationId,
+  //   guestCount: guests.length,
+  //   buyer: buyerDetails,
+  // });
+
   const checkoutRes = await orders.checkout(eventId, {
     reservationId,
     guests,
     buyer: buyerDetails,
   });
-  console.log('handleStartCheckout: checkout created', {
-    orderNumber: checkoutRes.order && checkoutRes.order.orderNumber,
-  });
+  // console.log('handleStartCheckout: checkout created', {
+  //   orderNumber: checkoutRes.order && checkoutRes.order.orderNumber,
+  // });
 
   // Step D: Determine user info for payment
   // If payer is provided (different payer selected), use payer details.
@@ -264,11 +431,11 @@ async function handleStartCheckout(eventId, data, ticketMetaMap) {
     amount = totalAmountFromIframe;
   }
 
-  console.log('handleStartCheckout: computed amount from items', {
-    amount,
-    items,
-    totalAmountFromIframe,
-  });
+  // console.log('handleStartCheckout: computed amount from items', {
+  //   amount,
+  //   items,
+  //   totalAmountFromIframe,
+  // });
 
   // Step F: Create payment in backend (secure – price defined server-side)
   const payment = await createEventPayment({
@@ -276,9 +443,9 @@ async function handleStartCheckout(eventId, data, ticketMetaMap) {
     amount,
     userInfo,
   });
-  console.log('handleStartCheckout: backend payment created', {
-    paymentId: payment.id,
-  });
+  // console.log('handleStartCheckout: backend payment created', {
+  //   paymentId: payment.id,
+  // });
 
   // Step F2: Save abandoned cart record to CMS (fire-and-forget – must not block checkout)
   let cartId = null;
@@ -310,6 +477,7 @@ async function handleStartCheckout(eventId, data, ticketMetaMap) {
       buyerName,
       paymentId: payment.id,
       orderNumber: checkoutRes.order.orderNumber || '',
+      eventId,
       totalAmount: amount,
       selectedTickets: selectedTicketsForCms,
       guests: guestsFromPayload,
@@ -318,7 +486,7 @@ async function handleStartCheckout(eventId, data, ticketMetaMap) {
       payerPhone,
       affiliateId: '',
     });
-    console.log('handleStartCheckout: abandoned cart saved', { cartId });
+    // console.log('handleStartCheckout: abandoned cart saved', { cartId });
   } catch (cartError) {
     console.error('handleStartCheckout: abandoned cart save failed (non-blocking)', cartError);
   }
@@ -331,16 +499,16 @@ async function handleStartCheckout(eventId, data, ticketMetaMap) {
       showThankYouPage: false,
       skipUserInfoPage: true,
     });
-    console.log('handleStartCheckout: startPayment RAW result', JSON.stringify(paymentRes));
+    // console.log('handleStartCheckout: startPayment RAW result', JSON.stringify(paymentRes));
   } catch (error) {
     // If startPayment is rejected (e.g., user closed modal), treat as cancellation
-    console.log('handleStartCheckout: startPayment rejected/cancelled', error);
+    // console.log('handleStartCheckout: startPayment rejected/cancelled', error);
     // Update cart status to cancelled (fire-and-forget)
     if (cartId) {
       updateCartAfterPayment(cartId, { status: 'cancelled', orderNumber: checkoutRes.order.orderNumber }).catch(() => {});
     }
     return {
-      status: 'Cancelled',
+      status: 'cancelled',
       orderNumber: checkoutRes.order.orderNumber,
       ticketsPdf: checkoutRes.order.ticketsPdf,
       customerEmail: userInfo.email,
@@ -348,41 +516,175 @@ async function handleStartCheckout(eventId, data, ticketMetaMap) {
   }
 
 
-  let finalStatus = paymentRes.status;
+  const rawStatus = paymentRes.status || '';
+  const finalStatus = rawStatus.toLowerCase();
 
-  if (finalStatus === 'Pending') {
-    console.log('handleStartCheckout: Pending → treating as Cancelled (Grow/Meshulam card flow)');
-    finalStatus = 'Cancelled';
+  // Notify iframe that payment popup closed with a valid result so the loading
+  // message can change from "מתחיל תהליך תשלום..." to "רק רגע בבקשה..." immediately.
+  // Only treat "successful" as a valid payment. "Pending" from Grow/Meshulam
+  // can mean the user just closed the popup without paying.
+  const hasValidPayment = finalStatus === 'successful'
+    && paymentRes.transactionId
+    && paymentRes.payment && paymentRes.payment.id;
+
+  if (hasValidPayment && typeof onPaymentReceived === 'function') {
+    try { onPaymentReceived(); } catch (_) { /* non-blocking */ }
   }
 
-  // Step H: If payment is successful, confirm the order in Wix Events
-  // This changes the order status from INITIATED to PAID and triggers ticket emails
-  if (finalStatus === 'Successful') {
+  // Step H: Handle payment result based on status
+  if (finalStatus === 'successful') {
+    // H1: Confirm the order in Wix Events immediately (INITIATED → PAID)
     try {
       await confirmEventOrder(eventId, checkoutRes.order.orderNumber);
-      console.log('handleStartCheckout: order confirmed in Wix Events');
     } catch (confirmError) {
       console.error('handleStartCheckout: failed to confirm order (payment was successful)', confirmError);
-      // Don't fail the entire flow - payment was successful, order confirmation can be retried
+    }
+
+    // H2: Update cart to paid (fire-and-forget, don't block UI)
+    // PDF fetching & WhatsApp delivery are handled in the backend by
+    // wixEventsOrders_onOrderConfirmed (events.js) – no need to wait here.
+    if (cartId) {
+      updateCartAfterPayment(cartId, {
+        status: 'paid',
+        transactionId: paymentRes.transactionId || '',
+        orderNumber: checkoutRes.order.orderNumber,
+      }).catch((err) => {
+        console.error('handleStartCheckout: cart update after payment failed (non-blocking)', err);
+      });
+    }
+
+    // console.log('handleStartCheckout: payment successful, returning immediately to UI', {
+    //   orderNumber: checkoutRes.order.orderNumber,
+    // });
+  } else if (finalStatus === 'pending') {
+    // Payment is pending verification by card company (common with Grow/Meshulam).
+    // Do NOT confirm the order yet – the wixPay_onPaymentUpdate event handler
+    // in events.js will confirm it when the payment status changes to Successful.
+
+    if (cartId) {
+      updateCartAfterPayment(cartId, {
+        status: 'pending-payment',
+        transactionId: paymentRes.transactionId || '',
+        orderNumber: checkoutRes.order.orderNumber,
+      }).catch((err) => {
+        console.error('handleStartCheckout: cart update to pending-payment failed (non-blocking)', err);
+      });
+    }
+  } else {
+    // Cancelled, Failed, or other status
+    if (cartId) {
+      const cartStatus = finalStatus === 'cancelled' ? 'cancelled' : 'failed';
+      updateCartAfterPayment(cartId, {
+        status: cartStatus,
+        transactionId: paymentRes.transactionId || '',
+        orderNumber: checkoutRes.order.orderNumber,
+      }).catch((err) => {
+        console.error('handleStartCheckout: cart update after payment failed (non-blocking)', err);
+      });
     }
   }
 
-  // Step I: Update abandoned cart record with payment result (fire-and-forget)
-  if (cartId) {
-    const cartStatus = finalStatus === 'Successful' ? 'paid' : (finalStatus === 'Cancelled' ? 'cancelled' : 'failed');
-    updateCartAfterPayment(cartId, {
-      status: cartStatus,
-      transactionId: paymentRes.transactionId || '',
-      orderNumber: checkoutRes.order.orderNumber,
-    }).catch((err) => {
-      console.error('handleStartCheckout: cart update after payment failed (non-blocking)', err);
-    });
+  // Fire Purchase tracking event for successful or pending-payment statuses
+  if (finalStatus === 'successful' || finalStatus === 'processing_payment') {
+    try {
+      const purchaseContents = selectedTickets.map((t) => {
+        const meta = ticketMetaMap[t.ticketId] || {};
+        return {
+          id: t.ticketId,
+          name: meta.name || 'כרטיס',
+          price: meta.price || 0,
+          quantity: t.quantity,
+        };
+      });
+      wixWindowFrontend.trackEvent('Purchase', {
+        id: checkoutRes.order.orderNumber,
+        revenue: amount,
+        currency: 'ILS',
+        contents: purchaseContents,
+        origin: 'Ticket Checkout',
+      });
+    
+    } catch (trackErr) {
+      console.error('[veloEventHandler] Purchase tracking failed (non-blocking)', trackErr);
+    }
   }
 
   return {
     status: finalStatus,
     orderNumber: checkoutRes.order.orderNumber,
-    ticketsPdf: checkoutRes.order.ticketsPdf,
+    ticketsPdf: '',
     customerEmail: userInfo.email,
+    amount,
+    paymentId: payment.id,
+    buyerPhone: userInfo.phone,
+    buyerFirstName: userInfo.firstName,
   };
+}
+
+
+
+// Wix Studio - Velo
+
+const ISRAEL_TZ = 'Asia/Jerusalem';
+
+// שעות פעילות
+const START_HOUR = 10;   // 10:00
+const END_HOUR = 17;     // עד 16:59
+
+// תאריך סיום (לא יוצג מהיום הזה והלאה)
+const STOP_DATE = { day: 12, month: 3 }; // 12/03
+
+$w.onReady(function () {
+
+  $w('#button12').hide();
+  $w('#button13').hide();
+
+  updateButtonsVisibility();
+  setInterval(updateButtonsVisibility, 60000);
+});
+
+function updateButtonsVisibility() {
+
+  const now = new Date();
+
+  // זמן לפי ישראל
+  const israelNow = new Date(
+    now.toLocaleString('en-US', { timeZone: ISRAEL_TZ })
+  );
+
+  const year = israelNow.getFullYear();
+  const month = israelNow.getMonth() + 1;
+  const day = israelNow.getDate();
+  const hour = israelNow.getHours();
+  const weekday = israelNow.getDay(); 
+  // 0=ראשון, 1=שני ... 6=שבת
+
+  // בדיקת תאריך סיום
+  const stopDateObj = new Date(year, STOP_DATE.month - 1, STOP_DATE.day);
+  if (israelNow >= stopDateObj) {
+    hideButtons();
+    return;
+  }
+
+  // ראשון (0) עד חמישי (4)
+  const isWeekday = weekday >= 0 && weekday <= 4;
+
+  // שעות פעילות
+  const isInHours = hour >= START_HOUR && hour < END_HOUR;
+
+  if (isWeekday && isInHours) {
+    showButtons();
+  } else {
+    hideButtons();
+  }
+}
+
+function showButtons() {
+  $w('#button12').show();
+  $w('#button13').show();
+}
+
+function hideButtons() {
+  $w('#button12').hide();
+  $w('#button13').hide();
 }
