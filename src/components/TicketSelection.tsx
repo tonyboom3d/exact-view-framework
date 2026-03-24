@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Minus, Plus, User, Users, Ticket, Calendar } from 'lucide-react';
+import { Minus, Plus, User, Users, Ticket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { type TicketSelection as TicketSelectionType, type TicketType, type TicketInfo } from '@/types/order';
@@ -53,27 +53,6 @@ const TicketSelection = ({ selections, onChange, onBuyTicket, tickets, loading }
 
   return (
     <div className="space-y-5">
-      {/* Event Info Banner – mobile only (on desktop this appears in the header) */}
-      <motion.div
-        className="text-center md:hidden"
-        initial={isMobile ? false : { opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-      >
-        <h1 className="text-[24px] font-bold text-foreground leading-tight">
-          Tony Robbins
-        </h1>
-        <p className="text-[16px] text-foreground/80 font-semibold mb-2">
-          Unleash the Power Within REMOTE
-        </p>
-        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[14px] text-muted-foreground">
-          <span className="flex items-center gap-1">
-            <Calendar className="w-3.5 h-3.5" />
-            4 ימים, 16-19 ביוני 2026
-          </span>
-        </div>
-      </motion.div>
-
       <motion.div
         className="text-center"
         initial={isMobile ? false : { opacity: 0, y: 20 }}

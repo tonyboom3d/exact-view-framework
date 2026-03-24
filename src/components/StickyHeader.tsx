@@ -62,7 +62,7 @@ const StickyHeader = () => {
           <img
             src={tonyImg}
             alt="Tony Robbins"
-            className={`absolute right-[-15px] sm:right-2 bottom-0 w-auto object-contain pointer-events-none transition-[height] duration-300 ${
+            className={`absolute z-0 right-[-15px] sm:right-2 bottom-0 w-auto object-contain pointer-events-none transition-[height] duration-300 ${
               isScrolled 
                 ? 'h-[68px] sm:h-[88px]' 
                 : 'h-[124px] sm:h-[132px] md:h-[140px]'
@@ -109,28 +109,51 @@ const StickyHeader = () => {
             </div>
           )}
 
-          {/* Desktop (md+): event details - between timer and image, same row */}
+          {/* Event details: desktop absolute block | mobile inside banner next to image */}
           <AnimatePresence>
             {!isScrolled && (
-              <motion.div 
-                className="hidden md:flex md:flex-col md:items-start md:justify-center absolute left-[320px] top-0 bottom-0 right-[140px] py-2"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}>
-                <h1 className="text-[20px] font-bold text-foreground leading-tight text-right">
-                  Tony Robbins
-                </h1>
-                <p className="text-[14px] text-foreground/80 font-semibold text-right">
-                  Unleash the Power Within REMOTE
-                </p>
-                <div className="flex flex-wrap items-center justify-start gap-x-3 text-[12px] text-muted-foreground mt-0.5">
-                  <span className="flex items-center gap-1">
-                    <Calendar className="w-3 h-3 shrink-0" />
-                    4 ימים, 16-19 ביוני 2026
-                  </span>
-                </div>
-              </motion.div>
+              <>
+                <motion.div
+                  key="header-event-desktop"
+                  className="hidden md:flex md:flex-col md:items-start md:justify-center absolute left-[320px] top-0 bottom-0 right-[140px] py-2 z-10"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}>
+                  <h1 className="text-[20px] font-bold text-foreground leading-tight text-right">
+                    Tony Robbins
+                  </h1>
+                  <p className="text-[14px] text-foreground/80 font-semibold text-right">
+                    Unleash the Power Within REMOTE
+                  </p>
+                  <div className="flex flex-wrap items-center justify-start gap-x-3 text-[12px] text-muted-foreground mt-0.5">
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-3 h-3 shrink-0" />
+                      4 ימים, 16-19 ביוני 2026
+                    </span>
+                  </div>
+                </motion.div>
+                <motion.div
+                  key="header-event-mobile"
+                  className="md:hidden absolute inset-y-0 left-3 right-[42%] sm:right-[40%] z-10 flex flex-col justify-center items-end text-right py-2 pr-1"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}>
+                  <h1 className="text-[17px] font-bold text-foreground leading-tight">
+                    Tony Robbins
+                  </h1>
+                  <p className="text-[12px] text-foreground/80 font-semibold mt-0.5">
+                    Unleash the Power Within REMOTE
+                  </p>
+                  <div className="flex flex-wrap items-center justify-end gap-x-2 text-[11px] text-muted-foreground mt-1">
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-3 h-3 shrink-0" />
+                      4 ימים, 16-19 ביוני 2026
+                    </span>
+                  </div>
+                </motion.div>
+              </>
             )}
           </AnimatePresence>
         </motion.div>
