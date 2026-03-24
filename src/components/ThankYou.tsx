@@ -110,7 +110,7 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
   }, 0);
 
   const eventTitle = 'Tony Robbins — Unleash the Power Within REMOTE';
-  const eventLocation = 'מלון פרימה מילניום התדהר 2 רעננה';
+  const eventLocation = '';
   const eventDescription = 'Tony Robbins UPW Event';
   // March 12, 2026 16:00 to March 16, 2026 02:00 (Israel local time, UTC+2)
   const calendarStartUTC = '20260312T140000Z';
@@ -121,9 +121,9 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
       action: 'TEMPLATE',
       text: eventTitle,
       dates: `${calendarStartUTC}/${calendarEndUTC}`,
-      location: eventLocation,
       details: eventDescription,
     });
+    if (eventLocation) params.set('location', eventLocation);
     window.open(`https://calendar.google.com/calendar/render?${params.toString()}`, '_blank');
   };
 
@@ -135,7 +135,7 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
       `DTSTART:${calendarStartUTC}`,
       `DTEND:${calendarEndUTC}`,
       `SUMMARY:${eventTitle}`,
-      `LOCATION:${eventLocation}`,
+      ...(eventLocation ? [`LOCATION:${eventLocation}`] : []),
       `DESCRIPTION:${eventDescription}`,
       'END:VEVENT',
       'END:VCALENDAR',
@@ -154,11 +154,11 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
       subject: eventTitle,
       startdt: '2026-03-12T16:00:00',
       enddt: '2026-03-16T02:00:00',
-      location: eventLocation,
       body: eventDescription,
       path: '/calendar/action/compose',
       rru: 'addevent',
     });
+    if (eventLocation) params.set('location', eventLocation);
     window.open(`https://outlook.live.com/calendar/0/deeplink/compose?${params.toString()}`, '_blank');
   };
 
@@ -364,7 +364,6 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
       {/* Event details */}
       <div className="text-center text-[15px] text-muted-foreground space-y-0.5">
         <p className="font-medium">4 ימים, 12-15 במרץ 2026</p>
-        <p>מלון פרימה מילניום, רעננה</p>
       </div>
 
       {/* Order summary */}
