@@ -41,7 +41,7 @@ const StickyHeader = () => {
   return (
     <motion.header
       className={`sticky top-0 z-50 bg-background border-b border-border transition-[padding] duration-300 will-change-transform ${
-        isScrolled ? 'py-1' : 'py-2'
+        isScrolled ? 'py-1' : 'py-3 sm:py-4'
       }`}
       style={{ transform: 'translateZ(0)' }}
       initial={isMobile ? false : { y: -60, opacity: 0 }}
@@ -52,8 +52,8 @@ const StickyHeader = () => {
         <motion.div
           className={`relative flex-col gap-1 bg-cta/5 rounded-xl overflow-visible flex items-end justify-center transition-[padding] duration-300 ${
             isScrolled 
-              ? 'px-2 sm:px-3 py-1 sm:py-1.5' 
-              : 'px-3 sm:px-4 py-2 sm:py-2.5'
+              ? 'px-2 sm:px-3 py-2 sm:py-2 min-h-[56px] md:min-h-[64px]' 
+              : 'px-3 sm:px-4 py-3 sm:py-4 min-h-[104px] md:min-h-[120px]'
           }`}
           initial={isMobile ? false : { opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -67,7 +67,8 @@ const StickyHeader = () => {
                 ? 'h-[60px] sm:h-[80px]' 
                 : 'h-[100px] sm:h-[100px]'
             }`}
-            style={{ transform: 'scaleX(-1) translateZ(0)' }} />
+            style={{ transform: 'scaleX(-1) translateZ(0)' }}
+          />
 
           {/* Countdown timer - left side (temporarily hidden, keep code for future use) */}
           {false && (
@@ -112,7 +113,7 @@ const StickyHeader = () => {
           <AnimatePresence>
             {!isScrolled && (
               <motion.div 
-                className="hidden md:flex md:flex-col md:items-start md:justify-center absolute left-[320px] top-1/2 -translate-y-1/2 right-[140px]"
+                className="hidden md:flex md:flex-col md:items-start md:justify-center absolute left-[320px] top-0 bottom-0 right-[140px] py-2"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
