@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, MapPin } from 'lucide-react';
+import { Calendar } from 'lucide-react';
 import tonyImg from '@/assets/tony-robbins.png';
 
 const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
@@ -53,7 +53,7 @@ const StickyHeader = () => {
           className={`relative flex-col gap-1 bg-cta/5 rounded-xl overflow-visible flex items-end justify-center transition-[padding] duration-300 ${
             isScrolled 
               ? 'px-2 sm:px-3 py-2 sm:py-2 min-h-[56px] md:min-h-[64px]' 
-              : 'px-3 sm:px-4 py-3 sm:py-4 min-h-[104px] md:min-h-[120px]'
+              : 'px-3 sm:px-4 py-3 sm:py-4 min-h-[120px] md:min-h-[140px]'
           }`}
           initial={isMobile ? false : { opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -64,8 +64,8 @@ const StickyHeader = () => {
             alt="Tony Robbins"
             className={`absolute right-[-15px] sm:right-2 bottom-0 w-auto object-contain pointer-events-none transition-[height] duration-300 ${
               isScrolled 
-                ? 'h-[60px] sm:h-[80px]' 
-                : 'h-[100px] sm:h-[100px]'
+                ? 'h-[68px] sm:h-[88px]' 
+                : 'h-[124px] sm:h-[132px] md:h-[140px]'
             }`}
             style={{ transform: 'scaleX(-1) translateZ(0)' }}
           />
@@ -128,10 +128,6 @@ const StickyHeader = () => {
                   <span className="flex items-center gap-1">
                     <Calendar className="w-3 h-3 shrink-0" />
                     4 ימים, 16-19 ביוני 2026
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <MapPin className="w-3 h-3 shrink-0" />
-                    מלון פרימה מילניום, רעננה
                   </span>
                 </div>
               </motion.div>

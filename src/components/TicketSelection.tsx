@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Minus, Plus, User, Users, Ticket, Calendar, MapPin } from 'lucide-react';
+import { Minus, Plus, User, Users, Ticket, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { type TicketSelection as TicketSelectionType, type TicketType, type TicketInfo } from '@/types/order';
@@ -70,10 +70,6 @@ const TicketSelection = ({ selections, onChange, onBuyTicket, tickets, loading }
           <span className="flex items-center gap-1">
             <Calendar className="w-3.5 h-3.5" />
             4 ימים, 16-19 ביוני 2026
-          </span>
-          <span className="flex items-center gap-1">
-            <MapPin className="w-3.5 h-3.5" />
-            מלון פרימה מילניום, רעננה
           </span>
         </div>
       </motion.div>
