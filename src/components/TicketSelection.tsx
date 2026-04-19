@@ -212,6 +212,7 @@ const TicketSelection = ({ selections, onChange, onBuyTicket, tickets, loading }
                            price: ticket.price,
                            quantity: buyQty,
                            currency: 'ILS',
+                          variant: ticket.type,
                          });
                          if (!isActive) onChange([{ type: ticket.type, quantity: 1 }]);
                          onBuyTicket(ticket.type);

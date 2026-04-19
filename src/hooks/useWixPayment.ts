@@ -116,11 +116,24 @@ export function useWixPayment() {
         totalAmount: totalPrice,
       };
 
-      // Fire StartPayment tracking event (fire-and-forget, no response expected)
+      // Fire InitiateCheckout tracking event (fire-and-forget, no response expected)
       try {
+        const checkoutContents = selections
+          .filter((s) => s.quantity > 0)
+          .map((s) => {
+            const ticket = ticketsList.find((t) => t.type === s.type);
+            return {
+              name: ticket?.name || 'כרטיס',
+              price: ticket?.price || 0,
+              currency: 'ILS',
+              variant: ticket?.type || s.type,
+              quantity: s.quantity,
+            };
+          });
+
         window.parent.postMessage({
-          type: 'TRACK_START_PAYMENT',
-          data: { totalAmount: totalPrice, currency: 'ILS' },
+          type: 'TRACK_INITIATE_CHECKOUT',
+          data: { contents: checkoutContents },
         }, '*');
       } catch (_) { /* non-blocking */ }
 

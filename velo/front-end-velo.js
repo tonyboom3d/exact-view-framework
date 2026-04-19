@@ -1,6 +1,6 @@
 import { orders } from 'wix-events.v2';
 import wixPay from 'wix-pay-frontend';
-import wixWindowFrontend from 'wix-window-frontend';
+import { analytics } from '@wix/site';
 import { session } from 'wix-storage';
 import { getTicketMeta, createEventPayment, confirmEventOrder, saveAbandonedCart, updateCartAfterPayment, checkPaymentStatus, sendPendingPaymentWhatsapp, cancelPendingPayment, getOrderDetails } from 'backend/eventLogics';
 
@@ -177,14 +177,15 @@ $w.onReady(async function () {
 
     // Handle TRACK_ADD_TO_CART – fire-and-forget, no response needed
     if (message.type === 'TRACK_ADD_TO_CART') {
-      const { name, price, quantity, currency } = message.data || {};
+      const { name, price, quantity, currency, variant } = message.data || {};
       try {
-        wixWindowFrontend.trackEvent('AddToCart', {
+        analytics.trackEvent('AddToCart', {
+          origin: 'Wix Events',
           name: name || '',
           price: price || 0,
-          quantity: quantity || 1,
           currency: currency || 'ILS',
-          origin: 'Ticket Selection',
+          variant: variant || name || 'ticket',
+          quantity: quantity || 1,
         });
         // console.log('[veloEventHandler] TRACK_ADD_TO_CART fired', { name, price, quantity });
       } catch (trackErr) {
@@ -193,16 +194,17 @@ $w.onReady(async function () {
       return;
     }
 
-    // Handle TRACK_START_PAYMENT – fire-and-forget, no response needed
-    if (message.type === 'TRACK_START_PAYMENT') {
-      const { totalAmount, currency } = message.data || {};
+    // Handle TRACK_INITIATE_CHECKOUT – fire-and-forget, no response needed
+    if (message.type === 'TRACK_INITIATE_CHECKOUT') {
+      const { contents } = message.data || {};
       try {
-        wixWindowFrontend.trackEvent('StartPayment', {
-          origin: 'Ticket Checkout',
+        analytics.trackEvent('InitiateCheckout', {
+          origin: 'Wix Events',
+          contents: Array.isArray(contents) ? contents : [],
         });
-        // console.log('[veloEventHandler] TRACK_START_PAYMENT fired', { totalAmount, currency });
+        // console.log('[veloEventHandler] TRACK_INITIATE_CHECKOUT fired', { itemCount: contents?.length || 0 });
       } catch (trackErr) {
-        console.error('[veloEventHandler] TRACK_START_PAYMENT failed', trackErr);
+        console.error('[veloEventHandler] TRACK_INITIATE_CHECKOUT failed', trackErr);
       }
       return;
     }
@@ -494,6 +496,10 @@ async function handleStartCheckout(eventId, data, ticketMetaMap, onPaymentReceiv
   // Step G: Start payment with Wix Pay (opens payment UI in browser)
   let paymentRes;
   try {
+    analytics.trackEvent('AddPaymentInfo', {
+      origin: 'Wix Events',
+      option: 'Meshulam',
+    });
     paymentRes = await wixPay.startPayment(payment.id, {
       termsAndConditionsLink: 'https://www.tonyrobbins.co.il/terms',
       showThankYouPage: false,
@@ -584,8 +590,8 @@ async function handleStartCheckout(eventId, data, ticketMetaMap, onPaymentReceiv
     }
   }
 
-  // Fire Purchase tracking event for successful or pending-payment statuses
-  if (finalStatus === 'successful' || finalStatus === 'processing_payment') {
+  // Fire Purchase tracking event only after a successful payment
+  if (finalStatus === 'successful') {
     try {
       const purchaseContents = selectedTickets.map((t) => {
         const meta = ticketMetaMap[t.ticketId] || {};
@@ -596,12 +602,14 @@ async function handleStartCheckout(eventId, data, ticketMetaMap, onPaymentReceiv
           quantity: t.quantity,
         };
       });
-      wixWindowFrontend.trackEvent('Purchase', {
+      analytics.trackEvent('Purchase', {
         id: checkoutRes.order.orderNumber,
+        origin: 'Wix Events',
         revenue: amount,
         currency: 'ILS',
+        tax: 0,
+        shipping: 0,
         contents: purchaseContents,
-        origin: 'Ticket Checkout',
       });
     
     } catch (trackErr) {
