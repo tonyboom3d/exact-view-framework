@@ -136,13 +136,20 @@ export function pushPurchaseDataLayer(context: PurchaseContext): boolean {
   const payload = { event: 'purchase', ecommerce };
 
   try {
-    // Push to parent window where GTM lives. Fall back to own window in dev/preview.
-    const target: Window = window.parent !== window ? window.parent : window;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (target as any).dataLayer = (target as any).dataLayer || [];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (target as any).dataLayer.push(payload);
-    console.log('[purchaseTracking] dataLayer.push sent', payload);
+    if (window.parent !== window) {
+      // Cross-origin iframe (github.io inside wix.com): direct dataLayer access is blocked.
+      // Send postMessage to parent – a listener in Wix Custom Code receives it and
+      // does the actual dataLayer.push on the parent window where GTM is loaded.
+      window.parent.postMessage({ type: 'GA4_PURCHASE', payload }, '*');
+      console.log('[purchaseTracking] postMessage GA4_PURCHASE sent to parent', payload);
+    } else {
+      // Same-origin or dev mode: push directly
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (window as any).dataLayer = (window as any).dataLayer || [];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (window as any).dataLayer.push(payload);
+      console.log('[purchaseTracking] dataLayer.push sent (same-origin)', payload);
+    }
 
     markSent(orderNumber);
     // Mark this browser as a returning buyer for next sessions
