@@ -14,16 +14,7 @@ const SeatingMap = (_props: SeatingMapProps) => {
   return (
     <div className="rounded-xl border border-border bg-muted/30 p-4">
       <div className="flex flex-col md:flex-row rtl:md:flex-row-reverse gap-6 md:gap-8 items-stretch">
-        {/* Map image - left on desktop, top on mobile */}
-        <div className="flex-shrink-0 md:max-w-[55%] flex justify-center md:justify-start">
-          <img
-            src={SEATING_MAP_IMAGE}
-            alt="מפת אזורי ישיבה"
-            className="w-full max-w-md md:max-w-none h-auto object-contain rounded-lg"
-          />
-        </div>
-
-        {/* Text content - right on desktop, below on mobile */}
+        {/* Text content - top on mobile, right on desktop */}
         <div className="flex-1 min-w-0 flex flex-col justify-center text-right space-y-4">
           <h3 className="text-[19px] font-bold text-foreground">מפת אזורי ישיבה</h3>
 
@@ -48,6 +39,15 @@ const SeatingMap = (_props: SeatingMapProps) => {
               או מחירים.
             </p>
           </div>
+        </div>
+
+        {/* Map image - below text on mobile, left on desktop */}
+        <div className="flex-shrink-0 md:max-w-[55%] flex justify-center md:justify-start">
+          <img
+            src={SEATING_MAP_IMAGE}
+            alt="מפת אזורי ישיבה"
+            className="w-full max-w-md md:max-w-none h-auto object-contain rounded-lg"
+          />
         </div>
       </div>
     </div>
