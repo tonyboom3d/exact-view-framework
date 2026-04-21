@@ -1,7 +1,7 @@
 import { type TicketType, type TicketInfo } from '@/types/order';
 
 const SEATING_MAP_IMAGE =
-  'https://static.wixstatic.com/media/977fa3_a97cf645c2574a4a8df3fa928c107706~mv2.png';
+  'https://static.wixstatic.com/media/977fa3_8feec6d9f02f4c86960936f527259820~mv2.png';
 
 interface SeatingMapProps {
   hoveredTicket?: TicketType | null;
@@ -30,26 +30,17 @@ const SeatingMap = (_props: SeatingMapProps) => {
           <div className="space-y-4 text-foreground/90 text-[15px] leading-relaxed">
             <section>
               <h4 className="font-bold text-[16px] text-foreground mb-1">Premier</h4>
-              <p>
-                המושבים הקרובים ביותר לבמה, בשתי השורות הראשונות של הגוש המרכזי. אזור זה מסומן
-                בצבע זהב.
-              </p>
+              <p>חוויית הפרימיום הקרובה ביותר לבמה.</p>
             </section>
 
             <section>
               <h4 className="font-bold text-[16px] text-foreground mb-1">VIP</h4>
-              <p>
-                מושבי פרימיום הממוקמים בגוש המרכזי בשורות 3 עד 6, וכן בשתי השורות הראשונות של
-                הגושים הצדדיים. האזור מסומן בצבע סגול ומציע חוויית צפייה משודרגת.
-              </p>
+              <p>חוויית צפייה משודרגת ומיקום אסטרטגי באולם.</p>
             </section>
 
             <section>
               <h4 className="font-bold text-[16px] text-foreground mb-1">General Admission</h4>
-              <p>
-                כל שאר המושבים באולם, מסומנים בצבע כחול. כולל את יתר השורות בגוש המרכזי והצדדי,
-                ומציעים חוויית ישיבה נוחה עם שדה ראייה מצוין.
-              </p>
+              <p>חוויית ההשתתפות המלאה עם אווירה אנרגטית של קהל גדול.</p>
             </section>
 
             <p className="text-[13px] text-muted-foreground pt-1 border-t border-border/60">
