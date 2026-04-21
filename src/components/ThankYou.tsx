@@ -100,7 +100,7 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
   }, [paymentStatus]);
 
   const shareLink = 'https://www.tonyrobbins.co.il/';
-  const shareText = `נרשמתי לסדנת UPW REMOTE של טוני רובינס בישראל 🔥\n\n4 ימים של כלים, אסטרטגיות ושינוי אמיתי – 12-15 במרץ 2026.\n\n${shareLink}\n\nמי שבעניין – זה הזמן.`;
+  const shareText = `נרשמתי לסדנת UPW REMOTE של טוני רובינס בישראל 🔥\n\n4 ימים של כלים, אסטרטגיות ושינוי אמיתי – 4 ימים, 16-19 ביוני 2026.\n\n${shareLink}\n\nמי שבעניין – זה הזמן.`;
 
   const activeSelections = selections.filter(s => s.quantity > 0);
   const totalTickets = activeSelections.reduce((sum, s) => sum + s.quantity, 0);
@@ -112,9 +112,9 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
   const eventTitle = 'Tony Robbins — Unleash the Power Within REMOTE';
   const eventLocation = '';
   const eventDescription = 'Tony Robbins UPW Event';
-  // March 12, 2026 16:00 to March 16, 2026 02:00 (Israel local time, UTC+2)
-  const calendarStartUTC = '20260312T140000Z';
-  const calendarEndUTC = '20260316T000000Z';
+  // June 16, 2026 16:00 to June 20, 2026 02:00 (Israel local time, UTC+3)
+  const calendarStartUTC = '20260616T130000Z';
+  const calendarEndUTC = '20260619T230000Z';
 
   const addToGoogleCalendar = () => {
     const params = new URLSearchParams({
@@ -152,8 +152,8 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
   const addToMicrosoftCalendar = () => {
     const params = new URLSearchParams({
       subject: eventTitle,
-      startdt: '2026-03-12T16:00:00',
-      enddt: '2026-03-16T02:00:00',
+      startdt: '2026-06-16T16:00:00',
+      enddt: '2026-06-20T02:00:00',
       body: eventDescription,
       path: '/calendar/action/compose',
       rru: 'addevent',
@@ -363,7 +363,7 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
 
       {/* Event details */}
       <div className="text-center text-[15px] text-muted-foreground space-y-0.5">
-        <p className="font-medium">4 ימים, 12-15 במרץ 2026</p>
+        <p className="font-medium">4 ימים, 16-19 ביוני 2026</p>
       </div>
 
       {/* Order summary */}

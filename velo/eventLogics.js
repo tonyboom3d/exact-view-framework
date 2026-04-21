@@ -794,7 +794,7 @@ export async function sendTicketFileToWhatsapp(phone, pdfUrl, guestName, orderNu
 מספר הזמנה: ${orderNumber || ''}
 
 פרטים לשמירה:
-12–15 במרץ 2026
+4 ימים, 16-19 ביוני 2026
 אולמי ME, מלון פרימה מילניום
 רח׳ תדהר 2, רעננה
 
