@@ -324,7 +324,6 @@ export function useWixPayment() {
       pushPurchaseDataLayer({
         orderNumber: d.transaction_id,
         totalAmount: typeof d.value === 'number' ? d.value : 0,
-        currency: d.currency || 'ILS',
         items,
       });
     });

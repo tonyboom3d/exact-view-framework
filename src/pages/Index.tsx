@@ -132,7 +132,6 @@ const Index = () => {
           pushPurchaseDataLayer({
             orderNumber: data.orderNumber,
             totalAmount: data.totalAmount,
-            currency: data.currency || 'ILS',
             items: [],
           });
         }
@@ -257,7 +256,6 @@ const Index = () => {
             savePurchaseContext({
               orderNumber: result.orderNumber,
               totalAmount: totalPrice,
-              currency: 'ILS',
               items: pendingItems,
             });
             return;
@@ -274,7 +272,6 @@ const Index = () => {
           pushPurchaseDataLayer({
             orderNumber: result.orderNumber,
             totalAmount: result.totalAmount ?? totalPrice,
-            currency: result.currency || 'ILS',
             items: successItems,
           });
 
@@ -342,7 +339,6 @@ const Index = () => {
               pushPurchaseDataLayer({
                 orderNumber: on,
                 totalAmount: pendingPayment?.totalAmount ?? totalPrice,
-                currency: pendingPayment?.currency || 'ILS',
                 items: confirmedItems,
               });
             }

@@ -14,7 +14,7 @@ export interface PurchaseItem {
 export interface PurchaseContext {
   orderNumber: string;
   totalAmount: number;
-  currency: string;
+  currency?: string;
   items: PurchaseItem[];
 }
 
@@ -107,7 +107,7 @@ function getTrafficSource(): string | undefined {
  * false if skipped due to dedup.
  */
 export function pushPurchaseDataLayer(context: PurchaseContext): boolean {
-  const { orderNumber, totalAmount, currency, items } = context;
+  const { orderNumber, totalAmount, items } = context;
 
   // --- Dedup: each transaction_id must be pushed exactly once ---
   if (getSentIds().has(orderNumber)) {
@@ -122,7 +122,7 @@ export function pushPurchaseDataLayer(context: PurchaseContext): boolean {
   const ecommerce: Record<string, unknown> = {
     transaction_id: orderNumber,
     value: totalAmount,
-    currency: currency || 'ILS',
+    currency: 'ILS',
     payment_type: 'Meshulam',
     num_items: numItems,
     user_type: userType,
