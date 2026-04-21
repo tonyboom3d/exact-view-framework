@@ -16,6 +16,13 @@ import type { PendingPaymentData } from '@/hooks/useWixPayment';
 import { toast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getTestGuest, getTestPayer } from '@/config/testPrefill';
+import {
+  buildPurchaseItems,
+  pushPurchaseDataLayer,
+  savePurchaseContext,
+  loadPurchaseContext,
+  clearPurchaseContext,
+} from '@/lib/purchaseTracking';
 
 const isInsideWix = window.parent !== window;
 const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
@@ -114,6 +121,21 @@ const Index = () => {
         clearPendingPayment();
         setStep(3);
         toast({ title: 'ההזמנה שלך אושרה!', description: `מספר הזמנה: ${data.orderNumber}` });
+
+        // Fire purchase dataLayer – recover item context persisted at checkout start
+        const ctx = loadPurchaseContext(data.orderNumber);
+        if (ctx) {
+          pushPurchaseDataLayer(ctx);
+          clearPurchaseContext();
+        } else {
+          // Fallback: no item breakdown available (context was not persisted)
+          pushPurchaseDataLayer({
+            orderNumber: data.orderNumber,
+            totalAmount: data.totalAmount,
+            currency: data.currency || 'ILS',
+            items: [],
+          });
+        }
       } else if (currentStatus === 'pending-payment' || currentStatus === 'in-progress') {
         // Still pending – show dialog
         setExistingPendingData(data);
@@ -228,13 +250,34 @@ const Index = () => {
             // Pending payment – PendingPaymentOverlay will handle polling
             // pendingPayment state was already set by useWixPayment
             setOrderNumber(result.orderNumber);
+
+            // Persist full purchase context so pending→paid recovery (same or new session)
+            // has the item breakdown for the dataLayer push
+            const pendingItems = buildPurchaseItems(selections, tickets);
+            savePurchaseContext({
+              orderNumber: result.orderNumber,
+              totalAmount: totalPrice,
+              currency: 'ILS',
+              items: pendingItems,
+            });
             return;
           }
 
+          // Immediate success path
           setOrderNumber(result.orderNumber);
           setReferralCode(result.referralCode);
           setPdfLink(result.pdfLink || null);
           setPaymentStatus(result.status || 'Successful');
+
+          // Fire purchase dataLayer before navigating to step 3
+          const successItems = buildPurchaseItems(selections, tickets);
+          pushPurchaseDataLayer({
+            orderNumber: result.orderNumber,
+            totalAmount: result.totalAmount ?? totalPrice,
+            currency: result.currency || 'ILS',
+            items: successItems,
+          });
+
           setStep(3);
           window.scrollTo({ top: 0, behavior: 'smooth' });
         } catch (err: any) {
@@ -287,6 +330,23 @@ const Index = () => {
             setOrderNumber(on);
             setPdfLink(tp || null);
             setPaymentStatus('Successful');
+
+            // Fire purchase dataLayer – prefer persisted context for full item breakdown
+            const ctx = loadPurchaseContext(on);
+            if (ctx) {
+              pushPurchaseDataLayer(ctx);
+              clearPurchaseContext();
+            } else {
+              // Same session: selections + tickets still available in scope
+              const confirmedItems = buildPurchaseItems(selections, tickets);
+              pushPurchaseDataLayer({
+                orderNumber: on,
+                totalAmount: pendingPayment?.totalAmount ?? totalPrice,
+                currency: pendingPayment?.currency || 'ILS',
+                items: confirmedItems,
+              });
+            }
+
             setStep(3);
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}

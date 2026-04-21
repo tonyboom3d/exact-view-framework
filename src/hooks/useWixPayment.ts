@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { sendMessage, onMessage } from '@/lib/wixBridge';
 import type { GuestInfo, BuyerInfo, TicketInfo } from '@/types/order';
 import type { TicketSelection } from '@/types/order';
+import { pushPurchaseDataLayer } from '@/lib/purchaseTracking';
+import type { PurchaseItem } from '@/lib/purchaseTracking';
 
 interface PaymentResult {
   orderNumber: string;
@@ -304,6 +306,27 @@ export function useWixPayment() {
       setLoadingMessage('');
       const message = msg?.payload?.message || 'שגיאה בתהליך התשלום';
       setError(message);
+    });
+    return unsub;
+  }, []);
+
+  // Listen for Velo's authoritative TRACK_PURCHASE message (fired only after
+  // confirmed successful payment). This carries CMS-enriched item data and is
+  // the canonical source for the GA4 / Meta dataLayer.push.
+  // Index.tsx also pushes on success, but pushPurchaseDataLayer is idempotent
+  // (dedup by transaction_id), so only one push will actually fire per order.
+  useEffect(() => {
+    const unsub = onMessage('TRACK_PURCHASE', (msg: any) => {
+      const d = msg?.data || msg?.payload || {};
+      if (!d.transaction_id) return;
+
+      const items: PurchaseItem[] = Array.isArray(d.items) ? d.items : [];
+      pushPurchaseDataLayer({
+        orderNumber: d.transaction_id,
+        totalAmount: typeof d.value === 'number' ? d.value : 0,
+        currency: d.currency || 'ILS',
+        items,
+      });
     });
     return unsub;
   }, []);
