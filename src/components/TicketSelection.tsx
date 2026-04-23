@@ -127,7 +127,7 @@ const TicketSelection = ({ selections, onChange, onBuyTicket, tickets, loading }
                     ₪{ticket.price.toLocaleString()}
                   </span>
                   {shouldShowTag && (
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 translate-y-2 -translate-x-8 sm:translate-y-0 sm:translate-x-0">
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10 translate-y-2 -translate-x-16 sm:translate-y-0 sm:translate-x-0">
                       <div className="bg-destructive text-white text-[17px] font-bold px-6 py-1.5 rounded -rotate-6 shadow-lg inline-flex items-center gap-2">
                         {discountTagText ? (
                           <span>{discountTagText}</span>

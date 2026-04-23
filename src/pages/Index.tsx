@@ -41,7 +41,7 @@ const Index = () => {
   const [showCompany, setShowCompany] = useState(false);
 
   // Wix integration hooks
-  const { tickets, ensureWixData, isAdminTest } = useWixTickets();
+  const { tickets, loading: ticketsLoading, ensureWixData, isAdminTest } = useWixTickets();
   const {
     createOrderAndPay,
     loading: paymentLoading,
@@ -488,7 +488,7 @@ const Index = () => {
                 onChange={handleSelectionsChange}
                 onBuyTicket={handleBuyTicket}
                 tickets={tickets}
-                loading={false}
+                loading={ticketsLoading || tickets.length === 0}
               />
             </motion.div>
           )}

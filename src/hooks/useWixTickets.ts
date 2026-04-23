@@ -33,10 +33,10 @@ const isInsideWix = window.parent !== window;
 const GUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export function useWixTickets() {
-  // Start with fallback tickets immediately — always visible
-  const [tickets, setTickets] = useState<TicketInfo[]>(FALLBACK_TICKETS);
-  const [loading, setLoading] = useState(false);
-  const [wixDataReady, setWixDataReady] = useState(!isInsideWix); // true immediately outside Wix
+  // Do not render fallback cards in the UI before real CMS data arrives
+  const [tickets, setTickets] = useState<TicketInfo[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [wixDataReady, setWixDataReady] = useState(false);
   const [isAdminTest, setIsAdminTest] = useState(false);
 
   // Promise that resolves when real Wix ticket data has arrived
@@ -66,8 +66,8 @@ export function useWixTickets() {
 
     console.log('[useWixTickets] Processing', payload.tickets.length, 'tickets from CMS');
 
-    setTickets((prev) =>
-      prev.map((fallback) => {
+    setTickets(() =>
+      FALLBACK_TICKETS.map((fallback) => {
         const meta = payload.tickets!.find(
           (t) => t.key.toLowerCase() === fallback.type.toLowerCase()
         );
@@ -118,7 +118,7 @@ export function useWixTickets() {
     console.log('[useWixTickets] isInsideWix:', isInsideWix);
 
     if (!isInsideWix) {
-      console.log('[useWixTickets] Not inside Wix iframe, using fallback tickets');
+      console.log('[useWixTickets] Not inside Wix iframe, waiting for Wix ticket data');
       return;
     }
 
