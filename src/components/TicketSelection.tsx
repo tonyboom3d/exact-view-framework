@@ -92,6 +92,7 @@ const TicketSelection = ({ selections, onChange, onBuyTicket, tickets, loading }
             ticket.originalPrice > 0 &&
             ticket.originalPrice > ticket.price;
           const discountTagText = (ticket.tagText || '').trim();
+          const shouldShowTag = hasDiscount || !!discountTagText;
 
           return (
             <motion.div
@@ -125,7 +126,7 @@ const TicketSelection = ({ selections, onChange, onBuyTicket, tickets, loading }
                   <span className="text-[17px] font-bold text-white">
                     ₪{ticket.price.toLocaleString()}
                   </span>
-                  {hasDiscount && (
+                  {shouldShowTag && (
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
                       <div className="bg-destructive text-white text-[17px] font-bold px-6 py-1.5 rounded -rotate-12 shadow-lg inline-flex items-center gap-2">
                         {discountTagText ? (
