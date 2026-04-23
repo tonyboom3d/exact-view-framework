@@ -664,14 +664,12 @@ async function handleStartCheckout(eventId, data, ticketMetaMap, onPaymentReceiv
                 id: orderNumber,
                 origin: 'Wix Events',
                 revenue: amount,
-                currency: 'ILS',
-                tax: 0,
-                shipping: 0,
                 contents: purchaseItems.map((it) => ({
                     id: it.item_id,
                     name: it.item_name,
                     price: it.price,
                     quantity: it.quantity,
+                    currency: 'ILS',
                 })),
             });
             console.log('[veloEventHandler] analytics event fired: Purchase', { orderNumber, amount, numItems });

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Check, Calendar, ChevronDown, Mail, Facebook, Loader2, Download, FileText, MessageCircle } from 'lucide-react';
+import { Check, Calendar, ChevronDown, Mail, Facebook, Loader2, Download, FileText, MessageCircle, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { TicketSelection, TicketInfo, GuestInfo, BuyerInfo } from '@/types/order';
 import { toast } from '@/hooks/use-toast';
@@ -110,7 +110,7 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
   }, 0);
 
   const eventTitle = 'Tony Robbins — Unleash the Power Within REMOTE';
-  const eventLocation = '';
+  const eventLocation = 'אולם התיאטרון סינמה סיטי גלילות';
   const eventDescription = 'Tony Robbins UPW Event';
   // June 16, 2026 16:00 to June 20, 2026 02:00 (Israel local time, UTC+3)
   const calendarStartUTC = '20260616T130000Z';
@@ -364,6 +364,10 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
       {/* Event details */}
       <div className="text-center text-[15px] text-muted-foreground space-y-0.5">
         <p className="font-medium">4 ימים, 16-19 ביוני 2026</p>
+        <p className="font-medium inline-flex items-center justify-center gap-1.5">
+          <MapPin className="w-4 h-4 shrink-0" />
+          אולם התיאטרון סינמה סיטי גלילות
+        </p>
       </div>
 
       {/* Order summary */}

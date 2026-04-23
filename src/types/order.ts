@@ -5,6 +5,7 @@ export interface TicketInfo {
   type: TicketType;
   name: string;
   price: number;
+  originalPrice?: number;
   description: string;
   fomoText: string;
   fomoPercent: number;

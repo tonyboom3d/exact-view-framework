@@ -88,6 +88,10 @@ const TicketSelection = ({ selections, onChange, onBuyTicket, tickets, loading }
           const isActive = activeType === ticket.type;
           const isHoveredFromMap = hoveredTicket === ticket.type;
           const isSoldOut = ticket.soldOut;
+          const hasDiscount =
+            typeof ticket.originalPrice === 'number' &&
+            ticket.originalPrice > 0 &&
+            ticket.originalPrice > ticket.price;
 
           return (
             <motion.div
@@ -118,14 +122,13 @@ const TicketSelection = ({ selections, onChange, onBuyTicket, tickets, loading }
                   {ticket.name}
                 </h3>
                 <div className="flex items-center gap-2">
-                  <span className="text-[17px] font-bold text-white/90">
+                  <span className="text-[17px] font-bold text-white">
                     ₪{ticket.price.toLocaleString()}
                   </span>
-                  {/* Show tag if: (1) soldOut with text, or (2) not soldOut but has tagText */}
-                  {(isSoldOut || ticket.tagText) && (
+                  {hasDiscount && (
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
                       <div className="bg-destructive text-white text-[17px] font-bold px-6 py-1.5 rounded -rotate-12 shadow-lg">
-                        {isSoldOut ? (ticket.tagText || 'אזלו הכרטיסים') : ticket.tagText}
+                        ₪{ticket.price.toLocaleString()} ₪{ticket.originalPrice!.toLocaleString()}
                       </div>
                     </div>
                   )}

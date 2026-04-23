@@ -35,6 +35,13 @@ function getItemPrice(item) {
     return typeof num === 'number' && !Number.isNaN(num) ? num : 0;
 }
 
+/** Get discount price from CMS item (supports current misspelled field name). */
+function getItemDiscountPrice(item) {
+    const raw = item.disscountPrice ?? item.discountPrice ?? 0;
+    const num = Number(raw);
+    return typeof num === 'number' && !Number.isNaN(num) ? num : 0;
+}
+
 // Admin test mode: override General Admission ticket to use the test-event ticket ID
 const ADMIN_TEST_GENERAL_TICKET_ID = '8aaefbe9-2f9e-41f6-8937-094f81abb164';
 
@@ -48,7 +55,10 @@ export async function getTicketMeta(isAdminTest = false) {
     }
 
     return items.map((item) => {
-        const price = isAdminTest ? 1 : getItemPrice(item);
+        const fullPrice = getItemPrice(item);
+        const discountPrice = getItemDiscountPrice(item);
+        const hasActiveDiscount = !isAdminTest && discountPrice > 0;
+        const price = isAdminTest ? 1 : (hasActiveDiscount ? discountPrice : fullPrice);
         // In admin test mode, override General Admission ticket ID to match the test event
         const ticketId = (isAdminTest && item.ticketKey && item.ticketKey.toLowerCase() === 'general')
             ? ADMIN_TEST_GENERAL_TICKET_ID
@@ -60,6 +70,7 @@ export async function getTicketMeta(isAdminTest = false) {
             soldPercent: item.soldPercent,
             isSoldOut: item.isSoldOut,
             price,
+            originalPrice: hasActiveDiscount ? fullPrice : 0,
             name: item.name,
             tagText: item.textOnTag || '',
         };
@@ -795,8 +806,7 @@ export async function sendTicketFileToWhatsapp(phone, pdfUrl, guestName, orderNu
 
 פרטים לשמירה:
 4 ימים, 16-19 ביוני 2026
-אולמי ME, מלון פרימה מילניום
-רח׳ תדהר 2, רעננה
+אולם התיאטרון סינמה סיטי גלילות
 
 הטבת לינה למשתתפים:
 קוד הנחה להזמנת חדרים: REMOTEXPR

@@ -21,6 +21,7 @@ interface WixTicketMeta {
    * If provided, it will override the fallback price in the UI.
    */
   price?: number;
+  originalPrice?: number;
   /**
    * Optional custom text for the sold-out tag (from CMS textOnTag field).
    * Defaults to "אזלו הכרטיסים" when not provided.
@@ -81,6 +82,7 @@ export function useWixTickets() {
           soldPercent: meta.soldPercent,
           isSoldOut: meta.isSoldOut,
           price: meta.price,
+          originalPrice: meta.originalPrice,
           tagText: meta.tagText,
         });
 
@@ -91,6 +93,7 @@ export function useWixTickets() {
           wixId: meta.id || fallback.wixId,
           soldOut: meta.isSoldOut ?? fallback.soldOut,
           price: meta.price ?? fallback.price,
+          originalPrice: meta.originalPrice && meta.originalPrice > 0 ? meta.originalPrice : undefined,
           fomoPercent: soldPercent,
           fomoText:
             soldPercent != null

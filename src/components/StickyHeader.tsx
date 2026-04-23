@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar } from 'lucide-react';
+import { Calendar, MapPin } from 'lucide-react';
 import tonyImg from '@/assets/tony-robbins.png';
 
 const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
@@ -131,6 +131,10 @@ const StickyHeader = () => {
                       <Calendar className="w-3 h-3 shrink-0" />
                       4 ימים, 16-19 ביוני 2026
                     </span>
+                    <span className="flex items-center gap-1">
+                      <MapPin className="w-3 h-3 shrink-0" />
+                      אולם התיאטרון סינמה סיטי גלילות
+                    </span>
                   </div>
                 </motion.div>
                 <motion.div
@@ -150,6 +154,10 @@ const StickyHeader = () => {
                     <span className="flex items-center gap-1">
                       <Calendar className="w-3 h-3 shrink-0" />
                       4 ימים, 16-19 ביוני 2026
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <MapPin className="w-3 h-3 shrink-0" />
+                      אולם התיאטרון סינמה סיטי גלילות
                     </span>
                   </div>
                 </motion.div>
