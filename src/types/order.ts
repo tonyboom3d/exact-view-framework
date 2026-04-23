@@ -82,7 +82,7 @@ export const FALLBACK_TICKETS: TicketInfo[] = [
     type: 'premier',
     name: 'Premier',
     price: 4500,
-    description: 'חוויית הפרימיום הקרובה ביותר לבמה. מושבים בשתי השורות הראשונות בגוש המרכזי.',
+    description: 'חוויית הפרימיום הקרובה ביותר לבמה - מושבים בגוש המרכזי.',
     fomoText: '100% כרטיסים נרכשו',
     fomoPercent: 100,
     soldOut: true,

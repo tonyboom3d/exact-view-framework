@@ -21,7 +21,7 @@ const SeatingMap = (_props: SeatingMapProps) => {
           <div className="space-y-4 text-foreground/90 text-[15px] leading-relaxed">
             <section>
               <h4 className="font-bold text-[16px] text-foreground mb-1">Premier</h4>
-              <p>חוויית הפרימיום הקרובה ביותר לבמה.</p>
+              <p>חוויית הפרימיום הקרובה ביותר לבמה - מושבים בגוש המרכזי.</p>
             </section>
 
             <section>
