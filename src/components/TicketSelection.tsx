@@ -127,8 +127,9 @@ const TicketSelection = ({ selections, onChange, onBuyTicket, tickets, loading }
                   </span>
                   {hasDiscount && (
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-                      <div className="bg-destructive text-white text-[17px] font-bold px-6 py-1.5 rounded -rotate-12 shadow-lg">
-                        ₪{ticket.price.toLocaleString()} ₪{ticket.originalPrice!.toLocaleString()}
+                      <div className="bg-destructive text-white text-[17px] font-bold px-6 py-1.5 rounded -rotate-12 shadow-lg inline-flex items-center gap-2">
+                        <span>₪{ticket.price.toLocaleString()}</span>
+                        <span className="line-through">₪{ticket.originalPrice!.toLocaleString()}</span>
                       </div>
                     </div>
                   )}
