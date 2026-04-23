@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Minus, Plus, User, Users, Ticket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { type TicketSelection as TicketSelectionType, type TicketType, type TicketInfo } from '@/types/order';
 import { motion } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -92,6 +91,7 @@ const TicketSelection = ({ selections, onChange, onBuyTicket, tickets, loading }
             typeof ticket.originalPrice === 'number' &&
             ticket.originalPrice > 0 &&
             ticket.originalPrice > ticket.price;
+          const discountTagText = (ticket.tagText || '').trim();
 
           return (
             <motion.div
@@ -128,8 +128,16 @@ const TicketSelection = ({ selections, onChange, onBuyTicket, tickets, loading }
                   {hasDiscount && (
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
                       <div className="bg-destructive text-white text-[17px] font-bold px-6 py-1.5 rounded -rotate-12 shadow-lg inline-flex items-center gap-2">
-                        <span>₪{ticket.price.toLocaleString()}</span>
-                        <span className="line-through">₪{ticket.originalPrice!.toLocaleString()}</span>
+                        {discountTagText ? (
+                          <span>{discountTagText}</span>
+                        ) : (
+                          <>
+                            <span>₪{ticket.price.toLocaleString()}</span>
+                            <span className="text-white/70 line-through decoration-2">
+                              ₪{ticket.originalPrice!.toLocaleString()}
+                            </span>
+                          </>
+                        )}
                       </div>
                     </div>
                   )}
