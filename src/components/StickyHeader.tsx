@@ -7,8 +7,8 @@ const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
 const StickyHeader = () => {
   const getTimeLeft = () => {
-    // March 11, 2026 16:00:00 GMT+0300
-    const target = new Date('2026-03-11T16:00:00+03:00').getTime();
+    // May 10, 2026 23:59:00 GMT+0300
+    const target = new Date('2026-05-10T23:59:00+03:00').getTime();
     const now = Date.now();
     const diff = Math.max(0, Math.floor((target - now) / 1000));
     return {
@@ -70,16 +70,16 @@ const StickyHeader = () => {
             style={{ transform: 'scaleX(-1) translateZ(0)' }}
           />
 
-          {/* Countdown timer - left side (temporarily hidden, keep code for future use) */}
-          {false && (
+          {/* Countdown timer - left side */}
+          {(
             <div className="flex flex-col md:flex-row-reverse md:items-center items-end gap-0.5 md:gap-2">
-              {/* Mobile: "מתחילים בעוד" above timer */}
+              {/* Mobile: "המחיר עולה בעוד" above timer */}
               <span className={`md:hidden font-bold text-foreground whitespace-nowrap transition-[font-size] duration-300 ${
                 isScrolled 
                   ? 'text-[12px] sm:text-[14px]' 
                   : 'text-[15px] sm:text-[17px]'
               }`}>
-                מתחילים בעוד
+                המחיר עולה בעוד
               </span>
               <div className={`gap-1 sm:gap-1.5 flex items-center justify-start transition-[gap] duration-300 ${
                 isScrolled ? 'gap-0.5 sm:gap-1' : ''
@@ -98,13 +98,13 @@ const StickyHeader = () => {
                 }`}>:</span>
                 <FlipUnit value={pad(timeLeft.seconds)} label="שניות" isScrolled={isScrolled} />
               </div>
-              {/* Desktop: "מתחילים בעוד" on same row, right of timer */}
+              {/* Desktop: "המחיר עולה בעוד" on same row, right of timer */}
               <span className={`hidden md:block font-bold text-foreground whitespace-nowrap transition-[font-size] duration-300 ${
                 isScrolled 
                   ? 'text-[12px] md:text-[14px]' 
                   : 'text-[15px] md:text-[17px]'
               }`}>
-                מתחילים בעוד
+                המחיר עולה בעוד
               </span>
             </div>
           )}
