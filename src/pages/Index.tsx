@@ -480,22 +480,24 @@ const Index = () => {
         <AnimatePresence mode="wait">
           {step === 1 && (
             <motion.div key="step1" initial={isMobile ? false : { opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <div className="flex items-center justify-between pt-3 pb-1">
+              <div className={`flex items-center pt-3 pb-1 ${priceSecondsLeft > 0 ? 'justify-between' : 'justify-end'}`}>
                 {/* Mobile/Tablet Timer - Left Side */}
-                <div className="lg:hidden flex flex-col items-start gap-0.5">
-                  <span className="text-[13px] sm:text-[14px] font-bold text-foreground">
-                    המחיר עולה בעוד
-                  </span>
-                  <div className="flex items-center gap-1 sm:gap-1.5" dir="ltr">
-                    <MobileFlipUnit value={String(Math.floor(priceSecondsLeft / 86400)).padStart(2, '0')} label="ימים" />
-                    <span className="text-destructive font-bold text-sm sm:text-base animate-pulse">:</span>
-                    <MobileFlipUnit value={String(Math.floor((priceSecondsLeft % 86400) / 3600)).padStart(2, '0')} label="שעות" />
-                    <span className="text-destructive font-bold text-sm sm:text-base animate-pulse">:</span>
-                    <MobileFlipUnit value={String(Math.floor((priceSecondsLeft % 3600) / 60)).padStart(2, '0')} label="דקות" />
-                    <span className="text-destructive font-bold text-sm sm:text-base animate-pulse">:</span>
-                    <MobileFlipUnit value={String(priceSecondsLeft % 60).padStart(2, '0')} label="שניות" />
+                {priceSecondsLeft > 0 && (
+                  <div className="lg:hidden flex flex-col items-start gap-0.5">
+                    <span className="text-[13px] sm:text-[14px] font-bold text-foreground">
+                      המחיר עולה בעוד
+                    </span>
+                    <div className="flex items-center gap-1 sm:gap-1.5" dir="ltr">
+                      <MobileFlipUnit value={String(Math.floor(priceSecondsLeft / 86400)).padStart(2, '0')} label="ימים" />
+                      <span className="text-destructive font-bold text-sm sm:text-base animate-pulse">:</span>
+                      <MobileFlipUnit value={String(Math.floor((priceSecondsLeft % 86400) / 3600)).padStart(2, '0')} label="שעות" />
+                      <span className="text-destructive font-bold text-sm sm:text-base animate-pulse">:</span>
+                      <MobileFlipUnit value={String(Math.floor((priceSecondsLeft % 3600) / 60)).padStart(2, '0')} label="דקות" />
+                      <span className="text-destructive font-bold text-sm sm:text-base animate-pulse">:</span>
+                      <MobileFlipUnit value={String(priceSecondsLeft % 60).padStart(2, '0')} label="שניות" />
+                    </div>
                   </div>
-                </div>
+                )}
                 {/* Home Button - Right Side */}
                 <Button
                   variant="default"

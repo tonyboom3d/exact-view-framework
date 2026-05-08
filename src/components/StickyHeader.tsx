@@ -37,6 +37,8 @@ const StickyHeader = () => {
   }, []);
 
   const pad = (n: number) => n.toString().padStart(2, '0');
+  
+  const totalSeconds = timeLeft.days * 86400 + timeLeft.hours * 3600 + timeLeft.minutes * 60 + timeLeft.seconds;
 
   return (
     <motion.header
@@ -71,7 +73,7 @@ const StickyHeader = () => {
           />
 
           {/* Countdown timer - desktop only (tablet/mobile uses button row timer) */}
-          {(
+          {totalSeconds > 0 && (
             <div className="hidden lg:flex flex-col md:flex-row-reverse md:items-center items-end gap-0.5 md:gap-2">
               {/* Mobile: "המחיר עולה בעוד" above timer */}
               <span className={`md:hidden font-bold text-foreground whitespace-nowrap transition-[font-size] duration-300 ${
