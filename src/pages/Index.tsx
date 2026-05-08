@@ -480,7 +480,23 @@ const Index = () => {
         <AnimatePresence mode="wait">
           {step === 1 && (
             <motion.div key="step1" initial={isMobile ? false : { opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <div className="flex items-center justify-end gap-2 pt-3 pb-1">
+              <div className="flex items-center justify-between pt-3 pb-1">
+                {/* Mobile/Tablet Timer - Left Side */}
+                <div className="lg:hidden flex flex-col items-start gap-0.5">
+                  <span className="text-[11px] sm:text-[12px] font-bold text-foreground">
+                    המחיר עולה בעוד
+                  </span>
+                  <div className="flex items-center gap-1" dir="ltr">
+                    <MobileFlipUnit value={String(Math.floor(priceSecondsLeft / 86400)).padStart(2, '0')} label="ימים" />
+                    <span className="text-destructive font-bold text-sm animate-pulse">:</span>
+                    <MobileFlipUnit value={String(Math.floor((priceSecondsLeft % 86400) / 3600)).padStart(2, '0')} label="שעות" />
+                    <span className="text-destructive font-bold text-sm animate-pulse">:</span>
+                    <MobileFlipUnit value={String(Math.floor((priceSecondsLeft % 3600) / 60)).padStart(2, '0')} label="דקות" />
+                    <span className="text-destructive font-bold text-sm animate-pulse">:</span>
+                    <MobileFlipUnit value={String(priceSecondsLeft % 60).padStart(2, '0')} label="שניות" />
+                  </div>
+                </div>
+                {/* Home Button - Right Side */}
                 <Button
                   variant="default"
                   size="sm"
@@ -494,14 +510,6 @@ const Index = () => {
                   <Home className="w-4 h-4" />
                   חזרה לראשי
                 </Button>
-                <div className="lg:hidden flex items-center gap-1.5 bg-cta/10 text-foreground px-2.5 h-9 rounded-lg border border-border/60">
-                  <span className="text-[12px] sm:text-[13px] font-bold whitespace-nowrap">
-                    המחיר עולה בעוד
-                  </span>
-                  <span className="font-extrabold tabular-nums text-[13px] sm:text-[14px]" dir="ltr">
-                    {`${String(Math.floor(priceSecondsLeft / 86400)).padStart(2, '0')}:${String(Math.floor((priceSecondsLeft % 86400) / 3600)).padStart(2, '0')}:${String(Math.floor((priceSecondsLeft % 3600) / 60)).padStart(2, '0')}:${String(priceSecondsLeft % 60).padStart(2, '0')}`}
-                  </span>
-                </div>
               </div>
               <TicketSelection
                 selections={selections}
@@ -577,6 +585,39 @@ const Index = () => {
         disabled={false}
       />
       </div>
+    </div>
+  );
+};
+
+const MobileFlipUnit = ({ value, label }: { value: string; label: string }) => {
+  return (
+    <div className="flex flex-col items-center gap-0">
+      <div className="flex gap-[2px]">
+        {value.split('').map((digit, i) => (
+          <MobileFlipDigit key={`${i}-${digit}`} value={digit} />
+        ))}
+      </div>
+      <span className="text-[9px] text-muted-foreground font-medium">{label}</span>
+    </div>
+  );
+};
+
+const MobileFlipDigit = ({ value }: { value: string }) => {
+  return (
+    <div className="relative inline-flex">
+      <AnimatePresence mode="popLayout">
+        <motion.div
+          key={value}
+          initial={{ opacity: 0, y: -4 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 4 }}
+          transition={{ duration: 0.2, ease: 'easeOut' }}
+          className="bg-destructive text-white font-mono font-extrabold rounded-md flex items-center justify-center shadow-md w-[14px] h-[20px] text-[12px]"
+          style={{ transform: 'translateZ(0)' }}
+        >
+          {value}
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 };
