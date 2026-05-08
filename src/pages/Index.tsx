@@ -483,16 +483,16 @@ const Index = () => {
               <div className="flex items-center justify-between pt-3 pb-1">
                 {/* Mobile/Tablet Timer - Left Side */}
                 <div className="lg:hidden flex flex-col items-start gap-0.5">
-                  <span className="text-[11px] sm:text-[12px] font-bold text-foreground">
+                  <span className="text-[13px] sm:text-[14px] font-bold text-foreground">
                     המחיר עולה בעוד
                   </span>
-                  <div className="flex items-center gap-1" dir="ltr">
+                  <div className="flex items-center gap-1 sm:gap-1.5" dir="ltr">
                     <MobileFlipUnit value={String(Math.floor(priceSecondsLeft / 86400)).padStart(2, '0')} label="ימים" />
-                    <span className="text-destructive font-bold text-sm animate-pulse">:</span>
+                    <span className="text-destructive font-bold text-sm sm:text-base animate-pulse">:</span>
                     <MobileFlipUnit value={String(Math.floor((priceSecondsLeft % 86400) / 3600)).padStart(2, '0')} label="שעות" />
-                    <span className="text-destructive font-bold text-sm animate-pulse">:</span>
+                    <span className="text-destructive font-bold text-sm sm:text-base animate-pulse">:</span>
                     <MobileFlipUnit value={String(Math.floor((priceSecondsLeft % 3600) / 60)).padStart(2, '0')} label="דקות" />
-                    <span className="text-destructive font-bold text-sm animate-pulse">:</span>
+                    <span className="text-destructive font-bold text-sm sm:text-base animate-pulse">:</span>
                     <MobileFlipUnit value={String(priceSecondsLeft % 60).padStart(2, '0')} label="שניות" />
                   </div>
                 </div>
@@ -597,7 +597,7 @@ const MobileFlipUnit = ({ value, label }: { value: string; label: string }) => {
           <MobileFlipDigit key={`${i}-${digit}`} value={digit} />
         ))}
       </div>
-      <span className="text-[9px] text-muted-foreground font-medium">{label}</span>
+      <span className="text-[10px] sm:text-[11px] text-muted-foreground font-medium">{label}</span>
     </div>
   );
 };
@@ -612,7 +612,7 @@ const MobileFlipDigit = ({ value }: { value: string }) => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 4 }}
           transition={{ duration: 0.2, ease: 'easeOut' }}
-          className="bg-destructive text-white font-mono font-extrabold rounded-md flex items-center justify-center shadow-md w-[14px] h-[20px] text-[12px]"
+          className="bg-destructive text-white font-mono font-extrabold rounded-md flex items-center justify-center shadow-md w-[18px] sm:w-[22px] h-[24px] sm:h-[28px] text-[14px] sm:text-[16px]"
           style={{ transform: 'translateZ(0)' }}
         >
           {value}
