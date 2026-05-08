@@ -70,9 +70,9 @@ const StickyHeader = () => {
             style={{ transform: 'scaleX(-1) translateZ(0)' }}
           />
 
-          {/* Countdown timer - left side */}
+          {/* Countdown timer - desktop only (tablet/mobile uses button row timer) */}
           {(
-            <div className="flex flex-col md:flex-row-reverse md:items-center items-end gap-0.5 md:gap-2">
+            <div className="hidden lg:flex flex-col md:flex-row-reverse md:items-center items-end gap-0.5 md:gap-2">
               {/* Mobile: "המחיר עולה בעוד" above timer */}
               <span className={`md:hidden font-bold text-foreground whitespace-nowrap transition-[font-size] duration-300 ${
                 isScrolled 

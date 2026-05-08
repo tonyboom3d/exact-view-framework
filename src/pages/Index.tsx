@@ -29,6 +29,18 @@ const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
 const Index = () => {
   const [step, setStep] = useState(1);
+  const getPriceIncreaseTimeLeftSeconds = useCallback(() => {
+    const target = new Date('2026-05-10T23:59:00+03:00').getTime();
+    const now = Date.now();
+    return Math.max(0, Math.floor((target - now) / 1000));
+  }, []);
+
+  const [priceSecondsLeft, setPriceSecondsLeft] = useState(getPriceIncreaseTimeLeftSeconds);
+
+  useEffect(() => {
+    const timer = setInterval(() => setPriceSecondsLeft(getPriceIncreaseTimeLeftSeconds()), 1000);
+    return () => clearInterval(timer);
+  }, [getPriceIncreaseTimeLeftSeconds]);
   const [selections, setSelections] = useState<TicketSelectionType[]>([]);
   const [buyer, setBuyer] = useState<BuyerInfo>({ email: '', firstName: '', lastName: '', phone: '' });
   const [guests, setGuests] = useState<GuestInfo[]>([]);
@@ -468,7 +480,7 @@ const Index = () => {
         <AnimatePresence mode="wait">
           {step === 1 && (
             <motion.div key="step1" initial={isMobile ? false : { opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <div className="flex justify-end pt-3 pb-1">
+              <div className="flex items-center justify-end gap-2 pt-3 pb-1">
                 <Button
                   variant="default"
                   size="sm"
@@ -480,8 +492,16 @@ const Index = () => {
                   }}
                 >
                   <Home className="w-4 h-4" />
-                  חזרה לדף הבית
+                  חזרה לראשי
                 </Button>
+                <div className="lg:hidden flex items-center gap-1.5 bg-cta/10 text-foreground px-2.5 h-9 rounded-lg border border-border/60">
+                  <span className="text-[12px] sm:text-[13px] font-bold whitespace-nowrap">
+                    המחיר עולה בעוד
+                  </span>
+                  <span className="font-extrabold tabular-nums text-[13px] sm:text-[14px]" dir="ltr">
+                    {`${String(Math.floor(priceSecondsLeft / 86400)).padStart(2, '0')}:${String(Math.floor((priceSecondsLeft % 86400) / 3600)).padStart(2, '0')}:${String(Math.floor((priceSecondsLeft % 3600) / 60)).padStart(2, '0')}:${String(priceSecondsLeft % 60).padStart(2, '0')}`}
+                  </span>
+                </div>
               </div>
               <TicketSelection
                 selections={selections}
