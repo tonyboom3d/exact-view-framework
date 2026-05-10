@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Wix Velo (keep local only; do not publish to GitHub)
+velo/
