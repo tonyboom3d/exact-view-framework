@@ -42,6 +42,15 @@ const PendingPaymentOverlay = ({
   const resolvedRef = useRef(false);
   const manuallyCancelledRef = useRef(false);
 
+  // Store callbacks in refs so inline arrow functions in the parent
+  // don't cause the polling useEffect to restart on every render.
+  const onPaymentConfirmedRef = useRef(onPaymentConfirmed);
+  const onPaymentFailedRef = useRef(onPaymentFailed);
+  const sendPendingWhatsappRef = useRef(sendPendingWhatsapp);
+  onPaymentConfirmedRef.current = onPaymentConfirmed;
+  onPaymentFailedRef.current = onPaymentFailed;
+  sendPendingWhatsappRef.current = sendPendingWhatsapp;
+
   const cleanup = useCallback(() => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
@@ -104,7 +113,7 @@ const PendingPaymentOverlay = ({
           cleanup();
           setPhase('confirmed');
           setTimeout(() => {
-            onPaymentConfirmed({
+            onPaymentConfirmedRef.current({
               orderNumber: pendingData.orderNumber,
               ticketsPdf: result.ticketsPdf,
             });
@@ -117,7 +126,7 @@ const PendingPaymentOverlay = ({
           cleanup();
           setPhase('failed');
           setTimeout(() => {
-            onPaymentFailed();
+            onPaymentFailedRef.current();
           }, 3000);
           return;
         }
@@ -133,7 +142,7 @@ const PendingPaymentOverlay = ({
         // Send WhatsApp notification ONLY if user didn't manually cancel (fire-and-forget)
         if (!whatsappSentRef.current && !manuallyCancelledRef.current && pendingData.buyerPhone) {
           whatsappSentRef.current = true;
-          sendPendingWhatsapp(
+          sendPendingWhatsappRef.current(
             pendingData.buyerPhone,
             pendingData.buyerFirstName,
             pendingData.orderNumber
@@ -145,7 +154,11 @@ const PendingPaymentOverlay = ({
     }, POLL_INTERVAL);
 
     return cleanup;
-  }, [visible, pendingData, pollPaymentStatus, sendPendingWhatsapp, onPaymentConfirmed, onPaymentFailed, cleanup]);
+  // onPaymentConfirmed, onPaymentFailed, sendPendingWhatsapp are intentionally
+  // excluded from deps – they're accessed via refs to prevent the effect from
+  // restarting (and resetting the timer) when the parent re-renders.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible, pendingData, pollPaymentStatus, cleanup]);
 
   if (!visible) return null;
 

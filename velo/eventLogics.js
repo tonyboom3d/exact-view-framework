@@ -6,8 +6,17 @@ import { triggeredEmails } from 'wix-crm-backend';
 import { contacts } from 'wix-crm-backend';
 import { fetch } from 'wix-fetch';
 import { getSecret } from 'wix-secrets-backend';
+import { generateInvoiceFromCart } from 'backend/morningService';
 // Test mode disabled for production. Admin test mode is controlled via URL param + Secret Manager.
 const TEST_MODE_ENABLED = false;
+
+// Ticket name mapping by Wix ticket definition ID (mirrors morningService TICKET_NAMES_MAP)
+const TICKET_NAMES_MAP = {
+    'fc7e3aeb-acb7-41f7-ab40-d47b4efd1f40': 'General Admission',
+    'faa98535-2d51-48f7-b895-b4a94887b76f': 'VIP',
+    'ae73acb8-c1a2-4f32-8fa1-d0dfc30d39fc': 'Premier',
+    '8aaefbe9-2f9e-41f6-8937-094f81abb164': 'כרטיס לבדיקות בלבד',
+};
 
 // Elevated functions (require elevated permissions)
 const elevatedConfirmOrder = elevate(orders.confirmOrder);
@@ -64,6 +73,8 @@ export async function getTicketMeta(isAdminTest = false) {
             ? ADMIN_TEST_GENERAL_TICKET_ID
             : item.wixTicketId;
 
+        const name = TICKET_NAMES_MAP[item.wixTicketId] || item.name || item.ticketKey || 'כרטיס';
+
         return {
             key: item.ticketKey,
             id: ticketId,
@@ -71,7 +82,7 @@ export async function getTicketMeta(isAdminTest = false) {
             isSoldOut: item.isSoldOut,
             price,
             originalPrice: hasActiveDiscount ? fullPrice : 0,
-            name: item.name,
+            name,
             tagText: item.textOnTag || '',
         };
     });
@@ -388,34 +399,11 @@ export async function saveAbandonedCart(cartData) {
             ticketsPdf: '',
         };
 
-        // Check if a record already exists for this phone number
-        let existingRecord = null;
-        if (payerPhone) {
-            const existing = await wixData.query('aboundedcarts')
-                .eq('payerPhone', payerPhone)
-                .descending('_createdDate')
-                .limit(1)
-                .find({ suppressAuth: true });
-
-            if (existing.items.length > 0) {
-                existingRecord = existing.items[0];
-            }
-        }
-
-        if (existingRecord) {
-            // Update existing record with fresh data
-            Object.assign(existingRecord, record);
-            console.log('saveAbandonedCart: updating existing record', { _id: existingRecord._id, payerPhone });
-            const result = await wixData.update('aboundedcarts', existingRecord, { suppressAuth: true });
-            console.log('saveAbandonedCart: updated', { _id: result._id });
-            return result._id;
-        } else {
-            // Insert new record
-            console.log('saveAbandonedCart: inserting new record', { title: record.title, payerPhone });
-            const result = await wixData.insert('aboundedcarts', record, { suppressAuth: true });
-            console.log('saveAbandonedCart: inserted', { _id: result._id });
-            return result._id;
-        }
+        // Always insert a new record per checkout attempt
+        console.log('saveAbandonedCart: inserting new record', { title: record.title, payerPhone });
+        const result = await wixData.insert('aboundedcarts', record, { suppressAuth: true });
+        console.log('saveAbandonedCart: inserted', { _id: result._id });
+        return result._id;
     } catch (error) {
         console.error('saveAbandonedCart: failed (non-blocking)', error);
         return null;
@@ -592,6 +580,19 @@ export async function confirmPendingPayment(paymentId, transactionId) {
         console.log('confirmPendingPayment: CMS record updated to paid', { _id: record._id });
     } catch (updateError) {
         console.error('confirmPendingPayment: failed to update CMS (non-blocking)', updateError);
+    }
+
+    // Step 6.5: Generate Morning invoice (fire-and-forget)
+    try {
+        generateInvoiceFromCart(orderNumber)
+            .then((invoiceResult) => {
+                console.log('confirmPendingPayment: invoice generation result', invoiceResult);
+            })
+            .catch((invoiceErr) => {
+                console.error('confirmPendingPayment: invoice generation failed (non-blocking)', invoiceErr);
+            });
+    } catch (invoiceSetupError) {
+        console.error('confirmPendingPayment: invoice setup failed (non-blocking)', invoiceSetupError);
     }
 
     // Step 7: Trigger WhatsApp delivery (fire-and-forget)
@@ -1115,4 +1116,292 @@ export async function cancelPendingPayment(paymentId) {
         console.error('cancelPendingPayment: failed', error);
         return { success: false, error: String(error) };
     }
+}
+
+// ── Grow Webhook Payment Confirmation ────────────────────────────────
+
+/**
+ * Confirms a payment based on a webhook from Grow payment processor.
+ * Acts as a backup mechanism when wixPay_onPaymentUpdate doesn't fire.
+ * 
+ * Search strategy:
+ *   1. Try to find by transactionCode matching transactionId in CMS
+ *   2. Fallback: find by payerPhone + payerEmail
+ *   3. If not found, retry up to 3 times with 5 second delays
+ *   4. If still not found, save to InvoiceLogs for manual review
+ * 
+ * @param {object} params
+ * @param {string} params.transactionCode - Transaction code from Grow
+ * @param {string} params.payerPhone - Payer phone from webhook
+ * @param {string} params.payerEmail - Payer email from webhook
+ * @param {number} params.paymentSum - Payment amount
+ * @param {string} params.fullName - Payer full name
+ * @param {string} params.asmachta - Transaction reference number
+ * @param {string} params.transactionType - Type of transaction
+ * @param {string} params.paymentDate - Date of payment
+ * @param {object} params.rawPayload - Full webhook payload for logging
+ * @returns {Promise<{success: boolean, matched: boolean, orderNumber?: string, error?: string}>}
+ */
+export async function confirmPaymentFromGrow(params) {
+    const {
+        transactionCode,
+        payerPhone,
+        payerEmail,
+        paymentSum,
+        fullName,
+        asmachta,
+        transactionType,
+        paymentDate,
+        rawPayload,
+    } = params;
+
+    const logTag = '[confirmPaymentFromGrow]';
+    const MAX_ATTEMPTS = 3;
+    const RETRY_DELAY_MS = 5000;
+
+    console.log(`${logTag} Starting`, {
+        transactionCode,
+        payerPhone,
+        payerEmail,
+        paymentSum,
+    });
+
+    let record = null;
+    let matchMethod = '';
+
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+        console.log(`${logTag} Attempt ${attempt}/${MAX_ATTEMPTS}`);
+
+        // Strategy 1: Find by transactionId (exact match with transactionCode)
+        if (transactionCode) {
+            try {
+                const byTransactionId = await wixData.query('aboundedcarts')
+                    .eq('transactionId', transactionCode)
+                    .descending('_createdDate')
+                    .limit(1)
+                    .find({ suppressAuth: true, consistentRead: true });
+
+                if (byTransactionId.items.length > 0) {
+                    record = byTransactionId.items[0];
+                    matchMethod = 'transactionId';
+                    console.log(`${logTag} Found by transactionId`, {
+                        _id: record._id,
+                        orderNumber: record.orderNumber,
+                    });
+                    break;
+                }
+            } catch (queryError) {
+                console.error(`${logTag} Query by transactionId failed`, queryError);
+            }
+        }
+
+        // Strategy 2: Find by payerPhone – try both raw and normalized formats.
+        // CMS stores the phone exactly as entered by the user (e.g. 0523813929),
+        // while Grow sends the same raw format. Exclude already-paid records only.
+        if (payerPhone && !record) {
+            const rawPhone = payerPhone.replace(/\D/g, ''); // strip non-digits
+            const normalizedPhone = normalizePhone(payerPhone); // 05... → 972...
+            const phonesToTry = [...new Set([rawPhone, normalizedPhone])].filter(Boolean);
+
+            for (const phone of phonesToTry) {
+                try {
+                    const byPhone = await wixData.query('aboundedcarts')
+                        .eq('payerPhone', phone)
+                        .ne('status', 'paid')
+                        .descending('_createdDate')
+                        .limit(5)
+                        .find({ suppressAuth: true, consistentRead: true });
+
+                    console.log(`${logTag} Phone search (${phone}): ${byPhone.items.length} results`);
+
+                    if (byPhone.items.length > 0) {
+                        for (const item of byPhone.items) {
+                            let payerDetails = item.payerDetails || {};
+                            if (typeof payerDetails === 'string') {
+                                try { payerDetails = JSON.parse(payerDetails); } catch (e) { payerDetails = {}; }
+                            }
+
+                            const storedEmail = (payerDetails.email || '').toLowerCase().trim();
+                            const webhookEmail = (payerEmail || '').toLowerCase().trim();
+
+                            // Match if emails match OR if no email in webhook (phone-only match)
+                            if (!webhookEmail || storedEmail === webhookEmail) {
+                                record = item;
+                                matchMethod = `payerPhone(${phone})` + (webhookEmail ? '+email' : '');
+                                console.log(`${logTag} Found by phone`, {
+                                    _id: record._id,
+                                    orderNumber: record.orderNumber,
+                                    storedStatus: record.status,
+                                    matchMethod,
+                                });
+                                break;
+                            }
+                        }
+                        if (record) break;
+                    }
+                } catch (queryError) {
+                    console.error(`${logTag} Query by payerPhone (${phone}) failed`, queryError);
+                }
+            }
+            if (record) break;
+        }
+
+        // Note: Strategy 3 (match by paymentId = transactionCode) was removed.
+        // Grow's transactionCode is an encrypted value unrelated to Wix Pay's paymentId.
+
+        // If not found and not last attempt, wait and retry
+        if (!record && attempt < MAX_ATTEMPTS) {
+            console.log(`${logTag} Not found, waiting ${RETRY_DELAY_MS}ms before retry...`);
+            await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
+        }
+    }
+
+    // If still not found after all attempts, save to InvoiceLogs
+    if (!record) {
+        console.warn(`${logTag} Order not found after ${MAX_ATTEMPTS} attempts, saving to InvoiceLogs`);
+
+        try {
+            await wixData.insert('InvoiceLogs', {
+                title: `Grow Webhook - Not Found - ${transactionCode || 'unknown'}`,
+                status: 'WEBHOOK_UNMATCHED',
+                orderId: transactionCode || '',
+                payload: JSON.stringify(rawPayload || {}),
+                response: JSON.stringify({
+                    attempts: MAX_ATTEMPTS,
+                    payerPhone,
+                    payerEmail,
+                    paymentSum,
+                    fullName,
+                    asmachta,
+                    transactionType,
+                    paymentDate,
+                    searchedAt: new Date().toISOString(),
+                }),
+            }, { suppressAuth: true });
+
+            console.log(`${logTag} Saved unmatched webhook to InvoiceLogs`);
+        } catch (logError) {
+            console.error(`${logTag} Failed to save to InvoiceLogs`, logError);
+        }
+
+        return {
+            success: true,
+            matched: false,
+            error: 'Order not found after retries - logged for manual review',
+        };
+    }
+
+    // Found a record - check if already processed
+    const { orderNumber, eventId, status, paymentId } = record;
+
+    if (status === 'paid') {
+        console.log(`${logTag} Order already paid, skipping`, { orderNumber, matchMethod });
+        return {
+            success: true,
+            matched: true,
+            orderNumber,
+        };
+    }
+
+    // Process the payment using existing confirmPendingPayment logic
+    // But we need to adapt since we might not have paymentId
+    console.log(`${logTag} Processing payment`, {
+        orderNumber,
+        eventId,
+        status,
+        matchMethod,
+    });
+
+    try {
+        // If we have paymentId, use the existing flow.
+        // Do NOT pass transactionCode as transactionId – it's Grow's encrypted code,
+        // not the Wix Pay transactionId. Save it separately as growTransactionCode.
+        if (paymentId) {
+            const confirmResult = await confirmPendingPayment(paymentId, null);
+            console.log(`${logTag} confirmPendingPayment result`, confirmResult);
+
+            // Save Grow's transactionCode in a dedicated field (non-blocking)
+            if (transactionCode) {
+                try {
+                    const latestRecord = await wixData.get('aboundedcarts', record._id, { suppressAuth: true });
+                    latestRecord.growTransactionCode = transactionCode;
+                    await wixData.update('aboundedcarts', latestRecord, { suppressAuth: true });
+                    console.log(`${logTag} growTransactionCode saved`, { orderNumber, transactionCode });
+                } catch (saveErr) {
+                    console.error(`${logTag} Failed to save growTransactionCode (non-blocking)`, saveErr);
+                }
+            }
+
+            console.log(`${logTag} Processed via confirmPendingPayment`, { matchMethod });
+            return {
+                success: true,
+                matched: true,
+                orderNumber: confirmResult.orderNumber || orderNumber,
+            };
+        }
+
+        // If no paymentId, manually confirm the order
+        if (orderNumber && eventId) {
+            // Confirm the order in Wix Events
+            await confirmEventOrder(eventId, orderNumber);
+            console.log(`${logTag} Order confirmed in Wix Events`, { orderNumber });
+
+            // Update CMS record – keep existing transactionId (Wix Pay's value),
+            // save Grow's code in growTransactionCode separately.
+            record.status = 'paid';
+            record.growTransactionCode = transactionCode || '';
+            await wixData.update('aboundedcarts', record, { suppressAuth: true });
+            console.log(`${logTag} CMS record updated to paid`, { orderNumber });
+
+            // Generate invoice (fire-and-forget)
+            generateInvoiceFromCart(orderNumber)
+                .then((invoiceResult) => {
+                    console.log(`${logTag} Invoice generation result`, invoiceResult);
+                })
+                .catch((invoiceErr) => {
+                    console.error(`${logTag} Invoice generation failed (non-blocking)`, invoiceErr);
+                });
+
+            console.log(`${logTag} Processed via directConfirm`, { matchMethod });
+            return {
+                success: true,
+                matched: true,
+                orderNumber,
+            };
+        }
+
+        // Missing required data
+        console.error(`${logTag} Missing orderNumber or eventId`, { orderNumber, eventId });
+        return {
+            success: false,
+            matched: true,
+            orderNumber,
+            error: 'Missing orderNumber or eventId in CMS record',
+        };
+
+    } catch (processError) {
+        console.error(`${logTag} Processing failed`, {
+            orderNumber,
+            error: String(processError),
+        });
+
+        return {
+            success: false,
+            matched: true,
+            orderNumber,
+            error: String(processError),
+        };
+    }
+}
+
+/**
+ * Normalizes a phone number to the format stored in CMS (972...)
+ */
+function normalizePhone(phone) {
+    if (!phone) return '';
+    let clean = phone.replace(/\D/g, '');
+    if (clean.startsWith('05')) {
+        clean = '972' + clean.substring(1);
+    }
+    return clean;
 }

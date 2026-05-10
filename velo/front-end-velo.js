@@ -3,6 +3,7 @@ import wixPay from 'wix-pay-frontend';
 import { analytics } from '@wix/site';
 import { session } from 'wix-storage';
 import { getTicketMeta, createEventPayment, confirmEventOrder, saveAbandonedCart, updateCartAfterPayment, checkPaymentStatus, sendPendingPaymentWhatsapp, cancelPendingPayment, getOrderDetails } from 'backend/eventLogics';
+import { generateInvoiceFromCart } from 'backend/morningService';
 import wixWindowFrontend from "wix-window-frontend";
 
 $w.onReady(async function () {
@@ -446,10 +447,12 @@ async function handleStartCheckout(eventId, data, ticketMetaMap, onPaymentReceiv
     };
 
     // Step E: Build items array from selected tickets (prices from CMS/backend)
-    // Calculate total quantity for fallback price distribution
+    // Wix Pay expects one { name, price } entry per ticket unit (no quantity field).
+    // We expand each ticket type into individual line items so both the name and
+    // price appear correctly in the Grow/Meshulam payment page.
     const totalQuantity = selectedTickets.reduce((sum, t) => sum + t.quantity, 0);
 
-    const items = selectedTickets.map((t) => {
+    const items = selectedTickets.flatMap((t) => {
         const meta = ticketMetaMap[t.ticketId] || {};
         // Use CMS price if available; otherwise distribute totalAmountFromIframe evenly
         const priceFromCms = meta.price;
@@ -457,16 +460,14 @@ async function handleStartCheckout(eventId, data, ticketMetaMap, onPaymentReceiv
             Math.round((totalAmountFromIframe / totalQuantity) * 100) / 100 :
             0;
         const price = priceFromCms > 0 ? priceFromCms : fallbackPrice;
+        const name = meta.name || meta.key || 'כרטיס';
 
-        return {
-            name: meta.name || 'כרטיס',
-            price,
-            quantity: t.quantity,
-        };
+        // Expand to individual items (one per ticket unit)
+        return Array.from({ length: t.quantity }, () => ({ name, price }));
     });
 
     // Calculate total amount from items
-    let amount = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    let amount = items.reduce((sum, item) => sum + item.price, 0);
 
     // Safety: if still 0, use the iframe total directly
     if (amount <= 0 && totalAmountFromIframe > 0) {
@@ -496,14 +497,14 @@ async function handleStartCheckout(eventId, data, ticketMetaMap, onPaymentReceiv
         const buyerName = `${mainBuyerDetails.firstName} ${mainBuyerDetails.lastName}`.trim();
 
         // Build enriched selectedTickets with names & prices for the CMS record
-        // Use items array (already resolved with correct names from ticketMetaMap in Step E)
-        const selectedTicketsForCms = selectedTickets.map((t, idx) => {
-            const itemInfo = items[idx] || {};
+        // Use ticketMetaMap directly (items is now expanded per-unit, not per-type)
+        const selectedTicketsForCms = selectedTickets.map((t) => {
+            const meta = ticketMetaMap[t.ticketId] || {};
             return {
                 ticketId: t.ticketId,
-                ticketName: itemInfo.name || 'כרטיס',
+                ticketName: meta.name || meta.key || 'כרטיס',
                 quantity: t.quantity,
-                price: itemInfo.price || 0,
+                price: meta.price || 0,
             };
         });
 
@@ -526,7 +527,7 @@ async function handleStartCheckout(eventId, data, ticketMetaMap, onPaymentReceiv
             payerPhone,
             affiliateId: '',
         });
-        // console.log('handleStartCheckout: abandoned cart saved', { cartId });
+        console.log('handleStartCheckout: abandoned cart saved', { cartId, orderNumber: checkoutRes.order.orderNumber, payerPhone });
     } catch (cartError) {
         console.error('handleStartCheckout: abandoned cart save failed (non-blocking)', cartError);
     }
@@ -550,7 +551,12 @@ async function handleStartCheckout(eventId, data, ticketMetaMap, onPaymentReceiv
             showThankYouPage: false,
             skipUserInfoPage: true,
         });
-        // console.log('handleStartCheckout: startPayment RAW result', JSON.stringify(paymentRes));
+        console.log('[wixPay] startPayment result', {
+            status: paymentRes.status,
+            transactionId: paymentRes.transactionId || 'none',
+            paymentId: paymentRes.payment && paymentRes.payment.id,
+            amount: paymentRes.payment && paymentRes.payment.amount,
+        });
     } catch (error) {
         // If startPayment is rejected (e.g., user closed modal), treat as cancellation
         // console.log('handleStartCheckout: startPayment rejected/cancelled', error);
@@ -603,9 +609,11 @@ async function handleStartCheckout(eventId, data, ticketMetaMap, onPaymentReceiv
             });
         }
 
-        // console.log('handleStartCheckout: payment successful, returning immediately to UI', {
-        //   orderNumber: checkoutRes.order.orderNumber,
-        // });
+        // H3: Generate Morning invoice (fire-and-forget)
+        generateInvoiceFromCart(checkoutRes.order.orderNumber)
+            .catch((invoiceErr) => {
+                console.error('handleStartCheckout: invoice generation failed (non-blocking)', invoiceErr);
+            });
     } else if (finalStatus === 'pending') {
         // Payment is pending verification by card company (common with Grow/Meshulam).
         // Do NOT confirm the order yet – the wixPay_onPaymentUpdate event handler
