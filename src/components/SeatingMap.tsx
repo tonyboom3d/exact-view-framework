@@ -34,6 +34,11 @@ const SeatingMap = (_props: SeatingMapProps) => {
               <p>חוויית ההשתתפות המלאה עם אווירה אנרגטית של קהל גדול.</p>
             </section>
 
+            <section>
+              <h4 className="font-bold text-[16px] text-foreground mb-1">Rear Gallery</h4>
+              <p>חוויה מלאה באירוע — מושבים בגלריה האחורית הנמצאת במפלס האולם.</p>
+            </section>
+
             <p className="text-[13px] text-muted-foreground pt-1 border-t border-border/60">
               המפה נועדה להמחשה בלבד ומציגה את חלוקת אזורי הישיבה לפי סוג כרטיס, ללא מספרי מושבים
               או מחירים.

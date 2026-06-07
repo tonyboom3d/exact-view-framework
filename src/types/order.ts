@@ -91,4 +91,18 @@ export const FALLBACK_TICKETS: TicketInfo[] = [
     colorClass: 'bg-amber-600',
     mapLabel: 'אזור פרמייר',
   },
+  {
+    wixId: 'dev-rearGallery',
+    type: 'rearGallery',
+    name: 'Rear Gallery',
+    price: 1999,
+    description: 'חוויה מלאה באירוע — מושבים בגלריה האחורית הנמצאת במפלס האולם.',
+    fomoText: '',
+    fomoPercent: 0,
+    soldOut: false,
+    color: 'linear-gradient(135deg, #1a5c4f, #2ea88a)',
+    progressColor: '#2ea88a',
+    colorClass: 'bg-teal-600',
+    mapLabel: 'גלריה אחורית',
+  },
 ];

@@ -66,8 +66,10 @@ export function useWixTickets() {
 
     console.log('[useWixTickets] Processing', payload.tickets.length, 'tickets from CMS');
 
+    const adminMode = !!payload.isAdminTest;
+
     setTickets(() =>
-      FALLBACK_TICKETS.map((fallback) => {
+      FALLBACK_TICKETS.filter((fb) => adminMode || fb.type !== 'rearGallery').map((fallback) => {
         const meta = payload.tickets!.find(
           (t) => t.key.toLowerCase() === fallback.type.toLowerCase()
         );
