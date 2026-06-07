@@ -76,7 +76,7 @@ export function useWixTickets() {
 
         if (!meta) {
           console.log(`[useWixTickets] No CMS match for type: ${fallback.type}`);
-          return fallback;
+          return adminMode ? { ...fallback, price: 1 } : fallback;
         }
 
         console.log(`[useWixTickets] Merging CMS data for ${fallback.type}:`, {
@@ -94,7 +94,7 @@ export function useWixTickets() {
           ...fallback,
           wixId: meta.id || fallback.wixId,
           soldOut: meta.isSoldOut ?? fallback.soldOut,
-          price: meta.price ?? fallback.price,
+          price: adminMode ? 1 : (meta.price ?? fallback.price),
           originalPrice: meta.originalPrice && meta.originalPrice > 0 ? meta.originalPrice : undefined,
           fomoPercent: soldPercent,
           fomoText:
