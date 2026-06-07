@@ -23,9 +23,10 @@ interface TicketSelectionProps {
   onBuyTicket: (type: TicketType) => void;
   tickets: TicketInfo[];
   loading?: boolean;
+  isAdminTest?: boolean;
 }
 
-const TicketSelection = ({ selections, onChange, onBuyTicket, tickets, loading }: TicketSelectionProps) => {
+const TicketSelection = ({ selections, onChange, onBuyTicket, tickets, loading, isAdminTest }: TicketSelectionProps) => {
   const [hoveredTicket, setHoveredTicket] = useState<TicketType | null>(null);
 
   const getQuantity = (type: TicketType) =>
@@ -254,6 +255,7 @@ const TicketSelection = ({ selections, onChange, onBuyTicket, tickets, loading }
           activeTicket={activeType}
           onHoverZone={handleMapHover}
           tickets={tickets}
+          isAdminTest={isAdminTest}
         />
       </motion.div>
     </div>

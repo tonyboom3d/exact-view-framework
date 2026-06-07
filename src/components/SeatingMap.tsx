@@ -8,9 +8,10 @@ interface SeatingMapProps {
   activeTicket?: TicketType | null;
   onHoverZone?: (type: TicketType | null) => void;
   tickets?: TicketInfo[];
+  isAdminTest?: boolean;
 }
 
-const SeatingMap = (_props: SeatingMapProps) => {
+const SeatingMap = ({ isAdminTest }: SeatingMapProps) => {
   return (
     <div className="rounded-xl border border-border bg-muted/30 p-4">
       <div className="flex flex-col md:flex-row rtl:md:flex-row-reverse gap-6 md:gap-8 items-stretch">
@@ -34,10 +35,12 @@ const SeatingMap = (_props: SeatingMapProps) => {
               <p>חוויית ההשתתפות המלאה עם אווירה אנרגטית של קהל גדול.</p>
             </section>
 
-            <section>
-              <h4 className="font-bold text-[16px] text-foreground mb-1">Rear Gallery</h4>
-              <p>חוויה מלאה באירוע — מושבים בגלריה האחורית הנמצאת במפלס האולם.</p>
-            </section>
+            {isAdminTest && (
+              <section>
+                <h4 className="font-bold text-[16px] text-foreground mb-1">Rear Gallery</h4>
+                <p>חוויה מלאה באירוע — מושבים בגלריה האחורית הנמצאת במפלס האולם.</p>
+              </section>
+            )}
 
             <p className="text-[13px] text-muted-foreground pt-1 border-t border-border/60">
               המפה נועדה להמחשה בלבד ומציגה את חלוקת אזורי הישיבה לפי סוג כרטיס, ללא מספרי מושבים

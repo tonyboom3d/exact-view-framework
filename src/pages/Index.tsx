@@ -519,6 +519,7 @@ const Index = () => {
                 onBuyTicket={handleBuyTicket}
                 tickets={tickets}
                 loading={ticketsLoading || tickets.length === 0}
+                isAdminTest={isAdminTest}
               />
             </motion.div>
           )}
