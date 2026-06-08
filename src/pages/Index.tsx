@@ -30,7 +30,7 @@ const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 const Index = () => {
   const [step, setStep] = useState(1);
   const getPriceIncreaseTimeLeftSeconds = useCallback(() => {
-    const target = new Date('2026-05-10T23:59:00+03:00').getTime();
+    const target = new Date('2026-06-12T00:00:00+03:00').getTime();
     const now = Date.now();
     return Math.max(0, Math.floor((target - now) / 1000));
   }, []);
@@ -485,7 +485,7 @@ const Index = () => {
                 {priceSecondsLeft > 0 && (
                   <div className="lg:hidden flex flex-col items-start gap-0.5">
                     <span className="text-[13px] sm:text-[14px] font-bold text-foreground">
-                      המחיר עולה בעוד
+                      סיום הטבת מחיר בעוד
                     </span>
                     <div className="flex items-center gap-1 sm:gap-1.5" dir="ltr">
                       <MobileFlipUnit value={String(Math.floor(priceSecondsLeft / 86400)).padStart(2, '0')} label="ימים" />
