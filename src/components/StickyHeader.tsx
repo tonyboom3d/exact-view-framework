@@ -2,13 +2,20 @@ import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, MapPin } from 'lucide-react';
 import tonyImg from '@/assets/tony-robbins.png';
+import { EventUIConfig } from '@/config/eventConfig';
 
 const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
-const StickyHeader = () => {
+const StickyHeader = ({ config }: { config?: EventUIConfig }) => {
+  const title = config?.title ?? 'Tony Robbins';
+  const subtitle = config?.subtitle ?? 'Unleash the Power Within REMOTE';
+  const datesText = config?.datesText ?? '4 ימים, 16-19 ביוני 2026';
+  const locationText = config?.locationText ?? 'אולם התיאטרון סינמה סיטי גלילות';
+  const deadlineISO = config?.priceTimerDeadlineISO ?? '2026-06-12T00:00:00+03:00';
+  const showTimer = config?.showHeaderPriceTimer ?? true;
+
   const getTimeLeft = () => {
-    // June 12, 2026 00:00:00 GMT+0300 (end of June 11)
-    const target = new Date('2026-06-12T00:00:00+03:00').getTime();
+    const target = new Date(deadlineISO).getTime();
     const now = Date.now();
     const diff = Math.max(0, Math.floor((target - now) / 1000));
     return {
@@ -39,6 +46,13 @@ const StickyHeader = () => {
   const pad = (n: number) => n.toString().padStart(2, '0');
   
   const totalSeconds = timeLeft.days * 86400 + timeLeft.hours * 3600 + timeLeft.minutes * 60 + timeLeft.seconds;
+
+  const LiveBadge = () => (
+    <span className="inline-flex items-center gap-1 mr-2">
+      <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+      <span className="text-[13px] font-bold text-red-500 uppercase">Live</span>
+    </span>
+  );
 
   return (
     <motion.header
@@ -73,7 +87,7 @@ const StickyHeader = () => {
           />
 
           {/* Countdown timer - desktop only (tablet/mobile uses button row timer) */}
-          {totalSeconds > 0 && (
+          {showTimer && totalSeconds > 0 && (
             <div className="hidden lg:flex flex-col md:flex-row-reverse md:items-center items-end gap-0.5 md:gap-2">
               {/* Mobile: "סיום הטבת מחיר בעוד" above timer */}
               <span className={`md:hidden font-bold text-foreground whitespace-nowrap transition-[font-size] duration-300 ${
@@ -122,20 +136,23 @@ const StickyHeader = () => {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.3 }}>
-                  <h1 className="text-[20px] font-bold text-foreground leading-tight text-right">
-                    Tony Robbins
-                  </h1>
+                  <div className="flex items-center">
+                    {config?.showLiveBadge && <LiveBadge />}
+                    <h1 className="text-[20px] font-bold text-foreground leading-tight text-right">
+                      {title}
+                    </h1>
+                  </div>
                   <p className="text-[14px] text-foreground/80 font-semibold text-right">
-                    Unleash the Power Within REMOTE
+                    {subtitle}
                   </p>
                   <div className="flex flex-wrap items-center justify-start gap-x-3 text-[12px] text-muted-foreground mt-0.5">
                     <span className="flex items-center gap-1">
                       <Calendar className="w-3 h-3 shrink-0" />
-                      4 ימים, 16-19 ביוני 2026
+                      {datesText}
                     </span>
                     <span className="flex items-center gap-1">
                       <MapPin className="w-3 h-3 shrink-0" />
-                      אולם התיאטרון סינמה סיטי גלילות
+                      {locationText}
                     </span>
                   </div>
                 </motion.div>
@@ -146,20 +163,23 @@ const StickyHeader = () => {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.3 }}>
-                  <h1 className="text-[17px] font-bold text-foreground leading-tight">
-                    Tony Robbins
-                  </h1>
+                  <div className="flex items-center">
+                    {config?.showLiveBadge && <LiveBadge />}
+                    <h1 className="text-[17px] font-bold text-foreground leading-tight">
+                      {title}
+                    </h1>
+                  </div>
                   <p className="text-[12px] text-foreground/80 font-semibold mt-0.5">
-                    Unleash the Power Within REMOTE
+                    {subtitle}
                   </p>
                   <div className="flex flex-wrap items-center justify-end gap-x-2 text-[11px] text-muted-foreground mt-1">
                     <span className="flex items-center gap-1">
                       <Calendar className="w-3 h-3 shrink-0" />
-                      4 ימים, 16-19 ביוני 2026
+                      {datesText}
                     </span>
                     <span className="flex items-center gap-1">
                       <MapPin className="w-3 h-3 shrink-0" />
-                      אולם התיאטרון סינמה סיטי גלילות
+                      {locationText}
                     </span>
                   </div>
                 </motion.div>

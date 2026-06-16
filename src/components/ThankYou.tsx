@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
-import { Check, Calendar, ChevronDown, Mail, Facebook, Loader2, Download, FileText, MessageCircle, MapPin } from 'lucide-react';
+import { Check, Calendar, ChevronDown, Mail, Facebook, Loader2, Download, FileText, MessageCircle, MapPin, Gift } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { TicketSelection, TicketInfo, GuestInfo, BuyerInfo } from '@/types/order';
 import { toast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { sendMessage } from '@/lib/wixBridge';
+import type { EventUIConfig } from '@/config/eventConfig';
 
 interface ThankYouProps {
   orderNumber: string;
@@ -17,9 +18,12 @@ interface ThankYouProps {
   tickets: TicketInfo[];
   paymentStatus?: 'Successful' | 'Pending' | null;
   pdfLink?: string | null;
+  config?: EventUIConfig;
+  couponUrl?: string;
+  couponCode?: string;
 }
 
-const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPayer, tickets, paymentStatus, pdfLink }: ThankYouProps) => {
+const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPayer, tickets, paymentStatus, pdfLink, config, couponUrl, couponCode }: ThankYouProps) => {
   const [showDetails, setShowDetails] = useState(false);
   const [pdfReady, setPdfReady] = useState(!!pdfLink);
   const [currentPdfLink, setCurrentPdfLink] = useState(pdfLink || '');
@@ -99,8 +103,8 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
     return () => clearInterval(interval);
   }, [paymentStatus]);
 
-  const shareLink = 'https://www.tonyrobbins.co.il/';
-  const shareText = `נרשמתי לסדנת UPW REMOTE של טוני רובינס בישראל 🔥\n\n4 ימים של כלים, אסטרטגיות ושינוי אמיתי – 4 ימים, 16-19 ביוני 2026.\n\n${shareLink}\n\nמי שבעניין – זה הזמן.`;
+  const shareLink = config?.shareLink || 'https://www.tonyrobbins.co.il/';
+  const shareText = config?.shareText || `נרשמתי לסדנת UPW REMOTE של טוני רובינס בישראל 🔥\n\n4 ימים של כלים, אסטרטגיות ושינוי אמיתי – 4 ימים, 16-19 ביוני 2026.\n\n${shareLink}\n\nמי שבעניין – זה הזמן.`;
 
   const activeSelections = selections.filter(s => s.quantity > 0);
   const totalTickets = activeSelections.reduce((sum, s) => sum + s.quantity, 0);
@@ -109,12 +113,11 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
     return sum + (ticket?.price || 0) * s.quantity;
   }, 0);
 
-  const eventTitle = 'Tony Robbins — Unleash the Power Within REMOTE';
-  const eventLocation = 'אולם התיאטרון סינמה סיטי גלילות';
+  const eventTitle = config ? `${config.title} — ${config.subtitle}` : 'Tony Robbins — Unleash the Power Within REMOTE';
+  const eventLocation = config?.locationText || 'אולם התיאטרון סינמה סיטי גלילות';
   const eventDescription = 'Tony Robbins UPW Event';
-  // June 16, 2026 16:00 to June 20, 2026 02:00 (Israel local time, UTC+3)
-  const calendarStartUTC = '20260616T130000Z';
-  const calendarEndUTC = '20260619T230000Z';
+  const calendarStartUTC = config?.calendarStartUTC || '20260616T130000Z';
+  const calendarEndUTC = config?.calendarEndUTC || '20260619T230000Z';
 
   const addToGoogleCalendar = () => {
     const params = new URLSearchParams({
@@ -152,8 +155,8 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
   const addToMicrosoftCalendar = () => {
     const params = new URLSearchParams({
       subject: eventTitle,
-      startdt: '2026-06-16T16:00:00',
-      enddt: '2026-06-20T02:00:00',
+      startdt: config?.calendarStartLocal || '2026-06-16T16:00:00',
+      enddt: config?.calendarEndLocal || '2026-06-20T02:00:00',
       body: eventDescription,
       path: '/calendar/action/compose',
       rru: 'addevent',
@@ -363,10 +366,10 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
 
       {/* Event details */}
       <div className="text-center text-[15px] text-muted-foreground space-y-0.5">
-        <p className="font-medium">4 ימים, 16-19 ביוני 2026</p>
+        <p className="font-medium">{config?.datesText || '4 ימים, 16-19 ביוני 2026'}</p>
         <p className="font-medium inline-flex items-center justify-center gap-1.5">
           <MapPin className="w-4 h-4 shrink-0" />
-          אולם התיאטרון סינמה סיטי גלילות
+          {config?.locationText || 'אולם התיאטרון סינמה סיטי גלילות'}
         </p>
       </div>
 
@@ -449,6 +452,40 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
           )}
         </AnimatePresence>
       </div>
+
+      {/* Coupon section (Event 2 1+1 promo) */}
+      {config?.couponRedeemBaseUrl && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.2 }}
+          className="rounded-xl border-2 border-amber-400 bg-gradient-to-br from-amber-50 to-orange-50 p-5 space-y-3"
+        >
+          <div className="flex items-center justify-center gap-2">
+            <Gift className="w-6 h-6 text-amber-600" />
+            <p className="text-[18px] font-bold text-amber-900">כרטיס נוסף במתנה!</p>
+          </div>
+          <p className="text-[14px] text-amber-800 leading-relaxed">
+            במסגרת מבצע 1+1, קיבלת קישור לרכישת כרטיס נוסף ללא עלות.
+          </p>
+          {couponUrl ? (
+            <a
+              href={couponUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-bold text-[15px] transition-colors shadow-md"
+            >
+              <Gift className="w-5 h-5" />
+              לרכישת הכרטיס הנוסף
+            </a>
+          ) : (
+            <div className="flex items-center justify-center gap-2 py-2 text-[14px] text-amber-700">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>הקופון בהכנה...</span>
+            </div>
+          )}
+        </motion.div>
+      )}
 
       {/* Share section */}
       <div className="rounded-xl border border-border bg-background p-5 space-y-3">

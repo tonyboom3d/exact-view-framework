@@ -7,11 +7,11 @@ import type { PendingPaymentData } from '@/hooks/useWixPayment';
 interface PendingPaymentOverlayProps {
   visible: boolean;
   pendingData: PendingPaymentData;
-  onPaymentConfirmed: (data: { orderNumber: string; ticketsPdf?: string }) => void;
+  onPaymentConfirmed: (data: { orderNumber: string; ticketsPdf?: string; couponUrl?: string; couponCode?: string }) => void;
   onPaymentFailed: () => void;
   onTimeout: () => void;
   onCancelled: () => void;
-  pollPaymentStatus: (paymentId: string) => Promise<{ status: string; ticketsPdf?: string }>;
+  pollPaymentStatus: (paymentId: string) => Promise<{ status: string; ticketsPdf?: string; couponUrl?: string; couponCode?: string }>;
   sendPendingWhatsapp: (phone: string, firstName: string, orderNumber: string) => Promise<void>;
   cancelPendingPayment: (paymentId: string) => Promise<void>;
 }
@@ -116,6 +116,8 @@ const PendingPaymentOverlay = ({
             onPaymentConfirmedRef.current({
               orderNumber: pendingData.orderNumber,
               ticketsPdf: result.ticketsPdf,
+              couponUrl: result.couponUrl,
+              couponCode: result.couponCode,
             });
           }, 2000);
           return;
