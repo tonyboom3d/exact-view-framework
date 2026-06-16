@@ -453,10 +453,6 @@ const Index = () => {
 
       <div className="flex-1 overflow-y-auto flex flex-col">
 
-      {showClosedPage ? (
-        <EventClosedMessage />
-      ) : (
-        <>
       {/* Step Indicator - centered */}
       <motion.div
         className="max-w-5xl mx-auto w-[95%] pt-3 pb-1 hidden md:flex justify-center"
@@ -596,8 +592,8 @@ const Index = () => {
         onBack={handleBack}
         disabled={false}
       />
-        </>
-      )}
+
+      {showClosedPage && <EventClosedMessage />}
       </div>
     </div>
   );

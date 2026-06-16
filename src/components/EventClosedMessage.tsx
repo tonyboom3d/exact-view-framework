@@ -12,16 +12,17 @@ const EventClosedMessage = () => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.45, ease: 'easeOut' }}
-      className="relative flex flex-1 items-center justify-center px-4 py-12 overflow-hidden"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4, ease: 'easeOut' }}
+      className="fixed inset-0 z-[120] flex items-center justify-center bg-black/40 backdrop-blur-md"
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-cta/20 via-background to-primary/15" />
-      <div className="absolute top-1/4 -right-16 w-72 h-72 rounded-full bg-cta/25 blur-3xl" />
-      <div className="absolute bottom-1/4 -left-16 w-72 h-72 rounded-full bg-primary/20 blur-3xl" />
-
-      <div className="relative max-w-md w-full text-center space-y-6 rounded-3xl border border-white/50 bg-white/35 dark:bg-black/25 backdrop-blur-xl shadow-2xl p-8 sm:p-10">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.92, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.45, ease: 'easeOut', delay: 0.1 }}
+        className="mx-4 max-w-md w-full text-center space-y-6 rounded-3xl border border-white/40 bg-white/30 dark:bg-black/30 backdrop-blur-xl shadow-2xl p-8 sm:p-10"
+      >
         <div className="w-20 h-20 mx-auto rounded-full bg-white/40 dark:bg-white/10 backdrop-blur-sm border border-white/50 flex items-center justify-center">
           <span className="text-4xl">🎉</span>
         </div>
@@ -45,7 +46,7 @@ const EventClosedMessage = () => {
           <Home className="w-4 h-4 ml-2" />
           חזרה לראשי
         </Button>
-      </div>
+      </motion.div>
     </motion.div>
   );
 };
