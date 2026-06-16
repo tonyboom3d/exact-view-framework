@@ -48,8 +48,8 @@ const StickyHeader = ({ config }: { config?: EventUIConfig }) => {
   const totalSeconds = timeLeft.days * 86400 + timeLeft.hours * 3600 + timeLeft.minutes * 60 + timeLeft.seconds;
 
   const LiveBadge = () => (
-    <span className="inline-flex items-center gap-1 mr-2">
-      <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+    <span className="inline-flex items-center gap-1.5" dir="ltr">
+      <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse shrink-0" />
       <span className="text-[13px] font-bold text-red-500 uppercase">Live</span>
     </span>
   );
@@ -136,12 +136,14 @@ const StickyHeader = ({ config }: { config?: EventUIConfig }) => {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.3 }}>
-                  <div className="flex items-center">
-                    {config?.showLiveBadge && <LiveBadge />}
-                    <h1 className="text-[20px] font-bold text-foreground leading-tight text-right">
-                      {title}
-                    </h1>
-                  </div>
+                  {config?.showLiveBadge && (
+                    <div className="mb-0.5">
+                      <LiveBadge />
+                    </div>
+                  )}
+                  <h1 className="text-[20px] font-bold text-foreground leading-tight text-right">
+                    {title}
+                  </h1>
                   <p className="text-[14px] text-foreground/80 font-semibold text-right">
                     {subtitle}
                   </p>
@@ -163,12 +165,14 @@ const StickyHeader = ({ config }: { config?: EventUIConfig }) => {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.3 }}>
-                  <div className="flex items-center">
-                    {config?.showLiveBadge && <LiveBadge />}
-                    <h1 className="text-[17px] font-bold text-foreground leading-tight">
-                      {title}
-                    </h1>
-                  </div>
+                  {config?.showLiveBadge && (
+                    <div className="mb-0.5">
+                      <LiveBadge />
+                    </div>
+                  )}
+                  <h1 className="text-[17px] font-bold text-foreground leading-tight">
+                    {title}
+                  </h1>
                   <p className="text-[12px] text-foreground/80 font-semibold mt-0.5">
                     {subtitle}
                   </p>
