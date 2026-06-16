@@ -16,8 +16,6 @@ interface PaymentResult {
   paymentId?: string;
   buyerPhone?: string;
   buyerFirstName?: string;
-  couponUrl?: string;
-  couponCode?: string;
 }
 
 export interface PendingPaymentData {

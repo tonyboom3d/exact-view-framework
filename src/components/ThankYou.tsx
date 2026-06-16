@@ -19,11 +19,10 @@ interface ThankYouProps {
   paymentStatus?: 'Successful' | 'Pending' | null;
   pdfLink?: string | null;
   config?: EventUIConfig;
-  couponUrl?: string;
-  couponCode?: string;
+  couponEmailSent?: boolean;
 }
 
-const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPayer, tickets, paymentStatus, pdfLink, config, couponUrl, couponCode }: ThankYouProps) => {
+const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPayer, tickets, paymentStatus, pdfLink, config, couponEmailSent }: ThankYouProps) => {
   const [showDetails, setShowDetails] = useState(false);
   const [pdfReady, setPdfReady] = useState(!!pdfLink);
   const [currentPdfLink, setCurrentPdfLink] = useState(pdfLink || '');
@@ -453,7 +452,7 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
         </AnimatePresence>
       </div>
 
-      {/* Coupon section (Event 2 1+1 promo) */}
+      {/* Coupon section (Event 2 1+1 promo – codes sent by email) */}
       {config?.couponRedeemBaseUrl && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -463,26 +462,19 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
         >
           <div className="flex items-center justify-center gap-2">
             <Gift className="w-6 h-6 text-amber-600" />
-            <p className="text-[18px] font-bold text-amber-900">כרטיס נוסף במתנה!</p>
+            <p className="text-[18px] font-bold text-amber-900">כרטיס/ים נוסף/ים במתנה!</p>
           </div>
           <p className="text-[14px] text-amber-800 leading-relaxed">
-            במסגרת מבצע 1+1, קיבלת קישור לרכישת כרטיס נוסף ללא עלות.
+            במסגרת מבצע 1+1, קוד/קודי הקופון לרכישת כרטיס/ים נוסף/ים נשלחו אליך למייל
+            {buyerEmail ? (
+              <> <span dir="ltr" className="font-semibold">{buyerEmail}</span></>
+            ) : null}
+            . כל קוד מיועד לכרטיס נוסף אחד מאותו סוג.
           </p>
-          {couponUrl ? (
-            <a
-              href={couponUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-bold text-[15px] transition-colors shadow-md"
-            >
-              <Gift className="w-5 h-5" />
-              לרכישת הכרטיס הנוסף
-            </a>
-          ) : (
-            <div className="flex items-center justify-center gap-2 py-2 text-[14px] text-amber-700">
-              <Loader2 className="w-4 h-4 animate-spin" />
-              <span>הקופון בהכנה...</span>
-            </div>
+          {couponEmailSent === false && (
+            <p className="text-[13px] text-amber-700">
+              הקופונים בהכנה — המייל יישלח אליך בדקות הקרובות.
+            </p>
           )}
         </motion.div>
       )}

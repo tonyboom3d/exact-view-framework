@@ -58,7 +58,7 @@ export const EVENT2_CONFIG: EventUIConfig = {
   shareText: 'נרשמתי לסדנת UPW REMOTE של טוני רובינס בישראל 🔥\n\n4 ימים של כלים, אסטרטגיות ושינוי אמיתי – 4 ימים, 3-6 בספטמבר 2026.\n\nhttps://www.tonyrobbins.co.il/\n\nמי שבעניין – זה הזמן.',
   promo: {
     title: '1+1 על כל סוגי הכרטיסים',
-    description: 'רוכשים כרטיס מכל סוג ובסוף תהליך ההזמנה מקבלים קישור לרכישת כרטיס נוסף במתנה.',
+    description: 'רוכשים כרטיס מכל סוג ובסוף תהליך ההזמנה מקבלים קוד/קודי קופון למייל — כרטיס נוסף במתנה לכל כרטיס שרכשתם.',
     deadlineISO: '2026-06-25T00:00:00+03:00',
   },
   couponRedeemBaseUrl: 'https://www.tonyrobbins.co.il/event-details/tony-robbins-live',

@@ -26,6 +26,8 @@ import {
   loadPurchaseContext,
   clearPurchaseContext,
 } from '@/lib/purchaseTracking';
+import { getThankYouOrderFromUrl, setThankYouUrl } from '@/lib/thankYouUrl';
+import { sendMessage } from '@/lib/wixBridge';
 
 const isInsideWix = window.parent !== window;
 const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
@@ -62,9 +64,9 @@ const IndexEvent2 = () => {
   const [pdfLink, setPdfLink] = useState<string | null>(null);
   const [showPendingDialog, setShowPendingDialog] = useState(false);
   const [existingPendingData, setExistingPendingData] = useState<PendingPaymentData | null>(null);
-  const [couponUrl, setCouponUrl] = useState('');
-  const [couponCode, setCouponCode] = useState('');
+  const [couponEmailSent, setCouponEmailSent] = useState<boolean | undefined>(undefined);
   const [showPromoPopup, setShowPromoPopup] = useState(false);
+  const [thankYouRestored, setThankYouRestored] = useState(false);
 
   useEffect(() => {
     if (EVENT2_CONFIG.promo) {
@@ -117,7 +119,71 @@ const IndexEvent2 = () => {
   }, [showPayer, isAdminTest]);
 
   useEffect(() => {
+    if (!isInsideWix || thankYouRestored || tickets.length === 0) return;
+
+    const orderFromUrl = getThankYouOrderFromUrl();
+    if (!orderFromUrl) return;
+
+    sendMessage<{
+      orderNumber?: string;
+      status?: string;
+      ticketsPdf?: string;
+      guests?: GuestInfo[];
+      selectedTickets?: Array<{ ticketId: string; quantity: number }>;
+      payerDetails?: BuyerInfo & { companyName?: string };
+      hasDifferentPayer?: boolean;
+      couponEmailSent?: boolean;
+    }>('GET_THANK_YOU_PAGE', { orderNumber: orderFromUrl })
+      .then((data) => {
+        if (!data || data.status !== 'paid') return;
+
+        setOrderNumber(data.orderNumber || orderFromUrl);
+        setPaymentStatus('Successful');
+        setPdfLink(data.ticketsPdf || null);
+        setShowPayer(!!data.hasDifferentPayer);
+        setCouponEmailSent(data.couponEmailSent ?? true);
+
+        if (data.guests?.length) {
+          setGuests(data.guests);
+        }
+
+        if (data.hasDifferentPayer && data.payerDetails) {
+          setBuyer({
+            firstName: data.payerDetails.firstName || '',
+            lastName: data.payerDetails.lastName || '',
+            email: data.payerDetails.email || '',
+            phone: data.payerDetails.phone || '',
+          });
+          if (data.payerDetails.companyName) {
+            setShowCompany(true);
+            setCompanyName(data.payerDetails.companyName);
+          }
+        }
+
+        if (data.selectedTickets?.length) {
+          const restoredSelections = data.selectedTickets
+            .map((st) => {
+              const ticket = tickets.find((t) => t.wixId === st.ticketId);
+              if (!ticket) return null;
+              return { type: ticket.type, quantity: st.quantity };
+            })
+            .filter(Boolean) as TicketSelectionType[];
+          if (restoredSelections.length > 0) {
+            setSelections(restoredSelections);
+          }
+        }
+
+        setStep(3);
+        setThankYouRestored(true);
+      })
+      .catch((err) => {
+        console.warn('[IndexEvent2] failed to restore thank-you page from URL', err);
+      });
+  }, [tickets, thankYouRestored]);
+
+  useEffect(() => {
     if (!isInsideWix) return;
+    if (getThankYouOrderFromUrl()) return;
 
     checkExistingPendingOrder().then((result) => {
       if (!result) return;
@@ -128,8 +194,10 @@ const IndexEvent2 = () => {
         setOrderNumber(data.orderNumber);
         setPaymentStatus('Successful');
         setPdfLink(ticketsPdf || null);
+        setCouponEmailSent(true);
         clearPendingPayment();
         setStep(3);
+        setThankYouUrl(data.orderNumber);
         toast({ title: 'ההזמנה שלך אושרה!', description: `מספר הזמנה: ${data.orderNumber}` });
 
         const ctx = loadPurchaseContext(data.orderNumber);
@@ -263,8 +331,7 @@ const IndexEvent2 = () => {
           setReferralCode(result.referralCode);
           setPdfLink(result.pdfLink || null);
           setPaymentStatus(result.status || 'Successful');
-          if (result.couponUrl) setCouponUrl(result.couponUrl);
-          if (result.couponCode) setCouponCode(result.couponCode);
+          setCouponEmailSent(true);
 
           const successItems = buildPurchaseItems(selections, tickets);
           pushPurchaseDataLayer({
@@ -274,6 +341,7 @@ const IndexEvent2 = () => {
           });
 
           setStep(3);
+          setThankYouUrl(result.orderNumber);
           window.scrollTo({ top: 0, behavior: 'smooth' });
         } catch (err: any) {
           // Error is handled by useWixPayment - it sets paymentError state
@@ -326,13 +394,12 @@ const IndexEvent2 = () => {
           pollPaymentStatus={pollPaymentStatus}
           sendPendingWhatsapp={sendPendingWhatsapp}
           cancelPendingPayment={cancelPendingPayment}
-          onPaymentConfirmed={({ orderNumber: on, ticketsPdf: tp, couponUrl: cu, couponCode: cc }) => {
+          onPaymentConfirmed={({ orderNumber: on, ticketsPdf: tp }) => {
             clearPendingPayment();
             setOrderNumber(on);
             setPdfLink(tp || null);
             setPaymentStatus('Successful');
-            if (cu) setCouponUrl(cu);
-            if (cc) setCouponCode(cc);
+            setCouponEmailSent(true);
 
             const ctx = loadPurchaseContext(on);
             if (ctx) {
@@ -348,6 +415,7 @@ const IndexEvent2 = () => {
             }
 
             setStep(3);
+            setThankYouUrl(on);
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
           onPaymentFailed={() => {
@@ -547,8 +615,7 @@ const IndexEvent2 = () => {
                 paymentStatus={paymentStatus}
                 pdfLink={pdfLink}
                 config={EVENT2_CONFIG}
-                couponUrl={couponUrl}
-                couponCode={couponCode}
+                couponEmailSent={couponEmailSent}
               />
             </motion.div>
           )}

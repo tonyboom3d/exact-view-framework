@@ -36,7 +36,7 @@ const PromoBanner = ({ deadlineISO }: PromoBannerProps) => {
           1+1
         </span>
         <span className="text-sm font-medium text-foreground/90 truncate">
-          על כל סוגי הכרטיסים - רוכשים כרטיס ומקבלים כרטיס נוסף במתנה!
+          על כל סוגי הכרטיסים — רוכשים כרטיס ומקבלים קוד קופון במייל לכרטיס נוסף במתנה!
         </span>
       </div>
 
