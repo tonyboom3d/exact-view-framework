@@ -21,7 +21,7 @@ const EventClosedMessage = () => {
         initial={{ opacity: 0, scale: 0.92, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.45, ease: 'easeOut', delay: 0.1 }}
-        className="mx-4 max-w-md w-full text-center space-y-6 rounded-3xl border border-white/40 bg-white/30 dark:bg-black/30 backdrop-blur-xl shadow-2xl p-8 sm:p-10"
+        className="mx-4 max-w-md w-full text-center space-y-6 rounded-3xl border border-border bg-white dark:bg-card shadow-2xl p-8 sm:p-10"
       >
         <div className="w-20 h-20 mx-auto rounded-full bg-white/40 dark:bg-white/10 backdrop-blur-sm border border-white/50 flex items-center justify-center">
           <span className="text-4xl">🎉</span>
