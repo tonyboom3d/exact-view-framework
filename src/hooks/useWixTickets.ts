@@ -88,7 +88,7 @@ export function useWixTickets() {
           tagText: meta.tagText,
         });
 
-        const soldPercent = meta.soldPercent ?? fallback.fomoPercent;
+        const soldPercent = meta.soldPercent ?? 0;
 
         return {
           ...fallback,
