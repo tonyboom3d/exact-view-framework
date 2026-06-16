@@ -107,6 +107,10 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
 
   const activeSelections = selections.filter(s => s.quantity > 0);
   const totalTickets = activeSelections.reduce((sum, s) => sum + s.quantity, 0);
+  const promoTicketCount = totalTickets > 0
+    ? totalTickets
+    : guests.filter((g) => g.firstName || g.lastName || g.email || g.phone).length;
+  const isPromoPlural = promoTicketCount > 1;
   const totalPrice = activeSelections.reduce((sum, s) => {
     const ticket = tickets.find(t => t.type === s.type);
     return sum + (ticket?.price || 0) * s.quantity;
@@ -462,18 +466,26 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
         >
           <div className="flex items-center justify-center gap-2">
             <Gift className="w-6 h-6 text-amber-600" />
-            <p className="text-[18px] font-bold text-amber-900">כרטיס/ים נוסף/ים במתנה!</p>
+            <p className="text-[18px] font-bold text-amber-900">
+              {isPromoPlural ? 'כרטיסים נוספים במתנה!' : 'כרטיס נוסף במתנה!'}
+            </p>
           </div>
           <p className="text-[14px] text-amber-800 leading-relaxed">
-            במסגרת מבצע 1+1, קוד/קודי הקופון לרכישת כרטיס/ים נוסף/ים נשלחו אליך למייל
+            {isPromoPlural
+              ? <>במסגרת מבצע 1+1, קודי הקופון לרכישת כרטיסים נוספים נשלחו אליך למייל</>
+              : <>במסגרת מבצע 1+1, קוד הקופון לרכישת כרטיס נוסף נשלח אליך למייל</>}
             {buyerEmail ? (
               <> <span dir="ltr" className="font-semibold">{buyerEmail}</span></>
             ) : null}
-            . כל קוד מיועד לכרטיס נוסף אחד מאותו סוג.
+            . {isPromoPlural
+              ? 'כל קוד מיועד לכרטיס נוסף אחד מאותו סוג.'
+              : 'הקוד מיועד לכרטיס נוסף אחד מאותו סוג.'}
           </p>
           {couponEmailSent === false && (
             <p className="text-[13px] text-amber-700">
-              הקופונים בהכנה — המייל יישלח אליך בדקות הקרובות.
+              {isPromoPlural
+                ? 'הקופונים בהכנה — המייל יישלח אליך בדקות הקרובות.'
+                : 'הקופון בהכנה — המייל יישלח אליך בדקות הקרובות.'}
             </p>
           )}
         </motion.div>
