@@ -23,6 +23,8 @@ import {
   loadPurchaseContext,
   clearPurchaseContext,
 } from '@/lib/purchaseTracking';
+import { isTicketSalesClosed } from '@/config/eventConfig';
+import EventClosedMessage from '@/components/EventClosedMessage';
 
 const isInsideWix = window.parent !== window;
 const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
@@ -310,6 +312,9 @@ const Index = () => {
   };
 
   const steps = [1, 2, 3];
+  const salesClosed = isTicketSalesClosed() && !isAdminTest;
+  const checkoutFlowActive = step === 3 || !!pendingPayment || showPendingDialog;
+  const showClosedPage = salesClosed && !checkoutFlowActive;
 
   // Auto-clear payment error after 3.7 seconds
   useEffect(() => {
@@ -448,6 +453,10 @@ const Index = () => {
 
       <div className="flex-1 overflow-y-auto flex flex-col">
 
+      {showClosedPage ? (
+        <EventClosedMessage />
+      ) : (
+        <>
       {/* Step Indicator - centered */}
       <motion.div
         className="max-w-5xl mx-auto w-[95%] pt-3 pb-1 hidden md:flex justify-center"
@@ -587,6 +596,8 @@ const Index = () => {
         onBack={handleBack}
         disabled={false}
       />
+        </>
+      )}
       </div>
     </div>
   );
