@@ -46,8 +46,9 @@ export function useWixPayment() {
     companyName?: string;
     totalPrice: number;
     ensureWixData?: () => Promise<TicketInfo[]>;
+    removedGiftIndices?: number[];
   }): Promise<PaymentResult> {
-    const { selections, guests, buyer, showPayer, companyName, totalPrice, ensureWixData } = params;
+    const { selections, guests, buyer, showPayer, companyName, totalPrice, ensureWixData, removedGiftIndices } = params;
 
     setLoading(true);
     setError(null);
@@ -116,6 +117,7 @@ export function useWixPayment() {
         payer: showPayer ? buyer : undefined,
         companyName: companyName || undefined,
         totalAmount: totalPrice,
+        removedGiftIndices: removedGiftIndices || [],
       };
 
       // Fire InitiateCheckout tracking event (fire-and-forget, no response expected)

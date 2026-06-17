@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, Clock, AlertTriangle } from 'lucide-react';
+import { ChevronDown, Clock, AlertTriangle, Gift, X } from 'lucide-react';
 import type { TicketSelection, TicketInfo, BuyerInfo, GuestInfo } from '@/types/order';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -24,12 +24,15 @@ interface BuyerDetailsProps {
   onShowCompanyChange: (v: boolean) => void;
   companyName: string;
   onCompanyNameChange: (v: string) => void;
+  removedGiftIndices?: Set<number>;
+  onRemoveGiftTicket?: (giftIndex: number) => void;
 }
 
 interface FlatTicket {
   index: number;
   ticketName: string;
   ticketNumber: number;
+  isGift: boolean;
 }
 
 const BuyerDetails = ({
@@ -49,8 +52,11 @@ const BuyerDetails = ({
   onShowCompanyChange,
   companyName,
   onCompanyNameChange,
+  removedGiftIndices,
+  onRemoveGiftTicket,
 }: BuyerDetailsProps) => {
-  // Flatten selections into individual tickets
+  const [confirmRemoveIndex, setConfirmRemoveIndex] = useState<number | null>(null);
+
   const flatTickets = useMemo<FlatTicket[]>(() => {
     const result: FlatTicket[] = [];
     let globalIndex = 0;
@@ -61,15 +67,31 @@ const BuyerDetails = ({
           index: globalIndex,
           ticketName: ticketInfo?.name || sel.type,
           ticketNumber: i + 1,
+          isGift: false,
         });
+        globalIndex++;
+        if (!removedGiftIndices?.has(globalIndex)) {
+          result.push({
+            index: globalIndex,
+            ticketName: ticketInfo?.name || sel.type,
+            ticketNumber: i + 1,
+            isGift: true,
+          });
+        }
         globalIndex++;
       }
     }
     return result;
-  }, [selections]);
+  }, [selections, tickets, removedGiftIndices]);
 
   const [openTicketIndex, setOpenTicketIndex] = useState(0);
   const phoneRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  const isTicketCompleteByGuestIdx = useCallback((guestIdx: number) => {
+    const guest = guests[guestIdx];
+    if (!guest) return false;
+    return guest.firstName.trim() !== '' && guest.lastName.trim() !== '' && guest.phone.trim() !== '';
+  }, [guests]);
 
   // ── Reservation countdown timer (15 minutes) ──
   const TIMER_DURATION = 15 * 60; // 15 minutes in seconds
@@ -118,26 +140,13 @@ const BuyerDetails = ({
     onGuestsChange(updated);
   };
 
-  const isTicketComplete = (idx: number) => {
-    const guest = guests[idx];
-    if (!guest) return false;
-    return guest.firstName.trim() !== '' && guest.lastName.trim() !== '' && guest.phone.trim() !== '';
-  };
+  const isTicketComplete = isTicketCompleteByGuestIdx;
 
-  const goToNextTicket = (currentIdx: number) => {
-    if (currentIdx < flatTickets.length - 1) {
-      setOpenTicketIndex(currentIdx + 1);
+  const toggleTicket = (flatIdx: number) => {
+    for (let fi = 0; fi < flatIdx; fi++) {
+      if (!isTicketCompleteByGuestIdx(flatTickets[fi].index)) return;
     }
-  };
-
-  const toggleTicket = (idx: number) => {
-    // Only allow opening a ticket if all previous tickets are complete
-    if (idx > 0 && !isTicketComplete(idx - 1)) return;
-    // Allow opening any ticket before current too
-    for (let i = 0; i < idx; i++) {
-      if (!isTicketComplete(i)) return;
-    }
-    setOpenTicketIndex((prev) => (prev === idx ? -1 : idx));
+    setOpenTicketIndex((prev) => (prev === flatIdx ? -1 : flatIdx));
   };
 
   return (
@@ -305,43 +314,112 @@ const BuyerDetails = ({
         )}
       </AnimatePresence>
 
+      {/* Remove gift ticket confirmation popup */}
+      <AnimatePresence>
+        {confirmRemoveIndex !== null && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="bg-card rounded-2xl shadow-2xl p-6 max-w-sm w-full text-center space-y-4 border border-border"
+            >
+              <div className="w-14 h-14 bg-amber-100 rounded-full flex items-center justify-center mx-auto">
+                <Gift className="w-7 h-7 text-amber-600" />
+              </div>
+              <h3 className="text-[20px] font-bold text-foreground">האם להסיר את הכרטיס במתנה שלך?</h3>
+              <div className="flex gap-3 pt-2">
+                <Button
+                  onClick={() => {
+                    if (confirmRemoveIndex !== null && onRemoveGiftTicket) {
+                      onRemoveGiftTicket(confirmRemoveIndex);
+                    }
+                    setConfirmRemoveIndex(null);
+                  }}
+                  className="flex-1 h-11 text-[15px] font-bold bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-xl"
+                >
+                  אישור
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setConfirmRemoveIndex(null)}
+                  className="flex-1 h-11 text-[15px] font-medium rounded-xl"
+                >
+                  ביטול
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Ticket sections */}
       <div className="space-y-3">
-        {flatTickets.map((ticket) => {
-          const isOpen = openTicketIndex === ticket.index;
+        {flatTickets.map((ticket, flatIdx) => {
+          const isOpen = openTicketIndex === flatIdx;
           const guest = guests[ticket.index];
-          const canOpen = ticket.index === 0 || isTicketComplete(ticket.index - 1);
           const allPreviousComplete = (() => {
-            for (let i = 0; i < ticket.index; i++) {
-              if (!isTicketComplete(i)) return false;
+            for (let fi = 0; fi < flatIdx; fi++) {
+              if (!isTicketComplete(flatTickets[fi].index)) return false;
             }
             return true;
           })();
 
+          const nextFlatIdx = flatIdx < flatTickets.length - 1 ? flatIdx + 1 : -1;
+
           return (
             <div
               key={ticket.index}
-              className={`rounded-xl border bg-card overflow-hidden transition-shadow ${
-                !allPreviousComplete ? 'border-border/50 opacity-50' : 'border-border'
+              className={`rounded-xl border overflow-hidden transition-shadow ${
+                !allPreviousComplete
+                  ? 'border-border/50 opacity-50 bg-card'
+                  : ticket.isGift
+                  ? 'border-amber-300 bg-gradient-to-l from-amber-50 to-orange-50 shadow-sm'
+                  : 'border-border bg-card'
               }`}
             >
               {/* Header */}
               <button
                 type="button"
-                onClick={() => allPreviousComplete && toggleTicket(ticket.index)}
+                onClick={() => allPreviousComplete && toggleTicket(flatIdx)}
                 className={`w-full flex items-center justify-between p-3 text-right ${
                   !allPreviousComplete ? 'cursor-not-allowed' : 'cursor-pointer'
                 }`}
                 disabled={!allPreviousComplete}
               >
-                <span className="text-[18px] font-bold text-foreground">
-                  כרטיס {ticket.index + 1}
-                </span>
-                <ChevronDown
-                  className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${
-                    isOpen ? 'rotate-180' : ''
-                  }`}
-                />
+                <div className="flex items-center gap-2">
+                  <span className="text-[18px] font-bold text-foreground">
+                    {ticket.isGift
+                      ? `${ticket.ticketName} — כרטיס נוסף במתנה "מבצע"`
+                      : `כרטיס ${ticket.ticketNumber} — ${ticket.ticketName}`}
+                  </span>
+                  {ticket.isGift && (
+                    <Gift className="w-4 h-4 text-amber-600 shrink-0" />
+                  )}
+                </div>
+                <div className="flex items-center gap-1">
+                  {ticket.isGift && onRemoveGiftTicket && (
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      onClick={(e) => { e.stopPropagation(); setConfirmRemoveIndex(ticket.index); }}
+                      onKeyDown={(e) => { if (e.key === 'Enter') { e.stopPropagation(); setConfirmRemoveIndex(ticket.index); } }}
+                      className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-destructive/10 transition-colors cursor-pointer"
+                    >
+                      <X className="w-4 h-4 text-muted-foreground hover:text-destructive" />
+                    </span>
+                  )}
+                  <ChevronDown
+                    className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${
+                      isOpen ? 'rotate-180' : ''
+                    }`}
+                  />
+                </div>
               </button>
 
               {/* Fields */}
@@ -403,25 +481,14 @@ const BuyerDetails = ({
                           ref={(el) => { phoneRefs.current[ticket.index] = el; }}
                         />
                         {errors[`guest_${ticket.index}_phone`] && <p className="text-sm text-destructive mt-1">{errors[`guest_${ticket.index}_phone`]}</p>}
-                        {/* WhatsApp opt-in checkbox – hidden for now, kept for future use */}
-                        {/* <div className="flex items-center gap-2 mt-1.5">
-                          <Checkbox
-                            id={`whatsapp-${ticket.index}`}
-                            checked={guest?.wantWhatsapp !== false}
-                            onCheckedChange={(v) => updateGuest(ticket.index, 'wantWhatsapp', !!v)}
-                          />
-                          <Label htmlFor={`whatsapp-${ticket.index}`} className="text-[15px] text-muted-foreground cursor-pointer">
-                            שילחו לוואטסאפ את הכרטיס
-                          </Label>
-                        </div> */}
                       </div>
                       {/* Next ticket button */}
-                      {ticket.index < flatTickets.length - 1 && (
+                      {nextFlatIdx >= 0 && (
                         <div className="flex justify-end mt-2">
                           <button
                             type="button"
                             disabled={!isTicketComplete(ticket.index)}
-                            onClick={() => goToNextTicket(ticket.index)}
+                            onClick={() => setOpenTicketIndex(nextFlatIdx)}
                             className={`px-4 py-1.5 rounded-lg text-[17px] font-medium transition-all ${
                               isTicketComplete(ticket.index)
                                 ? 'bg-blue-500 text-white hover:bg-blue-600'

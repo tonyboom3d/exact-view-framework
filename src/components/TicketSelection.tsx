@@ -150,7 +150,7 @@ const TicketSelection = ({ selections, onChange, onBuyTicket, tickets, loading, 
                 {/* Description */}
                 <p className="text-[16px] sm:text-[17px] text-muted-foreground mb-1 line-clamp-2 min-h-[2.5em]">{ticket.description}</p>
 
-                 {/* Row layout: progress bar right, buttons left (RTL) */}
+                 {/* Row layout: progress bar right, controls+buy left (RTL) */}
                  <div className="flex items-end gap-2 sm:gap-3">
                    {/* Progress bar – show only when fomoPercent > 0 */}
                    {(ticket.fomoPercent ?? 0) > 0 && (
@@ -183,8 +183,8 @@ const TicketSelection = ({ selections, onChange, onBuyTicket, tickets, loading, 
                      </motion.div>
                    )}
 
-                   {/* Buttons (appears on left in RTL) */}
-                   <div className="flex flex-col gap-1 items-center shrink-0">
+                   {/* Controls group: quantity + buy + gift badge (left side in RTL) */}
+                   <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3 shrink-0">
                      {/* Quantity selector */}
                      <div className="flex items-center gap-2">
                        <Button
@@ -215,6 +215,13 @@ const TicketSelection = ({ selections, onChange, onBuyTicket, tickets, loading, 
                        </Button>
                      </div>
 
+                     {!isSoldOut && (
+                       <div className="inline-flex items-center justify-center gap-1 text-[13px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2.5 py-0.5">
+                         <Gift className="w-3.5 h-3.5" />
+                         <span>+{isActive ? qty : 1} מתנה</span>
+                       </div>
+                     )}
+
                      {/* Buy button */}
                      <Button
                        onClick={(e) => {
@@ -226,7 +233,7 @@ const TicketSelection = ({ selections, onChange, onBuyTicket, tickets, loading, 
                            price: ticket.price,
                            quantity: buyQty,
                            currency: 'ILS',
-                          variant: ticket.type,
+                           variant: ticket.type,
                          });
                          if (!isActive) onChange([{ type: ticket.type, quantity: 1 }]);
                          onBuyTicket(ticket.type);
@@ -236,13 +243,6 @@ const TicketSelection = ({ selections, onChange, onBuyTicket, tickets, loading, 
                      >
                        {qty > 1 ? `לרכישה - ₪${(ticket.price * qty).toLocaleString()}` : 'לרכישה'}
                      </Button>
-
-                     {!isSoldOut && (
-                       <div className="inline-flex items-center gap-1 text-[13px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2.5 py-0.5">
-                         <Gift className="w-3.5 h-3.5" />
-                         <span>+{isActive ? qty : 1} מתנה</span>
-                       </div>
-                     )}
                    </div>
                  </div>
                </div>

@@ -44,6 +44,7 @@ const IndexEvent2 = () => {
   const [showPayer, setShowPayer] = useState(false);
   const [companyName, setCompanyName] = useState('');
   const [showCompany, setShowCompany] = useState(false);
+  const [removedGiftIndices, setRemovedGiftIndices] = useState<Set<number>>(new Set());
 
   const { tickets, loading: ticketsLoading, ensureWixData, isAdminTest } = useWixTickets();
   const {
@@ -218,9 +219,18 @@ const IndexEvent2 = () => {
 
   const handleSelectionsChange = (newSelections: TicketSelectionType[]) => {
     setSelections(newSelections);
+    setRemovedGiftIndices(new Set());
     const count = newSelections.reduce((sum, s) => sum + s.quantity, 0);
     syncGuests(count * 2);
   };
+
+  const handleRemoveGiftTicket = useCallback((giftIndex: number) => {
+    setRemovedGiftIndices((prev) => {
+      const next = new Set(prev);
+      next.add(giftIndex);
+      return next;
+    });
+  }, []);
 
   const handleBuyTicket = (type: TicketType) => {
     if (selections.length === 0 || selections[0].type !== type) {
@@ -258,6 +268,8 @@ const IndexEvent2 = () => {
     const missingFields: string[] = [];
 
     guests.forEach((guest, idx) => {
+      if (removedGiftIndices.has(idx)) return;
+
       const fnErr = validateName(guest.firstName, 'שם פרטי');
       if (fnErr) { newErrors[`guest_${idx}_firstName`] = fnErr; missingFields.push(`כרטיס ${idx + 1} - שם פרטי`); }
 
@@ -309,6 +321,7 @@ const IndexEvent2 = () => {
             companyName: companyName || undefined,
             totalPrice,
             ensureWixData,
+            removedGiftIndices: removedGiftIndices.size > 0 ? Array.from(removedGiftIndices) : undefined,
           });
 
           if (result.status === 'Pending') {
@@ -577,6 +590,8 @@ const IndexEvent2 = () => {
                 onShowCompanyChange={setShowCompany}
                 companyName={companyName}
                 onCompanyNameChange={setCompanyName}
+                removedGiftIndices={removedGiftIndices}
+                onRemoveGiftTicket={handleRemoveGiftTicket}
               />
               <div className="flex gap-2 mt-6">
                 <Button
