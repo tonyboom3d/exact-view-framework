@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, Clock, AlertTriangle, Gift, X } from 'lucide-react';
+import { ChevronDown, Clock, AlertTriangle, Gift, X, Copy } from 'lucide-react';
 import type { TicketSelection, TicketInfo, BuyerInfo, GuestInfo } from '@/types/order';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -141,6 +141,21 @@ const BuyerDetails = ({
   };
 
   const isTicketComplete = isTicketCompleteByGuestIdx;
+
+  const copyFromFirstTicket = (targetGuestIdx: number) => {
+    const firstGuest = guests[0];
+    if (!firstGuest) return;
+    const updated = [...guests];
+    if (!updated[targetGuestIdx]) updated[targetGuestIdx] = { firstName: '', lastName: '', phone: '', wantWhatsapp: true };
+    updated[targetGuestIdx] = {
+      ...updated[targetGuestIdx],
+      firstName: firstGuest.firstName,
+      lastName: firstGuest.lastName,
+      email: firstGuest.email || '',
+      phone: firstGuest.phone,
+    };
+    onGuestsChange(updated);
+  };
 
   const toggleTicket = (flatIdx: number) => {
     for (let fi = 0; fi < flatIdx; fi++) {
@@ -341,14 +356,14 @@ const BuyerDetails = ({
                     }
                     setConfirmRemoveIndex(null);
                   }}
-                  className="flex-1 h-11 text-[15px] font-bold bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-xl"
+                  variant="outline"
+                  className="flex-1 h-11 text-[15px] font-bold rounded-xl"
                 >
                   אישור
                 </Button>
                 <Button
-                  variant="outline"
                   onClick={() => setConfirmRemoveIndex(null)}
-                  className="flex-1 h-11 text-[15px] font-medium rounded-xl"
+                  className="flex-1 h-11 text-[15px] font-medium bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-xl"
                 >
                   ביטול
                 </Button>
@@ -433,6 +448,16 @@ const BuyerDetails = ({
                     className="overflow-hidden"
                   >
                     <div className="px-4 pb-1 space-y-2">
+                      {flatIdx > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => copyFromFirstTicket(ticket.index)}
+                          className="flex items-center gap-1 text-[13px] text-primary hover:text-primary/80 font-medium transition-colors"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                          העתק מכרטיס ראשון
+                        </button>
+                      )}
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <Label className="text-[15px] font-medium">שם פרטי *</Label>
