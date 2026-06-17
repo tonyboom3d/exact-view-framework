@@ -145,14 +145,16 @@ const BuyerDetails = ({
   const copyFromFirstTicket = (targetGuestIdx: number) => {
     const firstGuest = guests[0];
     if (!firstGuest) return;
+    const isGiftGuest = targetGuestIdx % 2 === 1;
     const updated = [...guests];
     if (!updated[targetGuestIdx]) updated[targetGuestIdx] = { firstName: '', lastName: '', phone: '', wantWhatsapp: true };
     updated[targetGuestIdx] = {
       ...updated[targetGuestIdx],
       firstName: firstGuest.firstName,
       lastName: firstGuest.lastName,
-      email: firstGuest.email || '',
       phone: firstGuest.phone,
+      // Gift tickets: don't copy email — Wix may show buyer name when emails match
+      ...(isGiftGuest ? {} : { email: firstGuest.email || '' }),
     };
     onGuestsChange(updated);
   };
@@ -492,6 +494,11 @@ const BuyerDetails = ({
                           style={{ textAlign: 'right' }}
                         />
                         {errors[`guest_${ticket.index}_email`] && <p className="text-sm text-destructive mt-1">{errors[`guest_${ticket.index}_email`]}</p>}
+                        {ticket.isGift && (
+                          <p className="text-[12px] text-muted-foreground mt-1">
+                            לשם נכון על הכרטיס — מומלץ אימייל שונה לכל משתתף
+                          </p>
+                        )}
                       </div>
                       <div>
                         <Label className="text-[15px] font-medium">טלפון *</Label>
