@@ -1,4 +1,4 @@
-import { Lock, ShieldCheck } from 'lucide-react';
+import { Lock, ShieldCheck, Gift } from 'lucide-react';
 import type { TicketSelection, TicketInfo } from '@/types/order';
 
 interface OrderSummaryProps {
@@ -25,12 +25,22 @@ const OrderSummary = ({ selections, tickets }: OrderSummaryProps) => {
           const ticket = tickets.find((t) => t.type === s.type);
           if (!ticket) return null;
           return (
-            <div key={s.type} className="flex items-center justify-between">
-              <div>
-                 <p className="font-medium text-foreground">{ticket.name}</p>
-                 <p className="text-[12px] text-muted-foreground">x{s.quantity}</p>
+            <div key={s.type}>
+              <div className="flex items-center justify-between">
+                <div>
+                   <p className="font-medium text-foreground">{ticket.name}</p>
+                   <p className="text-[12px] text-muted-foreground">x{s.quantity}</p>
+                </div>
+                <p className="font-bold text-foreground">₪{(ticket.price * s.quantity).toLocaleString()}</p>
               </div>
-              <p className="font-bold text-foreground">₪{(ticket.price * s.quantity).toLocaleString()}</p>
+              <div className="flex items-center justify-between mt-1.5 pr-1">
+                <div className="inline-flex items-center gap-1 text-[13px] font-semibold text-amber-700">
+                  <Gift className="w-3.5 h-3.5" />
+                  <span>{ticket.name} — כרטיס נוסף במתנה "מבצע"</span>
+                  <span className="text-muted-foreground">x{s.quantity}</span>
+                </div>
+                <p className="font-bold text-amber-700">₪0</p>
+              </div>
             </div>
           );
         })}

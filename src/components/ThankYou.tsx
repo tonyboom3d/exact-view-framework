@@ -19,10 +19,9 @@ interface ThankYouProps {
   paymentStatus?: 'Successful' | 'Pending' | null;
   pdfLink?: string | null;
   config?: EventUIConfig;
-  couponEmailSent?: boolean;
 }
 
-const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPayer, tickets, paymentStatus, pdfLink, config, couponEmailSent }: ThankYouProps) => {
+const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPayer, tickets, paymentStatus, pdfLink, config }: ThankYouProps) => {
   const [showDetails, setShowDetails] = useState(false);
   const [pdfReady, setPdfReady] = useState(!!pdfLink);
   const [currentPdfLink, setCurrentPdfLink] = useState(pdfLink || '');
@@ -107,10 +106,7 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
 
   const activeSelections = selections.filter(s => s.quantity > 0);
   const totalTickets = activeSelections.reduce((sum, s) => sum + s.quantity, 0);
-  const promoTicketCount = totalTickets > 0
-    ? totalTickets
-    : guests.filter((g) => g.firstName || g.lastName || g.email || g.phone).length;
-  const isPromoPlural = promoTicketCount > 1;
+  const totalWithGifts = totalTickets * 2;
   const totalPrice = activeSelections.reduce((sum, s) => {
     const ticket = tickets.find(t => t.type === s.type);
     return sum + (ticket?.price || 0) * s.quantity;
@@ -385,16 +381,25 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
             const ticket = tickets.find((t) => t.type === s.type);
             if (!ticket) return null;
             return (
-               <div key={s.type} className="flex items-center justify-between text-[16px]">
-                 <span className="text-muted-foreground">{ticket.name} x{s.quantity}</span>
-                <span className="font-medium text-foreground">₪{(ticket.price * s.quantity).toLocaleString()}</span>
+              <div key={s.type}>
+                <div className="flex items-center justify-between text-[16px]">
+                  <span className="text-muted-foreground">{ticket.name} x{s.quantity}</span>
+                  <span className="font-medium text-foreground">₪{(ticket.price * s.quantity).toLocaleString()}</span>
+                </div>
+                <div className="flex items-center justify-between text-[14px] mt-1 pr-1">
+                  <span className="inline-flex items-center gap-1 text-amber-700 font-semibold">
+                    <Gift className="w-3.5 h-3.5" />
+                    {ticket.name} — כרטיס נוסף במתנה "מבצע" x{s.quantity}
+                  </span>
+                  <span className="font-bold text-amber-700">₪0</span>
+                </div>
               </div>
             );
           })}
         </div>
 
         <div className="border-t border-border pt-2 flex items-center justify-between">
-            <span className="text-[17px] font-bold text-foreground">סה״כ ({totalTickets} כרטיסים)</span>
+            <span className="text-[17px] font-bold text-foreground">סה״כ ({totalWithGifts} כרטיסים)</span>
             <span className="text-[21px] font-extrabold text-foreground">₪{totalPrice.toLocaleString()}</span>
         </div>
 
@@ -418,22 +423,27 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
               className="overflow-hidden"
             >
               <div className="space-y-3 pt-2 border-t border-border">
-                {guests.slice(0, totalTickets).map((guest, idx) => {
-                  const flatIndex = idx;
+                {guests.slice(0, totalWithGifts).map((guest, idx) => {
                   let ticketLabel = '';
                   let counter = 0;
                   for (const sel of activeSelections) {
                     const ticket = tickets.find(t => t.type === sel.type);
                     for (let i = 0; i < sel.quantity; i++) {
-                      if (counter === flatIndex) {
+                      if (counter === idx) {
                         ticketLabel = `${ticket?.name} #${i + 1}`;
+                      }
+                      counter++;
+                      if (counter === idx) {
+                        ticketLabel = `${ticket?.name} - כרטיס נוסף במתנה "מבצע" #${i + 1}`;
                       }
                       counter++;
                     }
                   }
 
+                  const isGiftTicket = idx % 2 === 1;
+
                   return (
-                    <div key={idx} className="bg-muted/30 rounded-lg p-3 space-y-1">
+                    <div key={idx} className={`rounded-lg p-3 space-y-1 ${isGiftTicket ? 'bg-amber-50 border border-amber-200' : 'bg-muted/30'}`}>
                        <p className="text-[14px] font-bold text-foreground">{ticketLabel}</p>
                        <p className="text-[14px] text-muted-foreground">{guest.firstName} {guest.lastName}</p>
                        <p className="text-[14px] text-muted-foreground" dir="ltr" style={{ textAlign: 'right' }}>{guest.phone}</p>
@@ -455,41 +465,6 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
           )}
         </AnimatePresence>
       </div>
-
-      {/* Coupon section (Event 2 1+1 promo – codes sent by email) */}
-      {config?.couponRedeemBaseUrl && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.2 }}
-          className="rounded-xl border-2 border-amber-400 bg-gradient-to-br from-amber-50 to-orange-50 p-5 space-y-3"
-        >
-          <div className="flex items-center justify-center gap-2">
-            <Gift className="w-6 h-6 text-amber-600" />
-            <p className="text-[18px] font-bold text-amber-900">
-              {isPromoPlural ? 'כרטיסים נוספים במתנה!' : 'כרטיס נוסף במתנה!'}
-            </p>
-          </div>
-          <p className="text-[14px] text-amber-800 leading-relaxed">
-            {isPromoPlural
-              ? <>במסגרת מבצע 1+1, קודי הקופון לרכישת כרטיסים נוספים נשלחו אליך למייל</>
-              : <>במסגרת מבצע 1+1, קוד הקופון לרכישת כרטיס נוסף נשלח אליך למייל</>}
-            {buyerEmail ? (
-              <> <span dir="ltr" className="font-semibold">{buyerEmail}</span></>
-            ) : null}
-            . {isPromoPlural
-              ? 'כל קוד מיועד לכרטיס נוסף אחד מאותו סוג.'
-              : 'הקוד מיועד לכרטיס נוסף אחד מאותו סוג.'}
-          </p>
-          {couponEmailSent === false && (
-            <p className="text-[13px] text-amber-700">
-              {isPromoPlural
-                ? 'הקופונים בהכנה — המייל יישלח אליך בדקות הקרובות.'
-                : 'הקופון בהכנה — המייל יישלח אליך בדקות הקרובות.'}
-            </p>
-          )}
-        </motion.div>
-      )}
 
       {/* Share section */}
       <div className="rounded-xl border border-border bg-background p-5 space-y-3">

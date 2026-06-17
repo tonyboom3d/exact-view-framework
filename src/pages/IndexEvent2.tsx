@@ -64,7 +64,6 @@ const IndexEvent2 = () => {
   const [pdfLink, setPdfLink] = useState<string | null>(null);
   const [showPendingDialog, setShowPendingDialog] = useState(false);
   const [existingPendingData, setExistingPendingData] = useState<PendingPaymentData | null>(null);
-  const [couponEmailSent, setCouponEmailSent] = useState<boolean | undefined>(undefined);
   const [showPromoPopup, setShowPromoPopup] = useState(false);
   const [thankYouRestored, setThankYouRestored] = useState(false);
 
@@ -105,7 +104,7 @@ const IndexEvent2 = () => {
   useEffect(() => {
     if (!isAdminTest || step !== 2 || totalTickets <= 0) return;
     setGuests(
-      Array.from({ length: totalTickets }, (_, i) => {
+      Array.from({ length: totalTickets * 2 }, (_, i) => {
         const g = getTestGuest(i);
         return { firstName: g.firstName, lastName: g.lastName, email: g.email, phone: g.phone };
       })
@@ -132,7 +131,6 @@ const IndexEvent2 = () => {
       selectedTickets?: Array<{ ticketId: string; quantity: number }>;
       payerDetails?: BuyerInfo & { companyName?: string };
       hasDifferentPayer?: boolean;
-      couponEmailSent?: boolean;
     }>('GET_THANK_YOU_PAGE', { orderNumber: orderFromUrl })
       .then((data) => {
         if (!data || data.status !== 'paid') return;
@@ -141,7 +139,6 @@ const IndexEvent2 = () => {
         setPaymentStatus('Successful');
         setPdfLink(data.ticketsPdf || null);
         setShowPayer(!!data.hasDifferentPayer);
-        setCouponEmailSent(data.couponEmailSent ?? true);
 
         if (data.guests?.length) {
           setGuests(data.guests);
@@ -194,7 +191,6 @@ const IndexEvent2 = () => {
         setOrderNumber(data.orderNumber);
         setPaymentStatus('Successful');
         setPdfLink(ticketsPdf || null);
-        setCouponEmailSent(true);
         clearPendingPayment();
         setStep(3);
         setThankYouUrl(data.orderNumber);
@@ -223,7 +219,7 @@ const IndexEvent2 = () => {
   const handleSelectionsChange = (newSelections: TicketSelectionType[]) => {
     setSelections(newSelections);
     const count = newSelections.reduce((sum, s) => sum + s.quantity, 0);
-    syncGuests(count);
+    syncGuests(count * 2);
   };
 
   const handleBuyTicket = (type: TicketType) => {
@@ -331,7 +327,6 @@ const IndexEvent2 = () => {
           setReferralCode(result.referralCode);
           setPdfLink(result.pdfLink || null);
           setPaymentStatus(result.status || 'Successful');
-          setCouponEmailSent(true);
 
           const successItems = buildPurchaseItems(selections, tickets);
           pushPurchaseDataLayer({
@@ -399,7 +394,6 @@ const IndexEvent2 = () => {
             setOrderNumber(on);
             setPdfLink(tp || null);
             setPaymentStatus('Successful');
-            setCouponEmailSent(true);
 
             const ctx = loadPurchaseContext(on);
             if (ctx) {
@@ -573,7 +567,7 @@ const IndexEvent2 = () => {
                 onGuestsChange={setGuests}
                 useMyDetails={useMyDetails}
                 onUseMyDetailsChange={setUseMyDetails}
-                totalTickets={totalTickets}
+                totalTickets={totalTickets * 2}
                 errors={errors}
                 selections={selections}
                 showPayer={showPayer}
@@ -615,7 +609,6 @@ const IndexEvent2 = () => {
                 paymentStatus={paymentStatus}
                 pdfLink={pdfLink}
                 config={EVENT2_CONFIG}
-                couponEmailSent={couponEmailSent}
               />
             </motion.div>
           )}
