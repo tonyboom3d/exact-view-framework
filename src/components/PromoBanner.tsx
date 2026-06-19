@@ -4,12 +4,13 @@ import { Clock } from 'lucide-react';
 
 interface PromoBannerProps {
   deadlineISO: string;
+  timerDeadlineISO?: string;
   textDeadlineISO?: string;
 }
 
-const PromoBanner = ({ deadlineISO, textDeadlineISO }: PromoBannerProps) => {
-  const getTimeLeft = () => {
-    const target = new Date(deadlineISO).getTime();
+const PromoBanner = ({ deadlineISO, timerDeadlineISO, textDeadlineISO }: PromoBannerProps) => {
+  const getTimeLeft = (targetISO: string) => {
+    const target = new Date(targetISO).getTime();
     const now = Date.now();
     const diff = Math.max(0, Math.floor((target - now) / 1000));
     return {
@@ -20,23 +21,26 @@ const PromoBanner = ({ deadlineISO, textDeadlineISO }: PromoBannerProps) => {
     };
   };
 
-  const isTextVisible = () => {
-    if (!textDeadlineISO) return true;
-    return Date.now() < new Date(textDeadlineISO).getTime();
-  };
+  const isBefore = (iso?: string) => !iso || Date.now() < new Date(iso).getTime();
 
-  const [timeLeft, setTimeLeft] = useState(getTimeLeft);
-  const [showText, setShowText] = useState(isTextVisible);
+  const timerTarget = timerDeadlineISO || textDeadlineISO || deadlineISO;
+  const [timeLeft, setTimeLeft] = useState(() => getTimeLeft(timerTarget));
+  const [showText, setShowText] = useState(() => isBefore(textDeadlineISO));
+  const [showTimer, setShowTimer] = useState(() => isBefore(timerTarget));
+  const [isVisible, setIsVisible] = useState(() => isBefore(deadlineISO));
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft(getTimeLeft());
-      setShowText(isTextVisible());
-    }, 1000);
+    const tick = () => {
+      setTimeLeft(getTimeLeft(timerTarget));
+      setShowText(isBefore(textDeadlineISO));
+      setShowTimer(isBefore(timerTarget));
+      setIsVisible(isBefore(deadlineISO));
+    };
+    const timer = setInterval(tick, 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [deadlineISO, timerTarget, textDeadlineISO]);
 
-  if (timeLeft.total <= 0) return null;
+  if (!isVisible) return null;
 
   const pad = (n: number) => n.toString().padStart(2, '0');
 
@@ -59,10 +63,12 @@ const PromoBanner = ({ deadlineISO, textDeadlineISO }: PromoBannerProps) => {
         )}
       </div>
 
-      <div className="shrink-0 flex items-center gap-1.5 text-xs text-muted-foreground font-mono font-medium" dir="ltr">
-        <Clock className="w-3.5 h-3.5" />
-        <span>{pad(timeLeft.hours)}:{pad(timeLeft.minutes)}:{pad(timeLeft.seconds)}</span>
-      </div>
+      {showTimer && (
+        <div className="shrink-0 flex items-center gap-1.5 text-xs text-muted-foreground font-mono font-medium" dir="ltr">
+          <Clock className="w-3.5 h-3.5" />
+          <span>{pad(timeLeft.hours)}:{pad(timeLeft.minutes)}:{pad(timeLeft.seconds)}</span>
+        </div>
+      )}
     </motion.div>
   );
 };
