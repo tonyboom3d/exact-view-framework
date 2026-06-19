@@ -559,7 +559,10 @@ const IndexEvent2 = () => {
                 </Button>
               </div>
               {EVENT2_CONFIG.promo && (
-                <PromoBanner deadlineISO={EVENT2_CONFIG.promo.deadlineISO} />
+                <PromoBanner
+                  deadlineISO={EVENT2_CONFIG.promo.deadlineISO}
+                  textDeadlineISO={EVENT2_CONFIG.promo.popupDeadlineISO}
+                />
               )}
               <TicketSelection
                 selections={selections}

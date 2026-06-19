@@ -63,9 +63,7 @@ const PromoPopup = ({ deadlineISO, title, description, onDismiss }: PromoPopupPr
 
           {/* Countdown timer */}
           <div className="flex items-center justify-center gap-2" dir="ltr">
-            <TimerUnit value={pad(timeLeft.days)} label="ימים" />
-            <span className="font-bold text-destructive animate-pulse text-lg">:</span>
-            <TimerUnit value={pad(timeLeft.hours)} label="שעות" />
+            <TimerUnit value={pad(timeLeft.hours + timeLeft.days * 24)} label="שעות" />
             <span className="font-bold text-destructive animate-pulse text-lg">:</span>
             <TimerUnit value={pad(timeLeft.minutes)} label="דקות" />
             <span className="font-bold text-destructive animate-pulse text-lg">:</span>
