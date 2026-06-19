@@ -33,9 +33,6 @@ const PromoPopup = ({ deadlineISO, title, description, onDismiss }: PromoPopupPr
 
   const pad = (n: number) => n.toString().padStart(2, '0');
 
-  const deadlineDate = new Date(deadlineISO);
-  const formattedDeadline = `${deadlineDate.getDate()}/${deadlineDate.getMonth() + 1}`;
-
   return (
     <AnimatePresence>
       <motion.div
@@ -74,10 +71,6 @@ const PromoPopup = ({ deadlineISO, title, description, onDismiss }: PromoPopupPr
             <span className="font-bold text-destructive animate-pulse text-lg">:</span>
             <TimerUnit value={pad(timeLeft.seconds)} label="שניות" />
           </div>
-
-          <p className="text-sm text-muted-foreground">
-            המבצע בתוקף עד {formattedDeadline}
-          </p>
 
           <button
             onClick={onDismiss}

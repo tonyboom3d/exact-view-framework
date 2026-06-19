@@ -23,6 +23,7 @@ export interface EventUIConfig {
     title: string;
     description: string;
     deadlineISO: string;
+    popupDeadlineISO?: string;
   };
   couponRedeemBaseUrl?: string;
 }
@@ -60,5 +61,6 @@ export const EVENT2_CONFIG: EventUIConfig = {
     title: '1+1 על כל סוגי הכרטיסים',
     description: 'רוכשים כרטיס מכל סוג ומקבלים כרטיס נוסף במתנה — הכרטיס הנוסף מתווסף אוטומטית בתהליך ההזמנה.',
     deadlineISO: '2026-06-25T00:00:00+03:00',
+    popupDeadlineISO: '2026-06-20T00:00:00+03:00',
   },
 };

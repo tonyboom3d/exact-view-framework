@@ -70,8 +70,8 @@ const IndexEvent2 = () => {
 
   useEffect(() => {
     if (EVENT2_CONFIG.promo) {
-      const deadline = new Date(EVENT2_CONFIG.promo.deadlineISO).getTime();
-      if (Date.now() < deadline) {
+      const popupDeadline = new Date(EVENT2_CONFIG.promo.popupDeadlineISO || EVENT2_CONFIG.promo.deadlineISO).getTime();
+      if (Date.now() < popupDeadline) {
         setShowPromoPopup(true);
       }
     }
@@ -390,7 +390,7 @@ const IndexEvent2 = () => {
         <PromoPopup
           title={EVENT2_CONFIG.promo.title}
           description={EVENT2_CONFIG.promo.description}
-          deadlineISO={EVENT2_CONFIG.promo.deadlineISO}
+          deadlineISO={EVENT2_CONFIG.promo.popupDeadlineISO || EVENT2_CONFIG.promo.deadlineISO}
           onDismiss={() => setShowPromoPopup(false)}
         />
       )}
