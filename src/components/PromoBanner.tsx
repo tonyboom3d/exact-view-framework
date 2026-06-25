@@ -27,18 +27,18 @@ const PromoBanner = ({ deadlineISO, timerDeadlineISO, textDeadlineISO }: PromoBa
   const [timeLeft, setTimeLeft] = useState(() => getTimeLeft(timerTarget));
   const [showText, setShowText] = useState(() => isBefore(textDeadlineISO));
   const [showTimer, setShowTimer] = useState(() => isBefore(timerTarget));
-  const [isVisible, setIsVisible] = useState(() => isBefore(deadlineISO));
+  const [isVisible, setIsVisible] = useState(() => isBefore(timerTarget));
 
   useEffect(() => {
     const tick = () => {
       setTimeLeft(getTimeLeft(timerTarget));
       setShowText(isBefore(textDeadlineISO));
       setShowTimer(isBefore(timerTarget));
-      setIsVisible(isBefore(deadlineISO));
+      setIsVisible(isBefore(timerTarget));
     };
     const timer = setInterval(tick, 1000);
     return () => clearInterval(timer);
-  }, [deadlineISO, timerTarget, textDeadlineISO]);
+  }, [timerTarget, textDeadlineISO]);
 
   if (!isVisible) return null;
 
