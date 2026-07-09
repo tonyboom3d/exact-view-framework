@@ -10,7 +10,7 @@ const StickyHeader = ({ config }: { config?: EventUIConfig }) => {
   const title = config?.title ?? 'Tony Robbins';
   const subtitle = config?.subtitle ?? 'Unleash the Power Within REMOTE';
   const datesText = config?.datesText ?? '4 ימים, 16-19 ביוני 2026';
-  const locationText = config?.locationText ?? 'אולם התיאטרון סינמה סיטי גלילות';
+  const locationText = config?.locationText ?? 'היכל שלמה ת"א';
   const deadlineISO = config?.priceTimerDeadlineISO ?? '2026-06-12T00:00:00+03:00';
   const showTimer = config?.showHeaderPriceTimer ?? true;
 

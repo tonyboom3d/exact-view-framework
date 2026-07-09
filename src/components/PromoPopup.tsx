@@ -7,9 +7,10 @@ interface PromoPopupProps {
   description: string;
   onDismiss: () => void;
   forceShow?: boolean;
+  showTimer?: boolean;
 }
 
-const PromoPopup = ({ deadlineISO, title, description, onDismiss, forceShow = false }: PromoPopupProps) => {
+const PromoPopup = ({ deadlineISO, title, description, onDismiss, forceShow = false, showTimer = true }: PromoPopupProps) => {
   const getTimeLeft = () => {
     const target = new Date(deadlineISO).getTime();
     const now = Date.now();
@@ -63,13 +64,15 @@ const PromoPopup = ({ deadlineISO, title, description, onDismiss, forceShow = fa
           </div>
 
           {/* Countdown timer */}
-          <div className="flex items-center justify-center gap-2" dir="ltr">
-            <TimerUnit value={pad(timeLeft.hours + timeLeft.days * 24)} label="שעות" />
-            <span className="font-bold text-destructive animate-pulse text-lg">:</span>
-            <TimerUnit value={pad(timeLeft.minutes)} label="דקות" />
-            <span className="font-bold text-destructive animate-pulse text-lg">:</span>
-            <TimerUnit value={pad(timeLeft.seconds)} label="שניות" />
-          </div>
+          {showTimer && (
+            <div className="flex items-center justify-center gap-2" dir="ltr">
+              <TimerUnit value={pad(timeLeft.hours + timeLeft.days * 24)} label="שעות" />
+              <span className="font-bold text-destructive animate-pulse text-lg">:</span>
+              <TimerUnit value={pad(timeLeft.minutes)} label="דקות" />
+              <span className="font-bold text-destructive animate-pulse text-lg">:</span>
+              <TimerUnit value={pad(timeLeft.seconds)} label="שניות" />
+            </div>
+          )}
 
           <button
             onClick={onDismiss}

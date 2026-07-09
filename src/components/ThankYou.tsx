@@ -113,7 +113,7 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
   }, 0);
 
   const eventTitle = config ? `${config.title} — ${config.subtitle}` : 'Tony Robbins — Unleash the Power Within REMOTE';
-  const eventLocation = config?.locationText || 'אולם התיאטרון סינמה סיטי גלילות';
+  const eventLocation = config?.locationText || 'היכל שלמה ת"א';
   const eventDescription = 'Tony Robbins UPW Event';
   const calendarStartUTC = config?.calendarStartUTC || '20260616T130000Z';
   const calendarEndUTC = config?.calendarEndUTC || '20260619T230000Z';
@@ -368,7 +368,7 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
         <p className="font-medium">{config?.datesText || '4 ימים, 16-19 ביוני 2026'}</p>
         <p className="font-medium inline-flex items-center justify-center gap-1.5">
           <MapPin className="w-4 h-4 shrink-0" />
-          {config?.locationText || 'אולם התיאטרון סינמה סיטי גלילות'}
+          {config?.locationText || 'היכל שלמה ת"א'}
         </p>
       </div>
 

@@ -65,26 +65,29 @@ const IndexEvent2 = () => {
   const [pdfLink, setPdfLink] = useState<string | null>(null);
   const [showPendingDialog, setShowPendingDialog] = useState(false);
   const [existingPendingData, setExistingPendingData] = useState<PendingPaymentData | null>(null);
-  const [showPromoPopup, setShowPromoPopup] = useState(() => {
-    if (!EVENT2_CONFIG.promo) return false;
-    if (EVENT2_CONFIG.promo.popupForceShow) return true;
-    const popupDeadline = new Date(
-      EVENT2_CONFIG.promo.popupDeadlineISO || EVENT2_CONFIG.promo.deadlineISO
-    ).getTime();
+  const isPromoPopupInWindow = () => {
+    const promo = EVENT2_CONFIG.promo;
+    if (!promo) return false;
+    if (promo.popupForceShow) return true;
+    const popupDeadline = new Date(promo.popupDeadlineISO || promo.deadlineISO).getTime();
     return Date.now() < popupDeadline;
-  });
+  };
+
+  const isPromoPopupTimerActive = () => {
+    const promo = EVENT2_CONFIG.promo;
+    if (!promo) return false;
+    if (promo.popupForceShow) return true;
+    if (!promo.popupTimerStartISO) return true;
+    return Date.now() >= new Date(promo.popupTimerStartISO).getTime();
+  };
+
+  const [showPromoPopup, setShowPromoPopup] = useState(isPromoPopupInWindow);
+  const [showPromoPopupTimer, setShowPromoPopupTimer] = useState(isPromoPopupTimerActive);
   const [thankYouRestored, setThankYouRestored] = useState(false);
 
   useEffect(() => {
-    if (!EVENT2_CONFIG.promo) return;
-    if (EVENT2_CONFIG.promo.popupForceShow) {
-      setShowPromoPopup(true);
-      return;
-    }
-    const popupDeadline = new Date(EVENT2_CONFIG.promo.popupDeadlineISO || EVENT2_CONFIG.promo.deadlineISO).getTime();
-    if (Date.now() < popupDeadline) {
-      setShowPromoPopup(true);
-    }
+    setShowPromoPopup(isPromoPopupInWindow());
+    setShowPromoPopupTimer(isPromoPopupTimerActive());
   }, []);
 
   const totalTickets = useMemo(
@@ -402,6 +405,7 @@ const IndexEvent2 = () => {
           description={EVENT2_CONFIG.promo.description}
           deadlineISO={EVENT2_CONFIG.promo.popupDeadlineISO || EVENT2_CONFIG.promo.deadlineISO}
           forceShow={EVENT2_CONFIG.promo.popupForceShow}
+          showTimer={showPromoPopupTimer}
           onDismiss={() => setShowPromoPopup(false)}
         />
       )}
