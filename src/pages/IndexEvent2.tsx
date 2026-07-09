@@ -65,15 +65,25 @@ const IndexEvent2 = () => {
   const [pdfLink, setPdfLink] = useState<string | null>(null);
   const [showPendingDialog, setShowPendingDialog] = useState(false);
   const [existingPendingData, setExistingPendingData] = useState<PendingPaymentData | null>(null);
-  const [showPromoPopup, setShowPromoPopup] = useState(false);
+  const [showPromoPopup, setShowPromoPopup] = useState(() => {
+    if (!EVENT2_CONFIG.promo) return false;
+    if (EVENT2_CONFIG.promo.popupForceShow) return true;
+    const popupDeadline = new Date(
+      EVENT2_CONFIG.promo.popupDeadlineISO || EVENT2_CONFIG.promo.deadlineISO
+    ).getTime();
+    return Date.now() < popupDeadline;
+  });
   const [thankYouRestored, setThankYouRestored] = useState(false);
 
   useEffect(() => {
-    if (EVENT2_CONFIG.promo) {
-      const popupDeadline = new Date(EVENT2_CONFIG.promo.popupDeadlineISO || EVENT2_CONFIG.promo.deadlineISO).getTime();
-      if (Date.now() < popupDeadline) {
-        setShowPromoPopup(true);
-      }
+    if (!EVENT2_CONFIG.promo) return;
+    if (EVENT2_CONFIG.promo.popupForceShow) {
+      setShowPromoPopup(true);
+      return;
+    }
+    const popupDeadline = new Date(EVENT2_CONFIG.promo.popupDeadlineISO || EVENT2_CONFIG.promo.deadlineISO).getTime();
+    if (Date.now() < popupDeadline) {
+      setShowPromoPopup(true);
     }
   }, []);
 
@@ -391,6 +401,7 @@ const IndexEvent2 = () => {
           title={EVENT2_CONFIG.promo.title}
           description={EVENT2_CONFIG.promo.description}
           deadlineISO={EVENT2_CONFIG.promo.popupDeadlineISO || EVENT2_CONFIG.promo.deadlineISO}
+          forceShow={EVENT2_CONFIG.promo.popupForceShow}
           onDismiss={() => setShowPromoPopup(false)}
         />
       )}

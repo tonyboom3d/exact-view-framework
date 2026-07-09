@@ -6,9 +6,10 @@ interface PromoPopupProps {
   title: string;
   description: string;
   onDismiss: () => void;
+  forceShow?: boolean;
 }
 
-const PromoPopup = ({ deadlineISO, title, description, onDismiss }: PromoPopupProps) => {
+const PromoPopup = ({ deadlineISO, title, description, onDismiss, forceShow = false }: PromoPopupProps) => {
   const getTimeLeft = () => {
     const target = new Date(deadlineISO).getTime();
     const now = Date.now();
@@ -29,7 +30,7 @@ const PromoPopup = ({ deadlineISO, title, description, onDismiss }: PromoPopupPr
     return () => clearInterval(timer);
   }, []);
 
-  if (timeLeft.total <= 0) return null;
+  if (!forceShow && timeLeft.total <= 0) return null;
 
   const pad = (n: number) => n.toString().padStart(2, '0');
 

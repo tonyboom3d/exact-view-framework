@@ -25,6 +25,7 @@ export interface EventUIConfig {
     deadlineISO: string;
     popupDeadlineISO?: string;
     bannerDeadlineISO?: string;
+    popupForceShow?: boolean;
   };
   couponRedeemBaseUrl?: string;
 }
@@ -34,7 +35,7 @@ export const EVENT1_CONFIG: EventUIConfig = {
   subtitle: 'Unleash the Power Within REMOTE',
   showLiveBadge: false,
   datesText: '4 ימים, 16-19 ביוני 2026',
-  locationText: 'אולם התיאטרון סינמה סיטי גלילות',
+  locationText: 'היכל שלמה ת"א',
   showHeaderPriceTimer: true,
   priceTimerDeadlineISO: '2026-06-12T00:00:00+03:00',
   calendarStartUTC: '20260616T130000Z',
@@ -50,7 +51,7 @@ export const EVENT2_CONFIG: EventUIConfig = {
   subtitle: 'Tony Robbins',
   showLiveBadge: true,
   datesText: '4 ימים, 3-6 בספטמבר 2026',
-  locationText: 'אולם התיאטרון סינמה סיטי גלילות',
+  locationText: 'היכל שלמה ת"א',
   showHeaderPriceTimer: false,
   calendarStartUTC: '20260903T130000Z',
   calendarEndUTC: '20260906T230000Z',
@@ -62,7 +63,8 @@ export const EVENT2_CONFIG: EventUIConfig = {
     title: '1+1 על כל סוגי הכרטיסים',
     description: 'רוכשים כרטיס מכל סוג ומקבלים כרטיס נוסף במתנה — הכרטיס הנוסף מתווסף אוטומטית בתהליך ההזמנה.',
     deadlineISO: '2026-07-18T23:59:00+03:00',
-    popupDeadlineISO: '2026-07-09T23:59:00+03:00',
+    popupDeadlineISO: '2026-07-09T23:59:59+03:00',
     bannerDeadlineISO: '2026-06-20T23:59:00+03:00',
+    popupForceShow: true,
   },
 };
