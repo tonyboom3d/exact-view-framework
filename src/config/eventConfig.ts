@@ -63,8 +63,8 @@ export const EVENT2_CONFIG: EventUIConfig = {
     title: '1+1 על כל סוגי הכרטיסים',
     description: 'רוכשים כרטיס מכל סוג ומקבלים כרטיס נוסף במתנה — הכרטיס הנוסף מתווסף אוטומטית בתהליך ההזמנה.',
     deadlineISO: '2026-07-18T23:59:00+03:00',
-    popupDeadlineISO: '2026-07-09T23:59:59+03:00',
+    popupDeadlineISO: '2026-06-20T23:59:00+03:00',
     bannerDeadlineISO: '2026-06-20T23:59:00+03:00',
-    popupForceShow: true,
+    popupForceShow: false,
   },
 };
