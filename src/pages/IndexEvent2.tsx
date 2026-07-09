@@ -561,8 +561,8 @@ const IndexEvent2 = () => {
               {EVENT2_CONFIG.promo && (
                 <PromoBanner
                   deadlineISO={EVENT2_CONFIG.promo.deadlineISO}
-                  timerDeadlineISO={EVENT2_CONFIG.promo.popupDeadlineISO}
-                  textDeadlineISO={EVENT2_CONFIG.promo.popupDeadlineISO}
+                  timerDeadlineISO={EVENT2_CONFIG.promo.bannerDeadlineISO || EVENT2_CONFIG.promo.popupDeadlineISO}
+                  textDeadlineISO={EVENT2_CONFIG.promo.bannerDeadlineISO || EVENT2_CONFIG.promo.popupDeadlineISO}
                 />
               )}
               <TicketSelection
