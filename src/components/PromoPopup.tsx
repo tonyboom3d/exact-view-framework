@@ -4,13 +4,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 interface PromoPopupProps {
   deadlineISO: string;
   title: string;
+  subtitle?: string;
   description: string;
   onDismiss: () => void;
   forceShow?: boolean;
   showTimer?: boolean;
 }
 
-const PromoPopup = ({ deadlineISO, title, description, onDismiss, forceShow = false, showTimer = true }: PromoPopupProps) => {
+const PromoPopup = ({ deadlineISO, title, subtitle, description, onDismiss, forceShow = false, showTimer = true }: PromoPopupProps) => {
   const getTimeLeft = () => {
     const target = new Date(deadlineISO).getTime();
     const now = Date.now();
@@ -58,6 +59,11 @@ const PromoPopup = ({ deadlineISO, title, description, onDismiss, forceShow = fa
             <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
               {title}
             </h2>
+            {subtitle && (
+              <p className="text-sm sm:text-base font-semibold text-destructive">
+                {subtitle}
+              </p>
+            )}
             <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
               {description}
             </p>

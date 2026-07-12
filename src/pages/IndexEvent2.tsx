@@ -402,6 +402,7 @@ const IndexEvent2 = () => {
       {showPromoPopup && EVENT2_CONFIG.promo && (
         <PromoPopup
           title={EVENT2_CONFIG.promo.title}
+          subtitle={EVENT2_CONFIG.promo.subtitle}
           description={EVENT2_CONFIG.promo.description}
           deadlineISO={EVENT2_CONFIG.promo.popupDeadlineISO || EVENT2_CONFIG.promo.deadlineISO}
           forceShow={EVENT2_CONFIG.promo.popupForceShow}

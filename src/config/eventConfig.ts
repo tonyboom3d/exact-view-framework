@@ -21,6 +21,7 @@ export interface EventUIConfig {
   shareLink: string;
   promo?: {
     title: string;
+    subtitle?: string;
     description: string;
     deadlineISO: string;
     popupDeadlineISO?: string;
@@ -62,6 +63,7 @@ export const EVENT2_CONFIG: EventUIConfig = {
   shareText: 'נרשמתי לסדנת UPW REMOTE של טוני רובינס בישראל 🔥\n\n4 ימים של כלים, אסטרטגיות ושינוי אמיתי – 4 ימים, 3-6 בספטמבר 2026.\n\nhttps://www.tonyrobbins.co.il/\n\nמי שבעניין – זה הזמן.',
   promo: {
     title: '1+1 על כל סוגי הכרטיסים',
+    subtitle: 'מבצע לזמן מוגבל',
     description: 'רוכשים כרטיס מכל סוג ומקבלים כרטיס נוסף במתנה — הכרטיס הנוסף מתווסף אוטומטית בתהליך ההזמנה.',
     deadlineISO: '2026-07-18T23:59:00+03:00',
     popupDeadlineISO: '2026-07-25T23:59:00+03:00',
