@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Check, Calendar, ChevronDown, Mail, Facebook, Loader2, Download, FileText, MessageCircle, MapPin, Gift } from 'lucide-react';
+import { Check, Calendar, ChevronDown, Mail, Facebook, Loader2, Download, FileText, MessageCircle, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { TicketSelection, TicketInfo, GuestInfo, BuyerInfo } from '@/types/order';
 import { toast } from '@/hooks/use-toast';
@@ -106,7 +106,6 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
 
   const activeSelections = selections.filter(s => s.quantity > 0);
   const totalTickets = activeSelections.reduce((sum, s) => sum + s.quantity, 0);
-  const totalWithGifts = totalTickets * 2;
   const totalPrice = activeSelections.reduce((sum, s) => {
     const ticket = tickets.find(t => t.type === s.type);
     return sum + (ticket?.price || 0) * s.quantity;
@@ -386,20 +385,13 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
                   <span className="text-muted-foreground">{ticket.name} x{s.quantity}</span>
                   <span className="font-medium text-foreground">₪{(ticket.price * s.quantity).toLocaleString()}</span>
                 </div>
-                <div className="flex items-center justify-between text-[14px] mt-1 pr-1">
-                  <span className="inline-flex items-center gap-1 text-amber-700 font-semibold">
-                    <Gift className="w-3.5 h-3.5" />
-                    {ticket.name} — כרטיס נוסף במתנה "מבצע" x{s.quantity}
-                  </span>
-                  <span className="font-bold text-amber-700">₪0</span>
-                </div>
               </div>
             );
           })}
         </div>
 
         <div className="border-t border-border pt-2 flex items-center justify-between">
-            <span className="text-[17px] font-bold text-foreground">סה״כ ({totalWithGifts} כרטיסים)</span>
+            <span className="text-[17px] font-bold text-foreground">סה״כ ({totalTickets} כרטיסים)</span>
             <span className="text-[21px] font-extrabold text-foreground">₪{totalPrice.toLocaleString()}</span>
         </div>
 
@@ -423,7 +415,7 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
               className="overflow-hidden"
             >
               <div className="space-y-3 pt-2 border-t border-border">
-                {guests.slice(0, totalWithGifts).map((guest, idx) => {
+                {guests.slice(0, totalTickets).map((guest, idx) => {
                   let ticketLabel = '';
                   let counter = 0;
                   for (const sel of activeSelections) {
@@ -433,17 +425,11 @@ const ThankYou = ({ orderNumber, referralCode, selections, guests, buyer, showPa
                         ticketLabel = `${ticket?.name} #${i + 1}`;
                       }
                       counter++;
-                      if (counter === idx) {
-                        ticketLabel = `${ticket?.name} - כרטיס נוסף במתנה "מבצע" #${i + 1}`;
-                      }
-                      counter++;
                     }
                   }
 
-                  const isGiftTicket = idx % 2 === 1;
-
                   return (
-                    <div key={idx} className={`rounded-lg p-3 space-y-1 ${isGiftTicket ? 'bg-amber-50 border border-amber-200' : 'bg-muted/30'}`}>
+                    <div key={idx} className="rounded-lg p-3 space-y-1 bg-muted/30">
                        <p className="text-[14px] font-bold text-foreground">{ticketLabel}</p>
                        <p className="text-[14px] text-muted-foreground">{guest.firstName} {guest.lastName}</p>
                        <p className="text-[14px] text-muted-foreground" dir="ltr" style={{ textAlign: 'right' }}>{guest.phone}</p>

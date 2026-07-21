@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Minus, Plus, User, Users, Ticket, Gift } from 'lucide-react';
+import { Minus, Plus, User, Users, Ticket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { type TicketSelection as TicketSelectionType, type TicketType, type TicketInfo } from '@/types/order';
 import { motion } from 'framer-motion';
@@ -214,13 +214,6 @@ const TicketSelection = ({ selections, onChange, onBuyTicket, tickets, loading, 
                          <Minus className="w-3.5 h-3.5" />
                        </Button>
                      </div>
-
-                     {!isSoldOut && (
-                       <div className="inline-flex items-center justify-center gap-1 text-[13px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2.5 py-0.5">
-                         <Gift className="w-3.5 h-3.5" />
-                         <span>+{isActive ? qty : 1} מתנה</span>
-                       </div>
-                     )}
 
                      {/* Buy button */}
                      <Button

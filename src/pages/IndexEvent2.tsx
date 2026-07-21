@@ -9,8 +9,6 @@ import OrderSummary from '@/components/OrderSummary';
 import ThankYou from '@/components/ThankYou';
 import LoadingOverlay from '@/components/LoadingOverlay';
 import PendingPaymentOverlay from '@/components/PendingPaymentOverlay';
-import PromoPopup from '@/components/PromoPopup';
-import PromoBanner from '@/components/PromoBanner';
 import { type TicketSelection as TicketSelectionType, type BuyerInfo, type GuestInfo, type TicketType } from '@/types/order';
 import { useWixTickets } from '@/hooks/useWixTickets';
 import { useWixPayment } from '@/hooks/useWixPayment';
@@ -44,7 +42,6 @@ const IndexEvent2 = () => {
   const [showPayer, setShowPayer] = useState(false);
   const [companyName, setCompanyName] = useState('');
   const [showCompany, setShowCompany] = useState(false);
-  const [removedGiftIndices, setRemovedGiftIndices] = useState<Set<number>>(new Set());
 
   const { tickets, loading: ticketsLoading, ensureWixData, isAdminTest } = useWixTickets();
   const {
@@ -65,30 +62,7 @@ const IndexEvent2 = () => {
   const [pdfLink, setPdfLink] = useState<string | null>(null);
   const [showPendingDialog, setShowPendingDialog] = useState(false);
   const [existingPendingData, setExistingPendingData] = useState<PendingPaymentData | null>(null);
-  const isPromoPopupInWindow = () => {
-    const promo = EVENT2_CONFIG.promo;
-    if (!promo) return false;
-    if (promo.popupForceShow) return true;
-    const popupDeadline = new Date(promo.popupDeadlineISO || promo.deadlineISO).getTime();
-    return Date.now() < popupDeadline;
-  };
-
-  const isPromoPopupTimerActive = () => {
-    const promo = EVENT2_CONFIG.promo;
-    if (!promo) return false;
-    if (promo.popupForceShow) return true;
-    if (!promo.popupTimerStartISO) return true;
-    return Date.now() >= new Date(promo.popupTimerStartISO).getTime();
-  };
-
-  const [showPromoPopup, setShowPromoPopup] = useState(isPromoPopupInWindow);
-  const [showPromoPopupTimer, setShowPromoPopupTimer] = useState(isPromoPopupTimerActive);
   const [thankYouRestored, setThankYouRestored] = useState(false);
-
-  useEffect(() => {
-    setShowPromoPopup(isPromoPopupInWindow());
-    setShowPromoPopupTimer(isPromoPopupTimerActive());
-  }, []);
 
   const totalTickets = useMemo(
     () => selections.reduce((sum, s) => sum + s.quantity, 0),
@@ -118,7 +92,7 @@ const IndexEvent2 = () => {
   useEffect(() => {
     if (!isAdminTest || step !== 2 || totalTickets <= 0) return;
     setGuests(
-      Array.from({ length: totalTickets * 2 }, (_, i) => {
+      Array.from({ length: totalTickets }, (_, i) => {
         const g = getTestGuest(i);
         return { firstName: g.firstName, lastName: g.lastName, email: g.email, phone: g.phone };
       })
@@ -232,18 +206,9 @@ const IndexEvent2 = () => {
 
   const handleSelectionsChange = (newSelections: TicketSelectionType[]) => {
     setSelections(newSelections);
-    setRemovedGiftIndices(new Set());
     const count = newSelections.reduce((sum, s) => sum + s.quantity, 0);
-    syncGuests(count * 2);
+    syncGuests(count);
   };
-
-  const handleRemoveGiftTicket = useCallback((giftIndex: number) => {
-    setRemovedGiftIndices((prev) => {
-      const next = new Set(prev);
-      next.add(giftIndex);
-      return next;
-    });
-  }, []);
 
   const handleBuyTicket = (type: TicketType) => {
     if (selections.length === 0 || selections[0].type !== type) {
@@ -281,8 +246,6 @@ const IndexEvent2 = () => {
     const missingFields: string[] = [];
 
     guests.forEach((guest, idx) => {
-      if (removedGiftIndices.has(idx)) return;
-
       const fnErr = validateName(guest.firstName, 'שם פרטי');
       if (fnErr) { newErrors[`guest_${idx}_firstName`] = fnErr; missingFields.push(`כרטיס ${idx + 1} - שם פרטי`); }
 
@@ -334,7 +297,6 @@ const IndexEvent2 = () => {
             companyName: companyName || undefined,
             totalPrice,
             ensureWixData,
-            removedGiftIndices: removedGiftIndices.size > 0 ? Array.from(removedGiftIndices) : undefined,
           });
 
           if (result.status === 'Pending') {
@@ -398,18 +360,6 @@ const IndexEvent2 = () => {
     <div className="h-screen bg-background flex flex-col overflow-hidden">
       <StickyHeader config={EVENT2_CONFIG} />
       <LoadingOverlay visible={paymentLoading} message={loadingMessage} />
-
-      {showPromoPopup && EVENT2_CONFIG.promo && (
-        <PromoPopup
-          title={EVENT2_CONFIG.promo.title}
-          subtitle={EVENT2_CONFIG.promo.subtitle}
-          description={EVENT2_CONFIG.promo.description}
-          deadlineISO={EVENT2_CONFIG.promo.popupDeadlineISO || EVENT2_CONFIG.promo.deadlineISO}
-          forceShow={EVENT2_CONFIG.promo.popupForceShow}
-          showTimer={showPromoPopupTimer}
-          onDismiss={() => setShowPromoPopup(false)}
-        />
-      )}
 
       {pendingPayment && (
         <PendingPaymentOverlay
@@ -574,13 +524,6 @@ const IndexEvent2 = () => {
                   חזרה לראשי
                 </Button>
               </div>
-              {EVENT2_CONFIG.promo && (
-                <PromoBanner
-                  deadlineISO={EVENT2_CONFIG.promo.deadlineISO}
-                  timerDeadlineISO={EVENT2_CONFIG.promo.bannerDeadlineISO || EVENT2_CONFIG.promo.popupDeadlineISO}
-                  textDeadlineISO={EVENT2_CONFIG.promo.bannerDeadlineISO || EVENT2_CONFIG.promo.popupDeadlineISO}
-                />
-              )}
               <TicketSelection
                 selections={selections}
                 onChange={handleSelectionsChange}
@@ -600,7 +543,7 @@ const IndexEvent2 = () => {
                 onGuestsChange={setGuests}
                 useMyDetails={useMyDetails}
                 onUseMyDetailsChange={setUseMyDetails}
-                totalTickets={totalTickets * 2}
+                totalTickets={totalTickets}
                 errors={errors}
                 selections={selections}
                 showPayer={showPayer}
@@ -610,8 +553,6 @@ const IndexEvent2 = () => {
                 onShowCompanyChange={setShowCompany}
                 companyName={companyName}
                 onCompanyNameChange={setCompanyName}
-                removedGiftIndices={removedGiftIndices}
-                onRemoveGiftTicket={handleRemoveGiftTicket}
               />
               <div className="flex gap-2 mt-6">
                 <Button

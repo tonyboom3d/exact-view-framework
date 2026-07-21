@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, Clock, AlertTriangle, Gift, X, Copy } from 'lucide-react';
+import { ChevronDown, Clock, AlertTriangle, Copy } from 'lucide-react';
 import type { TicketSelection, TicketInfo, BuyerInfo, GuestInfo } from '@/types/order';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -24,15 +24,12 @@ interface BuyerDetailsProps {
   onShowCompanyChange: (v: boolean) => void;
   companyName: string;
   onCompanyNameChange: (v: string) => void;
-  removedGiftIndices?: Set<number>;
-  onRemoveGiftTicket?: (giftIndex: number) => void;
 }
 
 interface FlatTicket {
   index: number;
   ticketName: string;
   ticketNumber: number;
-  isGift: boolean;
 }
 
 const BuyerDetails = ({
@@ -52,11 +49,7 @@ const BuyerDetails = ({
   onShowCompanyChange,
   companyName,
   onCompanyNameChange,
-  removedGiftIndices,
-  onRemoveGiftTicket,
 }: BuyerDetailsProps) => {
-  const [confirmRemoveIndex, setConfirmRemoveIndex] = useState<number | null>(null);
-
   const flatTickets = useMemo<FlatTicket[]>(() => {
     const result: FlatTicket[] = [];
     let globalIndex = 0;
@@ -67,22 +60,12 @@ const BuyerDetails = ({
           index: globalIndex,
           ticketName: ticketInfo?.name || sel.type,
           ticketNumber: i + 1,
-          isGift: false,
         });
-        globalIndex++;
-        if (!removedGiftIndices?.has(globalIndex)) {
-          result.push({
-            index: globalIndex,
-            ticketName: ticketInfo?.name || sel.type,
-            ticketNumber: i + 1,
-            isGift: true,
-          });
-        }
         globalIndex++;
       }
     }
     return result;
-  }, [selections, tickets, removedGiftIndices]);
+  }, [selections, tickets]);
 
   const [openTicketIndex, setOpenTicketIndex] = useState(0);
   const phoneRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -145,7 +128,6 @@ const BuyerDetails = ({
   const copyFromFirstTicket = (targetGuestIdx: number) => {
     const firstGuest = guests[0];
     if (!firstGuest) return;
-    const isGiftGuest = targetGuestIdx % 2 === 1;
     const updated = [...guests];
     if (!updated[targetGuestIdx]) updated[targetGuestIdx] = { firstName: '', lastName: '', phone: '', wantWhatsapp: true };
     updated[targetGuestIdx] = {
@@ -153,8 +135,7 @@ const BuyerDetails = ({
       firstName: firstGuest.firstName,
       lastName: firstGuest.lastName,
       phone: firstGuest.phone,
-      // Gift tickets: don't copy email — Wix may show buyer name when emails match
-      ...(isGiftGuest ? {} : { email: firstGuest.email || '' }),
+      email: firstGuest.email || '',
     };
     onGuestsChange(updated);
   };
@@ -331,50 +312,6 @@ const BuyerDetails = ({
         )}
       </AnimatePresence>
 
-      {/* Remove gift ticket confirmation popup */}
-      <AnimatePresence>
-        {confirmRemoveIndex !== null && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className="bg-card rounded-2xl shadow-2xl p-6 max-w-sm w-full text-center space-y-4 border border-border"
-            >
-              <div className="w-14 h-14 bg-amber-100 rounded-full flex items-center justify-center mx-auto">
-                <Gift className="w-7 h-7 text-amber-600" />
-              </div>
-              <h3 className="text-[20px] font-bold text-foreground">האם להסיר את הכרטיס במתנה שלך?</h3>
-              <div className="flex gap-3 pt-2">
-                <Button
-                  onClick={() => {
-                    if (confirmRemoveIndex !== null && onRemoveGiftTicket) {
-                      onRemoveGiftTicket(confirmRemoveIndex);
-                    }
-                    setConfirmRemoveIndex(null);
-                  }}
-                  variant="outline"
-                  className="flex-1 h-11 text-[15px] font-bold rounded-xl"
-                >
-                  אישור
-                </Button>
-                <Button
-                  onClick={() => setConfirmRemoveIndex(null)}
-                  className="flex-1 h-11 text-[15px] font-medium bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-xl"
-                >
-                  ביטול
-                </Button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Ticket sections */}
       <div className="space-y-3">
         {flatTickets.map((ticket, flatIdx) => {
@@ -395,8 +332,6 @@ const BuyerDetails = ({
               className={`rounded-xl border overflow-hidden transition-shadow ${
                 !allPreviousComplete
                   ? 'border-border/50 opacity-50 bg-card'
-                  : ticket.isGift
-                  ? 'border-amber-300 bg-gradient-to-l from-amber-50 to-orange-50 shadow-sm'
                   : 'border-border bg-card'
               }`}
             >
@@ -411,26 +346,10 @@ const BuyerDetails = ({
               >
                 <div className="flex items-center gap-2">
                   <span className="text-[18px] font-bold text-foreground">
-                    {ticket.isGift
-                      ? `${ticket.ticketName} — כרטיס נוסף במתנה "מבצע"`
-                      : `כרטיס ${ticket.ticketNumber} — ${ticket.ticketName}`}
+                    {`כרטיס ${ticket.ticketNumber} — ${ticket.ticketName}`}
                   </span>
-                  {ticket.isGift && (
-                    <Gift className="w-4 h-4 text-amber-600 shrink-0" />
-                  )}
                 </div>
                 <div className="flex items-center gap-1">
-                  {ticket.isGift && onRemoveGiftTicket && (
-                    <span
-                      role="button"
-                      tabIndex={0}
-                      onClick={(e) => { e.stopPropagation(); setConfirmRemoveIndex(ticket.index); }}
-                      onKeyDown={(e) => { if (e.key === 'Enter') { e.stopPropagation(); setConfirmRemoveIndex(ticket.index); } }}
-                      className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-destructive/10 transition-colors cursor-pointer"
-                    >
-                      <X className="w-4 h-4 text-muted-foreground hover:text-destructive" />
-                    </span>
-                  )}
                   <ChevronDown
                     className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${
                       isOpen ? 'rotate-180' : ''
@@ -494,11 +413,6 @@ const BuyerDetails = ({
                           style={{ textAlign: 'right' }}
                         />
                         {errors[`guest_${ticket.index}_email`] && <p className="text-sm text-destructive mt-1">{errors[`guest_${ticket.index}_email`]}</p>}
-                        {ticket.isGift && (
-                          <p className="text-[12px] text-muted-foreground mt-1">
-                            לשם נכון על הכרטיס — מומלץ אימייל שונה לכל משתתף
-                          </p>
-                        )}
                       </div>
                       <div>
                         <Label className="text-[15px] font-medium">טלפון *</Label>
