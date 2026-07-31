@@ -531,6 +531,7 @@ const IndexEvent2 = () => {
                 tickets={tickets}
                 loading={ticketsLoading || tickets.length === 0}
                 isAdminTest={isAdminTest}
+                config={EVENT2_CONFIG}
               />
             </motion.div>
           )}

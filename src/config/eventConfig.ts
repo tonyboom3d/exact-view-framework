@@ -20,6 +20,15 @@ export interface EventUIConfig {
   shareText: string;
   shareLink: string;
   couponRedeemBaseUrl?: string;
+  promoBanner?: {
+    headline: string;
+    subtext: string;
+    deadlineISO: string;
+  };
+}
+
+export function isPromoBannerActive(deadlineISO: string): boolean {
+  return Date.now() < new Date(deadlineISO).getTime();
 }
 
 export const EVENT1_CONFIG: EventUIConfig = {
@@ -51,4 +60,9 @@ export const EVENT2_CONFIG: EventUIConfig = {
   calendarEndLocal: '2026-09-07T02:00:00',
   shareLink: 'https://www.tonyrobbins.co.il/',
   shareText: 'נרשמתי לסדנת UPW REMOTE של טוני רובינס בישראל 🔥\n\n4 ימים של כלים, אסטרטגיות ושינוי אמיתי – 4 ימים, 3-6 בספטמבר 2026.\n\nhttps://www.tonyrobbins.co.il/\n\nמי שבעניין – זה הזמן.',
+  promoBanner: {
+    headline: 'רוכשים עכשיו במחיר הנמוך ביותר שיוצע לאירוע',
+    subtext: '25% הנחה עד 7.8. לאחר מכן המחירים עולים.',
+    deadlineISO: '2026-08-08T00:00:00+03:00',
+  },
 };
