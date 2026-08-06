@@ -5,7 +5,7 @@ import { type TicketSelection as TicketSelectionType, type TicketType, type Tick
 import { motion } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
 import SeatingMap from '@/components/SeatingMap';
-import { type EventUIConfig, isPromoBannerActive } from '@/config/eventConfig';
+import { type EventUIConfig } from '@/config/eventConfig';
 
 const isInsideWixIframe = typeof window !== 'undefined' && window.parent !== window;
 
@@ -28,10 +28,7 @@ interface TicketSelectionProps {
   config?: EventUIConfig;
 }
 
-const TicketSelection = ({ selections, onChange, onBuyTicket, tickets, loading, isAdminTest, config }: TicketSelectionProps) => {
-  const promoBanner = config?.promoBanner;
-  const showPromoBanner =
-    !!promoBanner && isPromoBannerActive(promoBanner.deadlineISO);
+const TicketSelection = ({ selections, onChange, onBuyTicket, tickets, loading, isAdminTest }: TicketSelectionProps) => {
   const [hoveredTicket, setHoveredTicket] = useState<TicketType | null>(null);
 
   const getQuantity = (type: TicketType) =>
@@ -66,29 +63,6 @@ const TicketSelection = ({ selections, onChange, onBuyTicket, tickets, loading, 
       >
         <h2 className="text-[26px] sm:text-[31px] font-bold text-foreground">בחרו את הכרטיסים שלכם</h2>
       </motion.div>
-
-      {showPromoBanner && promoBanner && (
-        <motion.div
-          initial={isMobile ? false : { opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: isMobile ? 0 : 0.15 }}
-          className="rounded-xl border border-cta/30 bg-gradient-to-l from-cta/10 via-cta/5 to-transparent px-4 py-3 sm:px-5 sm:py-4 text-center shadow-sm"
-        >
-          <p className="text-[15px] sm:text-[17px] font-bold text-foreground leading-snug">
-            {promoBanner.headline}
-          </p>
-          <p className="mt-1 text-[14px] sm:text-[16px] leading-snug text-muted-foreground">
-            {promoBanner.subtext.includes('25% הנחה') ? (
-              <>
-                <span className="font-bold text-destructive">25% הנחה</span>
-                {promoBanner.subtext.replace('25% הנחה', '')}
-              </>
-            ) : (
-              promoBanner.subtext
-            )}
-          </p>
-        </motion.div>
-      )}
 
       {loading && (
         <div className="space-y-5">
